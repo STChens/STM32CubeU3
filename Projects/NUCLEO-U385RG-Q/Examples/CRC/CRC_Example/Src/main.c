@@ -24,6 +24,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include <stdio.h>
 
 /* USER CODE END Includes */
 
@@ -34,7 +35,8 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define BUFFER_SIZE    114
+#define BUFFER_SIZE    (2100/4) //114
+#define TEST_NB_BYTES  (BUFFER_SIZE*4)
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -80,13 +82,96 @@ uint32_t uwExpectedCRCValue = 0x379E9F06;
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
-static void MX_CRC_Init(void);
+static void MX_CRC_Init(uint32_t dataformat);
 static void MX_ICACHE_Init(void);
 /* USER CODE BEGIN PFP */
+static void print_buf(char *str, unsigned char *buf, int len);
+static uint32_t crc_test(uint32_t dataformat, int nbbytes, uint32_t *pdata);
+
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+//#define PRINT_DATA_BUF
+static void print_buf(char *str, unsigned char *buf, int len)
+{
+#ifdef PRINT_DATA_BUF
+        int i;
+        if ( str != NULL )
+                printf("%s\n", str);
+        printf("=============================================\n");
+        for (i = 0; i< len; i++)
+        {
+                printf("%02x ", buf[i]);
+                if ((i+1)%16 == 0 )
+                        printf("\r\n");
+        }
+        printf("\n=============================================\n");
+#endif
+}
+
+static uint32_t crc_test(uint32_t dataformat, int nbbytes, uint32_t *pdata)
+{
+	uint32_t crcval = 0;
+	uint32_t bufsize = nbbytes;
+
+	printf("====================================================\n");
+	printf("CRC test: number of bytes for CRC computation [%d]\r\n", nbbytes);
+	printf("====================================================\n");
+
+	switch (dataformat)
+	{
+	case CRC_INPUTDATA_FORMAT_BYTES:
+		MX_CRC_Init(dataformat);
+		MODIFY_REG(CRC->CR, (CRC_CR_RTYPE_IN | CRC_CR_REV_IN), CRC_INPUTDATA_INVERSION_BYTE_BYWORD);
+		printf("Data format: FORMAT_BYTES, %d bytes\r\n", bufsize);
+		break;
+	case CRC_INPUTDATA_FORMAT_HALFWORDS:
+		MX_CRC_Init(dataformat);
+		MODIFY_REG(CRC->CR, (CRC_CR_RTYPE_IN | CRC_CR_REV_IN), CRC_INPUTDATA_INVERSION_HALFWORD_BYWORD);
+		bufsize /= 2;
+		printf("Data format: FORMAT_HALFWORDS, %d halfwords\r\n", bufsize);
+		break;
+	case CRC_INPUTDATA_FORMAT_WORDS:
+		MX_CRC_Init(dataformat);
+		bufsize /= 4;
+		printf("Data format: FORMAT_WORDS, %d words\r\n", bufsize);
+		break;
+	default:
+		printf("Invalid data format! End the test.\r\n");
+		return crcval;
+	}
+
+	uint32_t end = 0;
+	uint32_t sysclkfreq = 0;
+
+	print_buf("Data for CRC computation:", (uint8_t*)pdata, nbbytes);
+
+	CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk | CoreDebug_DEMCR_MON_EN_Msk;
+	DWT->CYCCNT = 0;
+	DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
+
+	crcval = HAL_CRC_Calculate(&hcrc, (uint32_t *)pdata, bufsize);
+
+	end = DWT->CYCCNT;
+	DWT->CTRL &= (~DWT_CTRL_CYCCNTENA_Msk);
+
+	HAL_CRC_DeInit(&hcrc);
+
+	sysclkfreq = HAL_RCC_GetSysClockFreq();
+	sysclkfreq /= 1000;
+	sysclkfreq /= 1000;
+	printf("System clock frequency: %luMHz\r\n", sysclkfreq);
+	printf("Number of clock cycle to compute CRC: %lu\r\n", end);
+	printf("Time consumed to compute CRC: %lu us\r\n", end/sysclkfreq);
+
+	printf("Computed CRC value: %08lx\r\n", crcval);
+	printf("====================================================\n");
+
+
+
+	return crcval;
+}
 
 /* USER CODE END 0 */
 
@@ -123,12 +208,28 @@ int main(void)
   /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */
-  MX_CRC_Init();
+
   MX_ICACHE_Init();
   /* USER CODE BEGIN 2 */
+
+  COM_InitTypeDef COM_Init;
+  COM_Init.BaudRate = 115200;
+  COM_Init.WordLength = COM_WORDLENGTH_8B;
+  COM_Init.StopBits = COM_STOPBITS_1;
+  COM_Init.Parity = COM_PARITY_NONE;
+  COM_Init.HwFlowCtl = COM_HWCONTROL_NONE;
+
+  BSP_COM_Init(COM1, &COM_Init);
+  printf("COM Init done.\r\n");
+
+  uwCRCValue = crc_test(CRC_INPUTDATA_FORMAT_BYTES, TEST_NB_BYTES, (uint32_t *)aDataBuffer);
+  uwCRCValue = crc_test(CRC_INPUTDATA_FORMAT_HALFWORDS, TEST_NB_BYTES, (uint32_t *)aDataBuffer);
+  uwCRCValue = crc_test(CRC_INPUTDATA_FORMAT_WORDS, TEST_NB_BYTES, (uint32_t *)aDataBuffer);
+
   /* Configure LD2 */
   BSP_LED_Init(LD2);
 
+  MX_CRC_Init(CRC_INPUTDATA_FORMAT_WORDS);
   /* Compute the CRC of "aDataBuffer" */
   uwCRCValue = HAL_CRC_Calculate(&hcrc, (uint32_t *)aDataBuffer, BUFFER_SIZE);
 
@@ -136,11 +237,13 @@ int main(void)
   if (uwCRCValue != uwExpectedCRCValue)
   {
     /* Wrong CRC value: enter Error_Handler */
+	printf("Wrong CRC value: enter Error_Handler!\r\n");
     Error_Handler();
   }
   else
   {
     /* Right CRC value: Turn LD2 on */
+	printf("\r\nRight CRC value: %08lx\r\n", uwCRCValue);
     BSP_LED_On(LD2);
   }
 
@@ -195,7 +298,7 @@ void SystemClock_Config(void)
   RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_MSIS;
   RCC_OscInitStruct.MSISState = RCC_MSI_ON;
   RCC_OscInitStruct.MSISSource = RCC_MSI_RC0;
-  RCC_OscInitStruct.MSISDiv = RCC_MSI_DIV1;
+  RCC_OscInitStruct.MSISDiv = RCC_MSI_DIV2; // set clock to 48MHz
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
     Error_Handler();
@@ -223,7 +326,7 @@ void SystemClock_Config(void)
   * @param None
   * @retval None
   */
-static void MX_CRC_Init(void)
+static void MX_CRC_Init(uint32_t dataformat)
 {
 
   /* USER CODE BEGIN CRC_Init 0 */
@@ -238,7 +341,7 @@ static void MX_CRC_Init(void)
   hcrc.Init.DefaultInitValueUse = DEFAULT_INIT_VALUE_ENABLE;
   hcrc.Init.InputDataInversionMode = CRC_INPUTDATA_INVERSION_NONE;
   hcrc.Init.OutputDataInversionMode = CRC_OUTPUTDATA_INVERSION_DISABLE;
-  hcrc.InputDataFormat = CRC_INPUTDATA_FORMAT_WORDS;
+  hcrc.InputDataFormat = dataformat;
   if (HAL_CRC_Init(&hcrc) != HAL_OK)
   {
     Error_Handler();
