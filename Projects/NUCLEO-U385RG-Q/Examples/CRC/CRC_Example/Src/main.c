@@ -123,19 +123,19 @@ static uint32_t crc_test(uint32_t dataformat, int nbbytes, uint32_t *pdata)
 	{
 	case CRC_INPUTDATA_FORMAT_BYTES:
 		MX_CRC_Init(dataformat);
-		MODIFY_REG(CRC->CR, (CRC_CR_RTYPE_IN | CRC_CR_REV_IN), CRC_INPUTDATA_INVERSION_BYTE_BYWORD);
-		printf("Data format: FORMAT_BYTES, %d bytes\r\n", bufsize);
+		//MODIFY_REG(CRC->CR, (CRC_CR_RTYPE_IN | CRC_CR_REV_IN), CRC_INPUTDATA_INVERSION_BYTE_BYWORD);
+		printf("Data format: FORMAT_BYTES, %lu bytes\r\n", bufsize);
 		break;
 	case CRC_INPUTDATA_FORMAT_HALFWORDS:
 		MX_CRC_Init(dataformat);
-		MODIFY_REG(CRC->CR, (CRC_CR_RTYPE_IN | CRC_CR_REV_IN), CRC_INPUTDATA_INVERSION_HALFWORD_BYWORD);
+		//MODIFY_REG(CRC->CR, (CRC_CR_RTYPE_IN | CRC_CR_REV_IN), CRC_INPUTDATA_INVERSION_HALFWORD_BYWORD);
 		bufsize /= 2;
-		printf("Data format: FORMAT_HALFWORDS, %d halfwords\r\n", bufsize);
+		printf("Data format: FORMAT_HALFWORDS, %lu halfwords\r\n", bufsize);
 		break;
 	case CRC_INPUTDATA_FORMAT_WORDS:
 		MX_CRC_Init(dataformat);
 		bufsize /= 4;
-		printf("Data format: FORMAT_WORDS, %d words\r\n", bufsize);
+		printf("Data format: FORMAT_WORDS, %lu words\r\n", bufsize);
 		break;
 	default:
 		printf("Invalid data format! End the test.\r\n");
@@ -166,12 +166,96 @@ static uint32_t crc_test(uint32_t dataformat, int nbbytes, uint32_t *pdata)
 	printf("Time consumed to compute CRC: %lu us\r\n", end/sysclkfreq);
 
 	printf("Computed CRC value: %08lx\r\n", crcval);
-	printf("====================================================\n");
-
-
 
 	return crcval;
 }
+
+static uint32_t CRC_Calculate(uint32_t *pdata, int nbytes);
+static uint32_t CRC_Calculate(uint32_t *pdata, int nbytes)
+{
+	int words = nbytes/4;
+	int remaining;
+	int i;
+	uint8_t *pBuffer = (uint8_t *)&pdata[0];
+
+	uint16_t data;
+	__IO uint16_t *pReg;
+
+	// reset CRC DR register
+	CRC->CR |= CRC_CR_RESET;
+
+	remaining = nbytes - words*4;
+	// need to handle byte case
+	// write the words first
+	MODIFY_REG(CRC->CR, (CRC_CR_RTYPE_IN | CRC_CR_REV_IN), CRC_INPUTDATA_INVERSION_BYTE_BYWORD);
+	for (i = 0; i < words; i++ )
+	{
+		CRC->DR = pdata[i];
+	}
+
+	MODIFY_REG(CRC->CR, (CRC_CR_RTYPE_IN | CRC_CR_REV_IN), CRC_INPUTDATA_INVERSION_NONE);
+	// handle the remainig bytes
+	if ((remaining) == 1U)
+	{
+	  *(__IO uint8_t *)(__IO void *)(&CRC->DR) = pBuffer[4U * i];         /* Derogation MisraC2012 R.11.5 */
+	}
+	if ((remaining) == 2U)
+	{
+	  data = ((uint32_t)(pBuffer[4U * i]) << 8U) | ((uint32_t)(pBuffer[(4U * i) + 1U]));
+      pReg = (__IO uint16_t *)(__IO void *)(&CRC->DR);                    /* Derogation MisraC2012 R.11.5 */
+      *pReg = data;
+	}
+	if ((remaining) == 3U)
+	{
+	  data = ((uint16_t)(pBuffer[4U * i]) << 8U) | (uint16_t)pBuffer[(4U * i) + 1U];
+	  pReg = (__IO uint16_t *)(__IO void *)(&CRC->DR);                    /* Derogation MisraC2012 R.11.5 */
+	  *pReg = data;
+
+	  *(__IO uint8_t *)(__IO void *)(&CRC->DR) = pBuffer[(4U * i) + 2U];  /* Derogation MisraC2012 R.11.5 */
+	}
+	return CRC->DR;
+}
+
+static uint32_t crc_test_reg(int nbbytes, uint32_t *pdata)
+{
+	uint32_t crcval = 0;
+	uint32_t bufsize = nbbytes;
+	uint32_t end = 0;
+	uint32_t sysclkfreq = 0;
+
+	printf("====================================================\n");
+	printf("CRC test: number of bytes for CRC computation [%d]\r\n", nbbytes);
+	printf("CRC register write without calling HAL API\r\n");
+	printf("====================================================\n");
+
+	//MODIFY_REG(CRC->CR, (CRC_CR_RTYPE_IN | CRC_CR_REV_IN), CRC_INPUTDATA_INVERSION_BYTE_BYWORD);
+	print_buf("Data for CRC computation:", (uint8_t*)pdata, nbbytes);
+
+	MX_CRC_Init(CRC_INPUTDATA_FORMAT_BYTES);
+
+	CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk | CoreDebug_DEMCR_MON_EN_Msk;
+	DWT->CYCCNT = 0;
+	DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
+
+	crcval = CRC_Calculate((uint32_t *)pdata, bufsize);
+
+	end = DWT->CYCCNT;
+	DWT->CTRL &= (~DWT_CTRL_CYCCNTENA_Msk);
+
+	HAL_CRC_DeInit(&hcrc);
+
+	sysclkfreq = HAL_RCC_GetSysClockFreq();
+	sysclkfreq /= 1000;
+	sysclkfreq /= 1000;
+	printf("System clock frequency: %luMHz\r\n", sysclkfreq);
+	printf("Number of clock cycle to compute CRC: %lu\r\n", end);
+	printf("Time consumed to compute CRC: %lu us\r\n", end/sysclkfreq);
+
+	printf("Computed CRC value: %08lx\r\n", crcval);
+
+	return crcval;
+}
+
 
 /* USER CODE END 0 */
 
@@ -222,16 +306,28 @@ int main(void)
   BSP_COM_Init(COM1, &COM_Init);
   printf("COM Init done.\r\n");
 
+  //uwCRCValue = crc_test(CRC_INPUTDATA_FORMAT_HALFWORDS, TEST_NB_BYTES, (uint32_t *)aDataBuffer);
+  //uwCRCValue = crc_test(CRC_INPUTDATA_FORMAT_WORDS, TEST_NB_BYTES, (uint32_t *)aDataBuffer);
+
   uwCRCValue = crc_test(CRC_INPUTDATA_FORMAT_BYTES, TEST_NB_BYTES, (uint32_t *)aDataBuffer);
-  uwCRCValue = crc_test(CRC_INPUTDATA_FORMAT_HALFWORDS, TEST_NB_BYTES, (uint32_t *)aDataBuffer);
-  uwCRCValue = crc_test(CRC_INPUTDATA_FORMAT_WORDS, TEST_NB_BYTES, (uint32_t *)aDataBuffer);
+  uwCRCValue = crc_test_reg(TEST_NB_BYTES, (uint32_t *)aDataBuffer);
+
+  uwCRCValue = crc_test(CRC_INPUTDATA_FORMAT_BYTES, TEST_NB_BYTES-1, (uint32_t *)aDataBuffer);
+  uwCRCValue = crc_test_reg(TEST_NB_BYTES-1, (uint32_t *)aDataBuffer);
+
+  uwCRCValue = crc_test(CRC_INPUTDATA_FORMAT_BYTES, TEST_NB_BYTES-2, (uint32_t *)aDataBuffer);
+  uwCRCValue = crc_test_reg(TEST_NB_BYTES-2, (uint32_t *)aDataBuffer);
+
+  uwCRCValue = crc_test(CRC_INPUTDATA_FORMAT_BYTES, TEST_NB_BYTES-3, (uint32_t *)aDataBuffer);
+  uwCRCValue = crc_test_reg(TEST_NB_BYTES-3, (uint32_t *)aDataBuffer);
 
   /* Configure LD2 */
   BSP_LED_Init(LD2);
 
+  printf("\r\nTest word mode CRC computation of 114 words\r\n");
   MX_CRC_Init(CRC_INPUTDATA_FORMAT_WORDS);
   /* Compute the CRC of "aDataBuffer" */
-  uwCRCValue = HAL_CRC_Calculate(&hcrc, (uint32_t *)aDataBuffer, BUFFER_SIZE);
+  uwCRCValue = HAL_CRC_Calculate(&hcrc, (uint32_t *)aDataBuffer, 114);
 
   /* Compare the CRC value to the Expected one */
   if (uwCRCValue != uwExpectedCRCValue)
