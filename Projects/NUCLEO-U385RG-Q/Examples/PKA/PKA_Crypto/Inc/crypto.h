@@ -58,6 +58,8 @@ extern "C" {
 
 /* Exported functions prototypes ---------------------------------------------*/
 
+void ECDSA_Sign_SetK(INT8U *pK);
+
 INT16U Generate_ECDSA_With_SHA_Hash_Value(INT8U Security_Control_Byte, 
                                           INT8U *Private_Key_Address, 
                                           INT8U *Input_Hash_Value_Address, 
@@ -77,6 +79,7 @@ INT8U ECDH_Compute_Z(INT8U Security_Control_Byte,
                      INT8U *Private_Key_Address, 
                      INT8U *Public_Key_Address, 
                      INT8U *Shared_Secret_Z_Ram);
+
 
 /* USER CODE BEGIN EFP */
 

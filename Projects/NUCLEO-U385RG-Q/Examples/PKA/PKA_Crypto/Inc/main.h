@@ -33,6 +33,7 @@ extern "C" {
 /* USER CODE BEGIN Includes */
 #include "stm32u3xx_nucleo.h"
 #include "prime256v1.h"
+#include "prime384v1.h"
 #include "SigGen.h"
 #include "stdlib.h"
 #include "string.h"

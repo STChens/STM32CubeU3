@@ -40,7 +40,12 @@
 
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
-
+#define BRIGHT_RED "\033[91m"
+#define BRIGHT_GREEN "\033[92m"
+#define BRIGHT_YELLOW "\033[93m"
+#define BRIGHT_BLUE "\033[94m"
+#define RESET_COLOR "\033[0m"
+    
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
@@ -59,6 +64,7 @@ __IO uint32_t operationComplete = 0;
 void SystemClock_Config(void);
 static void MX_RNG_Init(void);
 static void MX_PKA_Init(void);
+static void MX_PKA_DeInit(void);
 static void MX_ICACHE_Init(void);
 
 static void print_buf(char* str, const uint8_t *buf, int size);
@@ -89,6 +95,217 @@ void print_buf(char* str, const uint8_t *buf, int size)
   if ( i % 16 != 0) printf("\r\n");
   printf("===============================================\r\n");
   
+}
+
+static void ECDSA_SignTest_SECP256R1(void)
+{
+  int result_ok = 0;
+  
+  printf("\r\n"BRIGHT_YELLOW"TESET ECDSA Sign with P-256 SHA256 ==> Start\r\n"RESET_COLOR);
+  print_buf("HASH value for signing", (const uint8_t *)SigGen256_Hash_Msg, SigGen256_Hash_Msg_len);
+  
+  printf("\r\n"BRIGHT_BLUE"TESET with direct call to HAL driver\r\n"RESET_COLOR);
+  
+  MX_PKA_Init();
+  /* Set input parameters */
+  in.primeOrderSize =  prime256v1_Order_len;
+  in.modulusSize =     prime256v1_Prime_len;
+  in.coefSign =        prime256v1_A_sign;
+  in.coef =            prime256v1_absA;
+  in.coefB =           prime256v1_B;
+  in.modulus =         prime256v1_Prime;
+  in.basePointX =      prime256v1_GeneratorX;
+  in.basePointY =      prime256v1_GeneratorY;
+  in.primeOrder =      prime256v1_Order;
+
+  in.integer =         SigGen256_k;
+  in.hash =            SigGen256_Hash_Msg;
+  in.privateKey =      SigGen256_d;
+
+  /* Launch the verification */
+  if(HAL_PKA_ECDSASign(&hpka, &in, 5000) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  /* Allocate required space */
+  out.RSign = malloc(prime256v1_Order_len);
+  out.SSign = malloc(prime256v1_Order_len);
+  if(out.RSign == NULL || out.SSign == NULL)
+  {
+    /* Not enough memory in heap */
+    Error_Handler();
+  }
+
+  /* Copy the result to allocated space */
+  HAL_PKA_ECDSASign_GetResult(&hpka , &out, NULL);
+  
+  print_buf("Signature R", out.RSign, SigGen256_R_len);
+  print_buf("Signature S", out.SSign, SigGen256_S_len);
+
+  /* Compare to expected result */
+  result_ok = 0;
+  if (memcmp(out.RSign, SigGen256_R, SigGen256_R_len) != 0)
+  {
+    result_ok++;
+    printf(BRIGHT_RED"Signature R data is NOT as expected\r\n"RESET_COLOR);  
+  }
+  if (memcmp(out.SSign, SigGen256_S, SigGen256_S_len) != 0)
+  {
+    result_ok++;
+    printf(BRIGHT_RED"Signature S data is NOT as expected\r\n"RESET_COLOR);  
+  }
+  if(result_ok == 0)
+  {
+    printf(BRIGHT_GREEN"Signature data (r,s) data is as expected\r\n"RESET_COLOR);
+  }
+
+  /* Deinitialize the PKA */
+  MX_PKA_DeInit();
+
+  printf("\r\n"BRIGHT_BLUE"TESET with call to crypto API\r\n"RESET_COLOR);
+  
+  printf(BRIGHT_BLUE"Test Crypto API ===> Signature generation\r\n"RESET_COLOR);
+  INT8U outsig[64];
+  ECDSA_Sign_SetK((uint8_t*)SigGen256_k);
+  INT16U ret = Generate_ECDSA_With_SHA_Hash_Value(ECC_CURVE_SECP256R1, 
+                                          (INT8U *)SigGen256_d, 
+                                          (INT8U *)SigGen256_Hash_Msg, 
+                                          &outsig[0]);
+  if (ret == 0 )
+  {
+    result_ok = 0;
+    print_buf("Output signature:", outsig, sizeof(outsig));
+    /* Compare to expected result */
+    if (memcmp(&outsig[0], SigGen256_R, SigGen256_R_len) != 0)
+    {
+      result_ok++;
+      printf(BRIGHT_RED"Signature R data is NOT as expected\r\n"RESET_COLOR);      
+    }
+
+    if (memcmp(&outsig[32], SigGen256_S, SigGen256_S_len) != 0)
+    {
+      result_ok++;
+      printf(BRIGHT_RED"Signature S data is NOT as expected\r\n"RESET_COLOR);
+    }
+    
+    if(result_ok == 0)
+    {
+      printf(BRIGHT_GREEN"Signature data (r,s) data is as expected\r\n"RESET_COLOR);
+    }
+  }    
+  else
+  {
+    printf(BRIGHT_RED"Call function Generate_ECDSA_With_SHA_Hash_Value returned error!\r\n"RESET_COLOR);
+  }  
+  
+  printf("\r\n"BRIGHT_YELLOW"TESET ECDSA Sign with P-256 SHA256 <== Done.\r\n\r\n"RESET_COLOR);  
+}
+
+static void ECDSA_SignTest_SECP384R1(void)
+{
+  int result_ok = 0;
+  
+  printf("\r\n"BRIGHT_YELLOW"TESET ECDSA Sign with P-384 SHA384 ==> Start\r\n"RESET_COLOR);
+  print_buf("HASH value for signing", (const uint8_t *)SigGen384_Hash_Msg, SigGen384_Hash_Msg_len);
+  
+  printf("\r\n"BRIGHT_BLUE"TESET with direct call to HAL driver\r\n"RESET_COLOR);
+  
+  MX_PKA_Init();
+  /* Set input parameters */
+  in.primeOrderSize =  prime384v1_Order_len;
+  in.modulusSize =     prime384v1_Prime_len;
+  in.coefSign =        prime384v1_A_sign;
+  in.coef =            prime384v1_absA;
+  in.coefB =           prime384v1_B;
+  in.modulus =         prime384v1_Prime;
+  in.basePointX =      prime384v1_GeneratorX;
+  in.basePointY =      prime384v1_GeneratorY;
+  in.primeOrder =      prime384v1_Order;
+
+  in.integer =         SigGen384_k;
+  in.hash =            SigGen384_Hash_Msg;
+  in.privateKey =      SigGen384_d;
+
+  /* Launch the verification */
+  if(HAL_PKA_ECDSASign(&hpka, &in, 5000) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  /* Allocate required space */
+  out.RSign = malloc(prime384v1_Order_len);
+  out.SSign = malloc(prime384v1_Order_len);
+  if(out.RSign == NULL || out.SSign == NULL)
+  {
+    /* Not enough memory in heap */
+    Error_Handler();
+  }
+
+  /* Copy the result to allocated space */
+  HAL_PKA_ECDSASign_GetResult(&hpka , &out, NULL);
+  
+  print_buf("Signature R", out.RSign, SigGen384_R_len);
+  print_buf("Signature S", out.SSign, SigGen384_S_len);
+
+  /* Compare to expected result */
+  result_ok = 0;
+  if (memcmp(out.RSign, SigGen384_R, SigGen384_R_len) != 0)
+  {
+    result_ok++;
+    printf(BRIGHT_RED"Signature R data is NOT as expected\r\n"RESET_COLOR); 
+  }
+
+  if (memcmp(out.SSign, SigGen384_S, SigGen384_S_len) != 0)
+  {
+    result_ok++;
+    printf(BRIGHT_RED"Signature S data is NOT as expected\r\n"RESET_COLOR); 
+  }
+  printf(BRIGHT_GREEN"Signature data (r,s) data is as expected\r\n"RESET_COLOR);
+
+  /* Deinitialize the PKA */
+  if(HAL_PKA_DeInit(&hpka) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  printf("\r\n"BRIGHT_BLUE"TESET with call to crypto API\r\n"RESET_COLOR);
+  
+  printf(BRIGHT_BLUE"Test Crypto API ===> Signature generation\r\n"RESET_COLOR);
+  INT8U outsig[96];
+  ECDSA_Sign_SetK((uint8_t*)SigGen384_k);
+  INT16U ret = Generate_ECDSA_With_SHA_Hash_Value(ECC_CURVE_SECP384R1, 
+                                          (INT8U *)SigGen384_d, 
+                                          (INT8U *)SigGen384_Hash_Msg, 
+                                          &outsig[0]);
+  if (ret == 0 )
+  {
+    print_buf("Output signature:", outsig, sizeof(outsig));
+    
+    /* Compare to expected result */
+    if (memcmp(&outsig[0], SigGen384_R, SigGen384_R_len) != 0)
+    {
+      result_ok++;
+      printf(BRIGHT_RED"Signature R data is NOT as expected\r\n"RESET_COLOR);
+    }
+
+    if (memcmp(&outsig[48], SigGen384_S, SigGen384_S_len) != 0)
+    {
+      result_ok++;
+      printf(BRIGHT_RED"Signature S data is NOT as expected\r\n"RESET_COLOR);
+    }
+    
+    if (result_ok == 0)
+    {
+      printf(BRIGHT_GREEN"Signature data (r,s) data is as expected\r\n"RESET_COLOR);
+    }
+  }  
+  else
+  {
+    printf(BRIGHT_RED"Call function Generate_ECDSA_With_SHA_Hash_Value returned error!\r\n"RESET_COLOR);
+  }  
+  
+  printf("\r\n"BRIGHT_YELLOW"TESET ECDSA Sign with P-384 SHA384 <== Done.\r\n\r\n"RESET_COLOR);  
 }
 
 /* USER CODE END 0 */
@@ -129,7 +346,6 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_RNG_Init();
-  MX_PKA_Init();
   MX_ICACHE_Init();
   /* USER CODE BEGIN 2 */
   
@@ -143,79 +359,8 @@ int main(void)
   
   printf("COM Init done.\r\n");
   
-  /* Set input parameters */
-  in.primeOrderSize =  prime256v1_Order_len;
-  in.modulusSize =     prime256v1_Prime_len;
-  in.coefSign =        prime256v1_A_sign;
-  in.coef =            prime256v1_absA;
-  in.coefB =           prime256v1_B;
-  in.modulus =         prime256v1_Prime;
-  in.basePointX =      prime256v1_GeneratorX;
-  in.basePointY =      prime256v1_GeneratorY;
-  in.primeOrder =      prime256v1_Order;
-
-  in.integer =         SigGen_k;
-  in.hash =            SigGen_Hash_Msg;
-  in.privateKey =      SigGen_d;
-
-  /* Launch the verification */
-  if(HAL_PKA_ECDSASign(&hpka, &in, 5000) != HAL_OK)
-  {
-    Error_Handler();
-  }
-
-  /* Allocate required space */
-  out.RSign = malloc(prime256v1_Order_len);
-  out.SSign = malloc(prime256v1_Order_len);
-  if(out.RSign == NULL || out.SSign == NULL)
-  {
-    /* Not enough memory in heap */
-    Error_Handler();
-  }
-
-  /* Copy the result to allocated space */
-  HAL_PKA_ECDSASign_GetResult(&hpka , &out, NULL);
-  
-  print_buf("HASH value", (const uint8_t *)SigGen_Hash_Msg, SigGen_Hash_Msg_len);
-  print_buf("Signature R", out.RSign, SigGen_R_len);
-  print_buf("Signature S", out.SSign, SigGen_S_len);
-
-  /* Compare to expected result */
-  if (memcmp(out.RSign, SigGen_R, SigGen_R_len) != 0)
-  {
-    Error_Handler();
-  }
-
-  if (memcmp(out.SSign, SigGen_S, SigGen_S_len) != 0)
-  {
-    Error_Handler();
-  }
-
-  /* Deinitialize the PKA */
-  if(HAL_PKA_DeInit(&hpka) != HAL_OK)
-  {
-    Error_Handler();
-  }
-
-  /* Success */
-  operationComplete = 1;
-  BSP_LED_On(LD2);
-  
-  /* USER CODE END 2 */
-  printf("Test Crypto API ===> Signature generation\r\n");
-  INT8U outsig[32];
-  INT16U ret = Generate_ECDSA_With_SHA_Hash_Value(ECC_CURVE_SECP256R1, 
-                                          (INT8U *)SigGen_d, 
-                                          (INT8U *)SigGen_Hash_Msg, 
-                                          &outsig[0]);
-  if (ret == 0 )
-  {
-    print_buf("Output signature:", outsig, sizeof(outsig));
-  }  
-  else
-  {
-    printf("Call function Generate_ECDSA_With_SHA_Hash_Value returned error!\r\n");
-  }
+  ECDSA_SignTest_SECP256R1();
+  ECDSA_SignTest_SECP384R1();
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
@@ -333,6 +478,9 @@ static void MX_PKA_Init(void)
 
   /* USER CODE BEGIN PKA_Init 0 */
   __HAL_RCC_PKA_CLK_ENABLE();
+  __HAL_RCC_PKA_FORCE_RESET();
+  /* Release PKA from reset state */
+  __HAL_RCC_PKA_RELEASE_RESET();
   /* USER CODE END PKA_Init 0 */
 
   /* USER CODE BEGIN PKA_Init 1 */
@@ -347,6 +495,17 @@ static void MX_PKA_Init(void)
 
   /* USER CODE END PKA_Init 2 */
 
+}
+
+static void MX_PKA_DeInit(void)
+{
+
+  HAL_PKA_DeInit(&hpka);
+  __HAL_RCC_PKA_FORCE_RESET();
+  /* Release PKA from reset state */
+  __HAL_RCC_PKA_RELEASE_RESET();
+  /* Peripheral clock disable */
+  __HAL_RCC_PKA_CLK_DISABLE(); 
 }
 
 /**
@@ -386,6 +545,7 @@ static void MX_RNG_Init(void)
 void Error_Handler(void)
 {
   /* USER CODE BEGIN Error_Handler_Debug */
+  printf(BRIGHT_RED"%s:%d\r\n"RESET_COLOR, __FUNCTION__, __LINE__);
   /* User can add his own implementation to report the HAL error return state */
   operationComplete = 2;
   while (1)

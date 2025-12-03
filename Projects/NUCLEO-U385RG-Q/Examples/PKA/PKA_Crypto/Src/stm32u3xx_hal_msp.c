@@ -77,6 +77,7 @@ void HAL_MspInit(void)
   /* USER CODE END MspInit 1 */
 }
 
+#if 0
 /**
 * @brief PKA MSP Initialization
 * This function configures the hardware resources used in this example
@@ -124,6 +125,7 @@ void HAL_PKA_MspDeInit(PKA_HandleTypeDef* hpka)
   }
 
 }
+#endif
 
 /**
 * @brief RNG MSP Initialization

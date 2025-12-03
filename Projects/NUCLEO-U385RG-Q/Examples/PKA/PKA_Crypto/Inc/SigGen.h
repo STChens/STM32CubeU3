@@ -24,23 +24,39 @@
 extern "C" {
 #endif
 
-extern const uint8_t  SigGen_Msg[];
-extern const uint32_t SigGen_Msg_len;
-extern const uint8_t  SigGen_Hash_Msg[];
-extern const uint32_t SigGen_Hash_Msg_len;
-extern const uint8_t  SigGen_d[];
-extern const uint32_t SigGen_d_len;
-extern const uint8_t  SigGen_Qx[];
-extern const uint32_t SigGen_Qx_len;
-extern const uint8_t  SigGen_Qy[];
-extern const uint32_t SigGen_Qy_len;
-extern const uint8_t  SigGen_k[];
-extern const uint32_t SigGen_k_len;
-extern const uint8_t  SigGen_R[];
-extern const uint32_t SigGen_R_len;
-extern const uint8_t  SigGen_S[];
-extern const uint32_t SigGen_S_len;
+extern const uint8_t  SigGen256_Msg[];
+extern const uint32_t SigGen256_Msg_len;
+extern const uint8_t  SigGen256_Hash_Msg[];
+extern const uint32_t SigGen256_Hash_Msg_len;
+extern const uint8_t  SigGen256_d[];
+extern const uint32_t SigGen256_d_len;
+extern const uint8_t  SigGen256_Qx[];
+extern const uint32_t SigGen256_Qx_len;
+extern const uint8_t  SigGen256_Qy[];
+extern const uint32_t SigGen256_Qy_len;
+extern const uint8_t  SigGen256_k[];
+extern const uint32_t SigGen256_k_len;
+extern const uint8_t  SigGen256_R[];
+extern const uint32_t SigGen256_R_len;
+extern const uint8_t  SigGen256_S[];
+extern const uint32_t SigGen256_S_len;
 
+extern const uint8_t  SigGen384_Msg[];
+extern const uint32_t SigGen384_Msg_len;
+extern const uint8_t  SigGen384_Hash_Msg[];
+extern const uint32_t SigGen384_Hash_Msg_len;
+extern const uint8_t  SigGen384_d[];
+extern const uint32_t SigGen384_d_len;
+extern const uint8_t  SigGen384_Qx[];
+extern const uint32_t SigGen384_Qx_len;
+extern const uint8_t  SigGen384_Qy[];
+extern const uint32_t SigGen384_Qy_len;
+extern const uint8_t  SigGen384_k[];
+extern const uint32_t SigGen384_k_len;
+extern const uint8_t  SigGen384_R[];
+extern const uint32_t SigGen384_R_len;
+extern const uint8_t  SigGen384_S[];
+extern const uint32_t SigGen384_S_len;
 #ifdef __cplusplus
 }
 #endif
