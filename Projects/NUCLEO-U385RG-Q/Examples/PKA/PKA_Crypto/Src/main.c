@@ -526,6 +526,109 @@ static void ECDSA_VerifyTest_SECP384R1(void)
   printf("\r\n"BRIGHT_YELLOW"Test ECDSA Verify with P-384 SHA384 <== Done.\r\n"RESET_COLOR);
 }
 
+/**
+ * @brief function to run ECC key generation test 
+ */
+static void ECC_KeyGen(void)
+{
+  INT16U ret;
+  
+  uint8_t priv256[32];
+  uint8_t pub256[64];
+  uint8_t sig256[64];
+  
+  uint8_t priv384[48];
+  uint8_t pub384[96];
+  uint8_t sig384[96];
+  
+  memset(priv256, 0, sizeof(priv256));
+  memset(pub256, 0, sizeof(pub256));
+  memset(sig256, 0, sizeof(sig256));
+  memset(priv384, 0, sizeof(priv384));
+  memset(pub384, 0, sizeof(pub384));
+  memset(sig384, 0, sizeof(sig384));
+  
+  printf("\r\n"BRIGHT_YELLOW"Test ECC Key Gen P-256 ==> Start\r\n"RESET_COLOR);
+  ret = ECDH_Generate_Key_Pair_Check_Key_Pair(ECC_CURVE_SECP256R1, priv256, pub256);
+  if ( ret == 0 )
+  {
+    printf(BRIGHT_GREEN"Generate key OK!"RESET_COLOR);
+    print_buf("P-256 Private key", priv256, sizeof(priv256));
+    print_buf("P-256 Public key", pub256, sizeof(pub256));
+    
+    printf(BRIGHT_BLUE"Sign message hash with private key\r\n"RESET_COLOR);
+    
+    /* Test message hash sign and verify with the key pair */
+    ret = Generate_ECDSA_With_SHA_Hash_Value(ECC_CURVE_SECP256R1, priv256, (INT8U *)SigVer256_Hash_Msg, sig256);
+    if ( ret == 0 )
+    {
+      printf(BRIGHT_GREEN"Hash sign OK!\r\n"RESET_COLOR);
+      print_buf("ECC 256 signature:", sig256, sizeof(sig256));
+      
+      printf(BRIGHT_BLUE"Verify message hash with public key\r\n"RESET_COLOR);
+      ret = Verify_ECDSA_With_SHA_Hash_Value(ECC_CURVE_SECP256R1, pub256, (INT8U *)SigVer256_Hash_Msg, sig256);
+      if ( ret == 0 )
+      {
+        printf(BRIGHT_GREEN"Signature verification OK!\r\n"RESET_COLOR);
+      }
+      else
+      {
+        printf(BRIGHT_RED"Signature verification FAILED!\r\n"RESET_COLOR);
+      }
+    }
+    else
+    {
+      printf(BRIGHT_RED"Hash sign FAILED!"RESET_COLOR);
+    }    
+  }
+  else
+  {
+    printf(BRIGHT_RED"Generate key failed!"RESET_COLOR);
+  }
+  
+  printf("\r\n"BRIGHT_YELLOW"Test ECC Key Gen P-256 <== Done.\r\n"RESET_COLOR);
+  
+  printf("\r\n"BRIGHT_YELLOW"Test ECC Key Gen P-384 ==> Start\r\n"RESET_COLOR);
+  ret = ECDH_Generate_Key_Pair_Check_Key_Pair(ECC_CURVE_SECP384R1, priv384, pub384);
+  if ( ret == 0 )
+  {
+    printf(BRIGHT_GREEN"Generate key OK!"RESET_COLOR);
+    print_buf("P-384 Private key", priv384, sizeof(priv384));
+    print_buf("P-384 Public key", pub384, sizeof(pub384));
+    
+    printf(BRIGHT_BLUE"Sign message hash with private key\r\n"RESET_COLOR);
+    
+    /* Test message hash sign and verify with the key pair */
+    ret = Generate_ECDSA_With_SHA_Hash_Value(ECC_CURVE_SECP384R1, priv384, (INT8U *)SigVer384_Hash_Msg, sig384);
+    if ( ret == 0 )
+    {
+      printf(BRIGHT_GREEN"Hash sign OK!\r\n"RESET_COLOR);
+      print_buf("ECC 384 signature:", sig384, sizeof(sig384));
+      
+      printf(BRIGHT_BLUE"Verify message hash with public key\r\n"RESET_COLOR);
+      ret = Verify_ECDSA_With_SHA_Hash_Value(ECC_CURVE_SECP384R1, pub384, (INT8U *)SigVer384_Hash_Msg, sig384);
+      if ( ret == 0 )
+      {
+        printf(BRIGHT_GREEN"Signature verification OK!\r\n"RESET_COLOR);        
+      }
+      else
+      {
+        printf(BRIGHT_RED"Signature verification FAILED!\r\n"RESET_COLOR);
+      }
+    }
+    else
+    {
+      printf(BRIGHT_RED"Hash sign FAILED!"RESET_COLOR);
+    } 
+  }
+  else
+  {
+    printf(BRIGHT_RED"Generate key failed!"RESET_COLOR);
+  }
+  
+  printf("\r\n"BRIGHT_YELLOW"Test ECC Key Gen P-384 <== Done.\r\n"RESET_COLOR);
+  
+}
 
 /* USER CODE END 0 */
 
@@ -583,6 +686,8 @@ int main(void)
   
   ECDSA_VerifyTest_SECP256R1();
   ECDSA_VerifyTest_SECP384R1();
+  
+  ECC_KeyGen();
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */

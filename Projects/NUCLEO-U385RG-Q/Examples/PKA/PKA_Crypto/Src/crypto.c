@@ -201,29 +201,56 @@ const uint8_t prime384v1_Seed[] = {
 const uint32_t prime384v1_Seed_len = 20;
 
 /* Private macros -----------------------------------------------*/
+#define PKA_OPERATION_TIMEOUT (500)
 
 /* Private function prototypes -----------------------------------------------*/
 static INT8U *pECDSA_Sign_K = NULL;
 static INT8U ECDSA_Sign_K[48] = {0};
 
+/**
+  * @brief Fill the buffer with random in size of bytes
+  * @param words  number of words to be filled (4xbytes)
+  * @retval 0 if succeed, otherwise failed
+  *                  
+*/
+static INT16U fill_random(INT8U *buf, int words)
+{
+  HAL_StatusTypeDef status;
+    
+  RNG_HandleTypeDef hrng;
+  hrng.Instance = RNG;
+  hrng.Init.ClockErrorDetection = RNG_CED_ENABLE;
+  status = HAL_RNG_Init(&hrng);    
+
+  if ( status == HAL_OK )
+  {
+    while ( words > 0 )
+    {
+      status |= HAL_RNG_GenerateRandomNumber(&hrng, (uint32_t*)buf + words-1);
+      words--;
+    }    
+  }
+  
+  return status;
+}
+
+/**
+  * @brief Get the pointer to the k value for ECDSA signing 
+  *        If a pointer is set previously for k then use the existing 
+  *        Otherwise fill the Array with random and return the pointer
+  * @param size   384 for SECP384R1, 256 for SECP256R1
+  * @retval pointer to the k buffer
+  *                  
+*/
 static INT8U *get_k(INT8 size)
 {  
   if (pECDSA_Sign_K != NULL) return pECDSA_Sign_K;
   else
   {
     // TODO get data from random number 
-    RNG_HandleTypeDef hrng;
-    hrng.Instance = RNG;
-    hrng.Init.ClockErrorDetection = RNG_CED_ENABLE;
-    HAL_RNG_Init(&hrng);
-    
-    if (size > 48) size = 48;
-    else if (size < 48) size = 32;
-    while ( size > 0 )
-    {
-      HAL_RNG_GenerateRandomNumber(&hrng, (uint32_t*)&ECDSA_Sign_K[size-4]);
-      size-=4;
-    }
+    if (size > 48) size = 12;
+    else if (size < 48) size = 8;
+    fill_random(ECDSA_Sign_K, size);
     return ECDSA_Sign_K;
   }
 }
@@ -315,7 +342,7 @@ INT16U Generate_ECDSA_With_SHA_Hash_Value(INT8U ecc_curve,
   in.privateKey =      pPrivKey;
   
   /* Launch the verification */
-  ret = HAL_PKA_ECDSASign(&hpka, &in, 5000);
+  ret = HAL_PKA_ECDSASign(&hpka, &in, PKA_OPERATION_TIMEOUT);
   if( ret == HAL_OK)
   {
     out.RSign = pSig;
@@ -416,7 +443,7 @@ INT16U Verify_ECDSA_With_SHA_Hash_Value(INT8U ecc_curve,
   }
 
   /* Launch the verification */
-  ret = HAL_PKA_ECDSAVerif(&hpka, &in, 500);
+  ret = HAL_PKA_ECDSAVerif(&hpka, &in, PKA_OPERATION_TIMEOUT);
   if ( ret == HAL_OK )
   {
     /* Get the signature verification result */
@@ -451,6 +478,98 @@ INT8U ECDH_Generate_Key_Pair_Check_Key_Pair(INT8U ecc_curve,
                                             INT8U *pPrivKey,
                                             INT8U *pPubKey)
 {
+  PKA_ECCMulInTypeDef in = {0};
+  PKA_ECCMulOutTypeDef out = {0};
+  PKA_HandleTypeDef hpka;
+  INT16U ret = HAL_ERROR;
+  int keysize = 0;
+  
+  /* check input parameter */
+  if( pPubKey == NULL ||
+      pPrivKey == NULL )
+  {
+    return ret;
+  }
+  
+  if ( ecc_curve != ECC_CURVE_SECP256R1 && 
+       ecc_curve != ECC_CURVE_SECP384R1)
+  {
+    return ret;
+  }
+  
+  /* First generate random number for private key */
+  if ( ecc_curve == ECC_CURVE_SECP256R1 )
+  {
+    keysize = 32;
+    in.scalarMulSize =  prime256v1_Order_len;
+    in.modulusSize =     prime256v1_Prime_len;
+    in.coefSign =        prime256v1_A_sign;
+    in.coefA =            prime256v1_absA;
+    in.coefB =           prime256v1_B;
+    in.modulus =         prime256v1_Prime;
+    in.pointX =      prime256v1_GeneratorX;
+    in.pointY =      prime256v1_GeneratorY;
+    in.primeOrder =      prime256v1_Order;
+    
+    out.ptX = pPubKey;
+    out.ptY = pPubKey + 32;
+  }
+  else
+  {
+    keysize = 48;
+    
+    in.scalarMulSize =  prime384v1_Order_len;
+    in.modulusSize =     prime384v1_Prime_len;
+    in.coefSign =        prime384v1_A_sign;
+    in.coefA =            prime384v1_absA;
+    in.coefB =           prime384v1_B;
+    in.modulus =         prime384v1_Prime;
+    in.pointX =      prime384v1_GeneratorX;
+    in.pointY =      prime384v1_GeneratorY;
+    in.primeOrder =      prime384v1_Order; 
+    
+    out.ptX = pPubKey;
+    out.ptY = pPubKey + 48;
+  }
+  
+  ret = fill_random(pPrivKey, keysize/4);
+  if ( ret == 0 )
+  {
+    /* make sure the highest bit of the private key is 1 to ensure the key length */
+    pPrivKey[0] |= 0x80;
+    
+    /* set the scalarMul k */
+    in.scalarMul = pPrivKey;
+    
+    /* Compute public key from private key */
+    
+    __HAL_RCC_PKA_CLK_ENABLE();
+    __HAL_RCC_PKA_FORCE_RESET();
+    /* Release PKA from reset state */
+    __HAL_RCC_PKA_RELEASE_RESET();
+    
+    hpka.Instance = PKA;
+    ret = HAL_PKA_Init(&hpka);
+    if ( ret != HAL_OK)
+    {
+      return ret;
+    }
+    
+    ret = HAL_PKA_ECCMul(&hpka, &in, PKA_OPERATION_TIMEOUT);
+    if( ret == HAL_OK)
+    {      
+      HAL_PKA_ECCMul_GetResult(&hpka, &out);
+    }
+    
+    HAL_PKA_DeInit(&hpka);
+    __HAL_RCC_PKA_FORCE_RESET();
+    /* Release PKA from reset state */
+    __HAL_RCC_PKA_RELEASE_RESET();
+    /* Peripheral clock disable */
+    __HAL_RCC_PKA_CLK_DISABLE();  
+  }
+  
+  return ret;
 }
 /**
   * @brief Establish secret with ECDH
