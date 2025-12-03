@@ -35,6 +35,7 @@ extern "C" {
 #include "prime256v1.h"
 #include "prime384v1.h"
 #include "SigGen.h"
+#include "SigVer.h"
 #include "stdlib.h"
 #include "string.h"
 /* USER CODE END Includes */

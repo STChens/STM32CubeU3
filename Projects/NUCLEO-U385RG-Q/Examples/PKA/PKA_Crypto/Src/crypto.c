@@ -245,9 +245,9 @@ void ECDSA_Sign_SetK(INT8U *pK)
 /**
   * @brief Compute the signature
   * @param ecc_curve        select secp256r1 or secp384r1
-  * @param pPrivKey          pointer to the private key for signing
-  * @param pMsgHash     pointer to the hash value
-  * @param pSig     pointer to the output signature
+  * @param pPrivKey          pointer to the private key for signing (raw data)
+  * @param pMsgHash     pointer to the hash value (raw data)
+  * @param pSig     pointer to the output signature (raw data)
   * @retval  0 if succeed, else failed 
 */
 INT16U Generate_ECDSA_With_SHA_Hash_Value(INT8U ecc_curve, 
@@ -338,9 +338,9 @@ INT16U Generate_ECDSA_With_SHA_Hash_Value(INT8U ecc_curve,
 /**
   * @brief Verify the signature
   * @param ecc_curve        select secp256r1 or secp384r1
-  * @param pPubKey           pointer to the publick key
-  * @param pMsgHash     pointer to the hash value
-  * @param pSig          pointer to the signature
+  * @param pPubKey           pointer to the publick key (raw data)
+  * @param pMsgHash     pointer to the hash value (raw data)
+  * @param pSig          pointer to the signature (raw data)
   * @retval  0 if succeed, else failed 
 */
 INT16U Verify_ECDSA_With_SHA_Hash_Value(INT8U ecc_curve, 
@@ -348,6 +348,96 @@ INT16U Verify_ECDSA_With_SHA_Hash_Value(INT8U ecc_curve,
                                         INT8U *pMsgHash, 
                                         INT8U *pSig)
 {
+  PKA_ECDSAVerifInTypeDef in = {0};
+  PKA_HandleTypeDef hpka;
+  INT16U ret = HAL_ERROR;
+  
+  /* check input parameter */
+  if( pPubKey == NULL ||
+      pMsgHash == NULL ||
+      pSig == NULL )
+  {
+    return ret;
+  }
+  
+  if ( ecc_curve != ECC_CURVE_SECP256R1 && 
+       ecc_curve != ECC_CURVE_SECP384R1)
+  {
+    return ret;
+  }
+  
+  __HAL_RCC_PKA_CLK_ENABLE();
+  __HAL_RCC_PKA_FORCE_RESET();
+  /* Release PKA from reset state */
+  __HAL_RCC_PKA_RELEASE_RESET();
+  
+  hpka.Instance = PKA;
+  ret = HAL_PKA_Init(&hpka);
+  if ( ret != HAL_OK)
+  {
+    return ret;
+  }
+  
+  if ( ecc_curve == ECC_CURVE_SECP256R1 )
+  {    
+    /* Set input parameters */
+    in.primeOrderSize =  prime256v1_Order_len;
+    in.modulusSize =     prime256v1_Prime_len;
+    in.coefSign =        prime256v1_A_sign;
+    in.coef =            prime256v1_absA;
+    in.modulus =         prime256v1_Prime;
+    in.basePointX =      prime256v1_GeneratorX;
+    in.basePointY =      prime256v1_GeneratorY;
+    in.primeOrder =      prime256v1_Order;
+
+    in.pPubKeyCurvePtX = pPubKey;
+    in.pPubKeyCurvePtY = pPubKey+32;
+    in.RSign =           pSig;
+    in.SSign =           pSig+32;
+    in.hash =            pMsgHash;
+  }
+  else
+  {
+    /* Set input parameters */
+    in.primeOrderSize =  prime384v1_Order_len;
+    in.modulusSize =     prime384v1_Prime_len;
+    in.coefSign =        prime384v1_A_sign;
+    in.coef =            prime384v1_absA;
+    in.modulus =         prime384v1_Prime;
+    in.basePointX =      prime384v1_GeneratorX;
+    in.basePointY =      prime384v1_GeneratorY;
+    in.primeOrder =      prime384v1_Order;
+
+    in.pPubKeyCurvePtX = pPubKey;
+    in.pPubKeyCurvePtY = pPubKey+48;
+    in.RSign =           pSig;
+    in.SSign =           pSig+48;
+    in.hash =            pMsgHash;
+  }
+
+  /* Launch the verification */
+  ret = HAL_PKA_ECDSAVerif(&hpka, &in, 500);
+  if ( ret == HAL_OK )
+  {
+    /* Get the signature verification result */
+    if( HAL_PKA_ECDSAVerif_IsValidSignature(&hpka) == SET)
+    {
+      ret = 0; // Signature verfication OK
+    }
+    else
+    {
+      ret = 1; // Signature verification failed
+    }
+  }
+  
+  HAL_PKA_DeInit(&hpka);
+  __HAL_RCC_PKA_FORCE_RESET();
+  /* Release PKA from reset state */
+  __HAL_RCC_PKA_RELEASE_RESET();
+  /* Peripheral clock disable */
+  __HAL_RCC_PKA_CLK_DISABLE();  
+  
+  return ret;
 }
 
 /**

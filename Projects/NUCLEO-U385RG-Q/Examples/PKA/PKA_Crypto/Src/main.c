@@ -55,8 +55,7 @@ PKA_HandleTypeDef hpka;
 RNG_HandleTypeDef hrng;
 
 /* USER CODE BEGIN PV */
-PKA_ECDSASignInTypeDef in = {0};
-PKA_ECDSASignOutTypeDef out = {0};
+
 __IO uint32_t operationComplete = 0;
 /* USER CODE END PV */
 
@@ -74,6 +73,9 @@ static void print_buf(char* str, const uint8_t *buf, int size);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+/**
+ * @brief function to print data of a buffer
+ */
 void print_buf(char* str, const uint8_t *buf, int size)
 {
   int i;
@@ -97,14 +99,19 @@ void print_buf(char* str, const uint8_t *buf, int size)
   
 }
 
+/**
+ * @brief function to run ECDSA sign test with P-256 curve
+ */
 static void ECDSA_SignTest_SECP256R1(void)
 {
+  PKA_ECDSASignInTypeDef in = {0};
+  PKA_ECDSASignOutTypeDef out = {0};
   int result_ok = 0;
   
-  printf("\r\n"BRIGHT_YELLOW"TESET ECDSA Sign with P-256 SHA256 ==> Start\r\n"RESET_COLOR);
+  printf("\r\n"BRIGHT_YELLOW"Test ECDSA Sign with P-256 SHA256 ==> Start\r\n"RESET_COLOR);
   print_buf("HASH value for signing", (const uint8_t *)SigGen256_Hash_Msg, SigGen256_Hash_Msg_len);
   
-  printf("\r\n"BRIGHT_BLUE"TESET with direct call to HAL driver\r\n"RESET_COLOR);
+  printf("\r\n"BRIGHT_BLUE"Test with direct call to HAL driver\r\n"RESET_COLOR);
   
   MX_PKA_Init();
   /* Set input parameters */
@@ -163,7 +170,7 @@ static void ECDSA_SignTest_SECP256R1(void)
   /* Deinitialize the PKA */
   MX_PKA_DeInit();
 
-  printf("\r\n"BRIGHT_BLUE"TESET with call to crypto API\r\n"RESET_COLOR);
+  printf("\r\n"BRIGHT_BLUE"Test with call to crypto API\r\n"RESET_COLOR);
   
   printf(BRIGHT_BLUE"Test Crypto API ===> Signature generation\r\n"RESET_COLOR);
   INT8U outsig[64];
@@ -199,17 +206,22 @@ static void ECDSA_SignTest_SECP256R1(void)
     printf(BRIGHT_RED"Call function Generate_ECDSA_With_SHA_Hash_Value returned error!\r\n"RESET_COLOR);
   }  
   
-  printf("\r\n"BRIGHT_YELLOW"TESET ECDSA Sign with P-256 SHA256 <== Done.\r\n\r\n"RESET_COLOR);  
+  printf("\r\n"BRIGHT_YELLOW"Test ECDSA Sign with P-256 SHA256 <== Done.\r\n\r\n"RESET_COLOR);  
 }
 
+/**
+ * @brief function to run ECDSA sign test with P-384 curve
+ */
 static void ECDSA_SignTest_SECP384R1(void)
 {
   int result_ok = 0;
-  
-  printf("\r\n"BRIGHT_YELLOW"TESET ECDSA Sign with P-384 SHA384 ==> Start\r\n"RESET_COLOR);
+  PKA_ECDSASignInTypeDef in = {0};
+  PKA_ECDSASignOutTypeDef out = {0};
+
+  printf("\r\n"BRIGHT_YELLOW"Test ECDSA Sign with P-384 SHA384 ==> Start\r\n"RESET_COLOR);
   print_buf("HASH value for signing", (const uint8_t *)SigGen384_Hash_Msg, SigGen384_Hash_Msg_len);
   
-  printf("\r\n"BRIGHT_BLUE"TESET with direct call to HAL driver\r\n"RESET_COLOR);
+  printf("\r\n"BRIGHT_BLUE"Test with direct call to HAL driver\r\n"RESET_COLOR);
   
   MX_PKA_Init();
   /* Set input parameters */
@@ -269,7 +281,7 @@ static void ECDSA_SignTest_SECP384R1(void)
     Error_Handler();
   }
 
-  printf("\r\n"BRIGHT_BLUE"TESET with call to crypto API\r\n"RESET_COLOR);
+  printf("\r\n"BRIGHT_BLUE"Test with call to crypto API\r\n"RESET_COLOR);
   
   printf(BRIGHT_BLUE"Test Crypto API ===> Signature generation\r\n"RESET_COLOR);
   INT8U outsig[96];
@@ -305,8 +317,215 @@ static void ECDSA_SignTest_SECP384R1(void)
     printf(BRIGHT_RED"Call function Generate_ECDSA_With_SHA_Hash_Value returned error!\r\n"RESET_COLOR);
   }  
   
-  printf("\r\n"BRIGHT_YELLOW"TESET ECDSA Sign with P-384 SHA384 <== Done.\r\n\r\n"RESET_COLOR);  
+  printf("\r\n"BRIGHT_YELLOW"Test ECDSA Sign with P-384 SHA384 <== Done.\r\n\r\n"RESET_COLOR);  
 }
+
+/**
+ * @brief function to run ECDSA verify test with P-256 curve
+ */
+static void ECDSA_VerifyTest_SECP256R1(void)
+{
+  PKA_ECDSAVerifInTypeDef in = {0};
+  
+  printf("\r\n"BRIGHT_YELLOW"Test ECDSA Verify with P-256 SHA256 ==> Start\r\n"RESET_COLOR);
+  
+  MX_PKA_Init();
+  
+  /* Set input parameters */
+  in.primeOrderSize =  prime256v1_Order_len;
+  in.modulusSize =     prime256v1_Prime_len;
+  in.coefSign =        prime256v1_A_sign;
+  in.coef =            prime256v1_absA;
+  in.modulus =         prime256v1_Prime;
+  in.basePointX =      prime256v1_GeneratorX;
+  in.basePointY =      prime256v1_GeneratorY;
+  in.primeOrder =      prime256v1_Order;
+
+  in.pPubKeyCurvePtX = SigVer256_Qx;
+  in.pPubKeyCurvePtY = SigVer256_Qy;
+  in.RSign =           SigVer256_R;
+  in.SSign =           SigVer256_S;
+  in.hash =            SigVer256_Hash_Msg;
+
+  /* Launch the verification */
+  if(HAL_PKA_ECDSAVerif(&hpka, &in, 5000) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  printf("\r\n"BRIGHT_BLUE"\r\n***Test with direct call to HAL driver with VALID hash\r\n"RESET_COLOR);
+  print_buf("HASH value for signature verification", (const uint8_t *)in.hash, SigGen256_Hash_Msg_len);
+  
+  /* Compare to expected result */
+  if(HAL_PKA_ECDSAVerif_IsValidSignature(&hpka) != SigVer256_Result)
+  {
+    printf(BRIGHT_RED"Verification failed! (NOT as expected)\r\n"RESET_COLOR);
+  }
+  else
+  {
+    printf(BRIGHT_GREEN"Verification OK (as expected)\r\n"RESET_COLOR);
+  }
+ 
+  printf("\r\n"BRIGHT_BLUE"\r\n***Test with direct call to HAL driver with WRONG hash\r\n"RESET_COLOR);
+  
+  /* Simulate a wrong hash message verification */
+  in.hash = SigVer256_Hash_Msg_False;
+  print_buf("HASH value for signature verification", (const uint8_t *)in.hash, SigGen256_Hash_Msg_len);
+  
+  /* Launch the verification */
+  if(HAL_PKA_ECDSAVerif(&hpka, &in, 5000) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  /* Compare to expected result */
+  if(HAL_PKA_ECDSAVerif_IsValidSignature(&hpka) != SigVer256_Result)
+  {
+    printf(BRIGHT_RED"Verification failed"BRIGHT_GREEN" (as expected)!\r\n"RESET_COLOR);
+  }
+  else
+  {
+    printf(BRIGHT_GREEN"Verification OK"BRIGHT_RED" (NOT as expected)!\r\n"RESET_COLOR);
+  }  
+  
+  MX_PKA_DeInit();
+  
+  printf("\r\n"BRIGHT_BLUE"\r\n***Test with call to crypto API\r\n"RESET_COLOR);
+  
+  uint8_t pubkey[64], sig[64];
+  memcpy(&pubkey[0], SigVer256_Qx, 32);
+  memcpy(&pubkey[32], SigVer256_Qy, 32);
+  memcpy(&sig[0], SigVer256_R, 32);
+  memcpy(&sig[32], SigVer256_S, 32);
+  
+  printf(BRIGHT_BLUE"\r\n***Test Crypto API ===> Verify signature with VALID hash\r\n"RESET_COLOR);
+  print_buf("HASH value for signature verification", (const uint8_t *)SigVer256_Hash_Msg, SigGen256_Hash_Msg_len);
+  if ( Verify_ECDSA_With_SHA_Hash_Value(ECC_CURVE_SECP256R1, pubkey, (uint8_t*)SigVer256_Hash_Msg, sig) == 0 )
+  {
+    printf(BRIGHT_GREEN"Verification OK (as expected)\r\n"RESET_COLOR);
+  }
+  else
+  {
+    printf(BRIGHT_RED"Verification failed! (NOT as expected)\r\n"RESET_COLOR);
+  }
+  
+  printf(BRIGHT_BLUE"Test Crypto API ===> Verify signature with WRONG hash\r\n"RESET_COLOR);
+  print_buf("HASH value for signature verification", (const uint8_t *)SigVer256_Hash_Msg_False, SigGen256_Hash_Msg_len);
+  if ( Verify_ECDSA_With_SHA_Hash_Value(ECC_CURVE_SECP256R1, pubkey, (uint8_t*)SigVer256_Hash_Msg_False, sig) == 0 )
+  {
+    printf(BRIGHT_GREEN"Verification OK"BRIGHT_RED" (NOT as expected)!\r\n"RESET_COLOR);
+  }
+  else
+  {
+    printf(BRIGHT_RED"Verification failed"BRIGHT_GREEN" (as expected)!\r\n"RESET_COLOR);    
+  }
+  
+  printf("\r\n"BRIGHT_YELLOW"Test ECDSA Verify with P-256 SHA256 <== Done.\r\n"RESET_COLOR);
+}
+
+/**
+ * @brief function to run ECDSA verify test with P-384 curve
+ */
+static void ECDSA_VerifyTest_SECP384R1(void)
+{
+  PKA_ECDSAVerifInTypeDef in = {0};
+  
+  printf("\r\n"BRIGHT_YELLOW"Test ECDSA Verify with P-384 SHA384 ==> Start\r\n"RESET_COLOR);
+  
+  MX_PKA_Init();
+  
+  /* Set input parameters */
+  in.primeOrderSize =  prime384v1_Order_len;
+  in.modulusSize =     prime384v1_Prime_len;
+  in.coefSign =        prime384v1_A_sign;
+  in.coef =            prime384v1_absA;
+  in.modulus =         prime384v1_Prime;
+  in.basePointX =      prime384v1_GeneratorX;
+  in.basePointY =      prime384v1_GeneratorY;
+  in.primeOrder =      prime384v1_Order;
+
+  in.pPubKeyCurvePtX = SigVer384_Qx;
+  in.pPubKeyCurvePtY = SigVer384_Qy;
+  in.RSign =           SigVer384_R;
+  in.SSign =           SigVer384_S;
+  in.hash =            SigVer384_Hash_Msg;
+
+  /* Launch the verification */
+  if(HAL_PKA_ECDSAVerif(&hpka, &in, 5000) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  printf("\r\n"BRIGHT_BLUE"\r\n***Test with direct call to HAL driver with VALID hash\r\n"RESET_COLOR);
+  print_buf("HASH value for signature verification", (const uint8_t *)in.hash, SigGen384_Hash_Msg_len);
+  
+  /* Compare to expected result */
+  if(HAL_PKA_ECDSAVerif_IsValidSignature(&hpka) != SigVer384_Result)
+  {
+    printf(BRIGHT_RED"Verification failed! (NOT as expected)\r\n"RESET_COLOR);
+  }
+  else
+  {
+    printf(BRIGHT_GREEN"Verification OK (as expected)\r\n"RESET_COLOR);
+  }
+ 
+  printf("\r\n"BRIGHT_BLUE"\r\n***Test with direct call to HAL driver with WRONG hash\r\n"RESET_COLOR);
+  
+  /* Simulate a wrong hash message verification */
+  in.hash = SigVer384_Hash_Msg_False;
+  print_buf("HASH value for signature verification", (const uint8_t *)in.hash, SigGen384_Hash_Msg_len);
+  
+  /* Launch the verification */
+  if(HAL_PKA_ECDSAVerif(&hpka, &in, 5000) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  /* Compare to expected result */
+  if(HAL_PKA_ECDSAVerif_IsValidSignature(&hpka) != SigVer384_Result)
+  {
+    printf(BRIGHT_RED"Verification failed"BRIGHT_GREEN" (as expected)!\r\n"RESET_COLOR);
+  }
+  else
+  {
+    printf(BRIGHT_GREEN"Verification OK"BRIGHT_RED" (NOT as expected)!\r\n"RESET_COLOR);
+  }  
+  
+  MX_PKA_DeInit();
+  
+  printf("\r\n"BRIGHT_BLUE"\r\n***Test with call to crypto API\r\n"RESET_COLOR);
+  
+  uint8_t pubkey[96], sig[96];
+  memcpy(&pubkey[0], SigVer384_Qx, 48);
+  memcpy(&pubkey[48], SigVer384_Qy, 48);
+  memcpy(&sig[0], SigVer384_R, 48);
+  memcpy(&sig[48], SigVer384_S, 48);
+  
+  printf(BRIGHT_BLUE"\r\n***Test Crypto API ===> Verify signature with VALID hash\r\n"RESET_COLOR);
+  print_buf("HASH value for signature verification", (const uint8_t *)SigVer384_Hash_Msg, SigGen384_Hash_Msg_len);
+  if ( Verify_ECDSA_With_SHA_Hash_Value(ECC_CURVE_SECP384R1, pubkey, (uint8_t*)SigVer384_Hash_Msg, sig) == 0 )
+  {
+    printf(BRIGHT_GREEN"Verification OK (as expected)\r\n"RESET_COLOR);
+  }
+  else
+  {
+    printf(BRIGHT_RED"Verification failed! (NOT as expected)\r\n"RESET_COLOR);
+  }
+  
+  printf(BRIGHT_BLUE"Test Crypto API ===> Verify signature with WRONG hash\r\n"RESET_COLOR);
+  print_buf("HASH value for signature verification", (const uint8_t *)SigVer384_Hash_Msg_False, SigGen384_Hash_Msg_len);
+  if ( Verify_ECDSA_With_SHA_Hash_Value(ECC_CURVE_SECP384R1, pubkey, (uint8_t*)SigVer384_Hash_Msg_False, sig) == 0 )
+  {
+    printf(BRIGHT_GREEN"Verification OK"BRIGHT_RED" (NOT as expected)!\r\n"RESET_COLOR);
+  }
+  else
+  {
+    printf(BRIGHT_RED"Verification failed"BRIGHT_GREEN" (as expected)!\r\n"RESET_COLOR);    
+  }
+  
+  printf("\r\n"BRIGHT_YELLOW"Test ECDSA Verify with P-384 SHA384 <== Done.\r\n"RESET_COLOR);
+}
+
 
 /* USER CODE END 0 */
 
@@ -361,6 +580,9 @@ int main(void)
   
   ECDSA_SignTest_SECP256R1();
   ECDSA_SignTest_SECP384R1();
+  
+  ECDSA_VerifyTest_SECP256R1();
+  ECDSA_VerifyTest_SECP384R1();
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
