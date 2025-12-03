@@ -23,7 +23,9 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "crypto.h"
+#include "string.h"
+#include "stdio.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -58,12 +60,37 @@ void SystemClock_Config(void);
 static void MX_RNG_Init(void);
 static void MX_PKA_Init(void);
 static void MX_ICACHE_Init(void);
+
+static void print_buf(char* str, const uint8_t *buf, int size);
 /* USER CODE BEGIN PFP */
 
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+void print_buf(char* str, const uint8_t *buf, int size)
+{
+  int i;
+  
+  printf("\r\n-----------------------------------------------\r\n");
+  if(str != NULL)
+  {
+    printf("%s\r\n", str);
+    printf("-----------------------------------------------\r\n");
+  }
+  for(i = 0; i<size; i++)
+  {
+    printf("%02x ", buf[i]);
+    if((i+1)%16 == 0)
+    {
+      printf("\r\n");
+    }
+  }
+  if ( i % 16 != 0) printf("\r\n");
+  printf("===============================================\r\n");
+  
+}
+
 /* USER CODE END 0 */
 
 /**
@@ -105,6 +132,17 @@ int main(void)
   MX_PKA_Init();
   MX_ICACHE_Init();
   /* USER CODE BEGIN 2 */
+  
+  COM_InitTypeDef COM_Init;
+  COM_Init.BaudRate = 115200;
+  COM_Init.HwFlowCtl = COM_HWCONTROL_NONE;
+  COM_Init.Parity = COM_PARITY_NONE;
+  COM_Init.StopBits = COM_STOPBITS_1;
+  COM_Init.WordLength = COM_WORDLENGTH_8B;
+  BSP_COM_Init(COM1, &COM_Init);
+  
+  printf("COM Init done.\r\n");
+  
   /* Set input parameters */
   in.primeOrderSize =  prime256v1_Order_len;
   in.modulusSize =     prime256v1_Prime_len;
@@ -137,6 +175,10 @@ int main(void)
 
   /* Copy the result to allocated space */
   HAL_PKA_ECDSASign_GetResult(&hpka , &out, NULL);
+  
+  print_buf("HASH value", (const uint8_t *)SigGen_Hash_Msg, SigGen_Hash_Msg_len);
+  print_buf("Signature R", out.RSign, SigGen_R_len);
+  print_buf("Signature S", out.SSign, SigGen_S_len);
 
   /* Compare to expected result */
   if (memcmp(out.RSign, SigGen_R, SigGen_R_len) != 0)
@@ -158,7 +200,22 @@ int main(void)
   /* Success */
   operationComplete = 1;
   BSP_LED_On(LD2);
+  
   /* USER CODE END 2 */
+  printf("Test Crypto API ===> Signature generation\r\n");
+  INT8U outsig[32];
+  INT16U ret = Generate_ECDSA_With_SHA_Hash_Value(ECC_CURVE_SECP256R1, 
+                                          (INT8U *)SigGen_d, 
+                                          (INT8U *)SigGen_Hash_Msg, 
+                                          &outsig[0]);
+  if (ret == 0 )
+  {
+    print_buf("Output signature:", outsig, sizeof(outsig));
+  }  
+  else
+  {
+    printf("Call function Generate_ECDSA_With_SHA_Hash_Value returned error!\r\n");
+  }
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
@@ -275,7 +332,7 @@ static void MX_PKA_Init(void)
 {
 
   /* USER CODE BEGIN PKA_Init 0 */
-
+  __HAL_RCC_PKA_CLK_ENABLE();
   /* USER CODE END PKA_Init 0 */
 
   /* USER CODE BEGIN PKA_Init 1 */
