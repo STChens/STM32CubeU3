@@ -34,10 +34,12 @@ extern "C" {
 #include "stm32u3xx_nucleo.h"
 #include "prime256v1.h"
 #include "prime384v1.h"
-#include "SigGen.h"
-#include "SigVer.h"
+#include "SigGen_TestVector.h"
+#include "SigVer_TestVector.h"
+#include "ECDH_TestVector.h"
 #include "stdlib.h"
 #include "string.h"
+  
 /* USER CODE END Includes */
 
 /* Exported types ------------------------------------------------------------*/
@@ -52,7 +54,12 @@ extern "C" {
 
 /* Exported macro ------------------------------------------------------------*/
 /* USER CODE BEGIN EM */
-
+#define BRIGHT_RED "\033[91m"
+#define BRIGHT_GREEN "\033[92m"
+#define BRIGHT_YELLOW "\033[93m"
+#define BRIGHT_BLUE "\033[96m"
+#define RESET_COLOR "\033[0m"
+  
 /* USER CODE END EM */
 
 /* Exported functions prototypes ---------------------------------------------*/

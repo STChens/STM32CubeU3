@@ -1,12 +1,12 @@
 /**
   ******************************************************************************
-  * @file    PKA/PKA_ECDSA_Verify/Inc/SigVer.h
+  * @file    PKA/PKA_ECDSA_Crypto/Inc/SigVer_TestVector.h
   * @author  MCD Application Team
-  * @brief   This file contains the headers of SigVer.c .
+  * @brief   This file contains the headers of SigVer_TestVector.c .
   ******************************************************************************
   * @attention
   *
-  * Copyright (c) 2024 STMicroelectronics.
+  * Copyright (c) 2025 STMicroelectronics.
   * All rights reserved.
   *
   * This software is licensed under terms that can be found in the LICENSE file
@@ -17,8 +17,8 @@
   */
 
 /* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef __SIGVER_H
-#define __SIGVER_H
+#ifndef __SIGVER_TV_H
+#define __SIGVER_TV_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -57,6 +57,6 @@ extern const uint32_t SigVer384_Result;
 }
 #endif
 
-#endif /* __SIGVER_H */
+#endif /* __SIGVER_TV_H */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

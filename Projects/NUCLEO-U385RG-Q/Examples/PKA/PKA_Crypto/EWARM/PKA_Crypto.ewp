@@ -276,7 +276,7 @@
                 <option>
                     <name>CCAllowList</name>
                     <version>1</version>
-                    <state>00000000</state>
+                    <state>11111110</state>
                 </option>
                 <option>
                     <name>CCDebugInfo</name>
@@ -357,7 +357,7 @@
                 </option>
                 <option>
                     <name>CCOptLevel</name>
-                    <state>0</state>
+                    <state>3</state>
                 </option>
                 <option>
                     <name>CCOptStrategy</name>
@@ -366,7 +366,7 @@
                 </option>
                 <option>
                     <name>CCOptLevelSlave</name>
-                    <state>0</state>
+                    <state>3</state>
                 </option>
                 <option>
                     <name>CCPosIndRopi</name>
@@ -1080,13 +1080,19 @@
                 <name>$PROJ_DIR$\..\Src\crypto.c</name>
             </file>
             <file>
+                <name>$PROJ_DIR$\..\Src\crypto_test.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\Src\ECDH_TestVector.c</name>
+            </file>
+            <file>
                 <name>$PROJ_DIR$\..\Src\main.c</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\Src\SigGen.c</name>
+                <name>$PROJ_DIR$\..\Src\SigGen_TestVector.c</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\Src\SigVer.c</name>
+                <name>$PROJ_DIR$\..\Src\SigVer_TestVector.c</name>
             </file>
             <file>
                 <name>$PROJ_DIR$\..\Src\stm32u3xx_hal_msp.c</name>

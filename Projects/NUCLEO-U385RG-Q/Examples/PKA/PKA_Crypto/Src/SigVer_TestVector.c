@@ -1,6 +1,6 @@
 /**
   ******************************************************************************
-  * @file    PKA/PKA_ECDSA_Verify/Src/SigVer256.c
+  * @file    PKA/PKA_Crypto/Src/SigVer_TestVector.c
   * @author  MCD Application Team
   * @brief   This file contains reference buffers from 
   *          NIST Cryptographic Algorithm Validation Program (CAVP).
@@ -27,6 +27,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 /*
+ * https://github.com/pyca/cryptography/blob/main/vectors/cryptography_vectors/asymmetric/ECDSA/FIPS_186-3/SigVer.rsp
   Adapted from
   [P-256,SHA-256]
   Msg = e1130af6a38ccb412a9c8d13e15dbfc9e69a16385af3c3f1e5da954fd5e7c45fd75e2b8c36699228e92840c0562fbf3772f07e17f1add56588dd45f7450e1217ad239922dd9c32695dc71ff2424ca0dec1321aa47064a044b7fe3c2b97d03ce470a592304c5ef21eed9f93da56bb232d1eeb0035f9bf0dfafdcc4606272b20a3
@@ -92,6 +93,7 @@ const uint32_t SigVer256_Result = SET;
 
 
 /* Adapted from 
+ * https://github.com/pyca/cryptography/blob/main/vectors/cryptography_vectors/asymmetric/ECDSA/FIPS_186-3/SigVer.rsp
   [P-384,SHA-384]
   Msg = 9dd789ea25c04745d57a381f22de01fb0abd3c72dbdefd44e43213c189583eef85ba662044da3de2dd8670e6325154480155bbeebb702c75781ac32e13941860cb576fe37a05b757da5b5b418f6dd7c30b042e40f4395a342ae4dce05634c33625e2bc524345481f7e253d9551266823771b251705b4a85166022a37ac28f1bd
   Qx = cb908b1fd516a57b8ee1e14383579b33cb154fece20c5035e2b3765195d1951d75bd78fb23e00fef37d7d064fd9af144

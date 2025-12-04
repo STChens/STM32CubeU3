@@ -210,63 +210,36 @@ const uint32_t prime384v1_Seed_len = 20;
     if ( ret != HAL_OK) \
     {   \
       return ret; \
+    }   \
+    else \
+    {   \
+      /* Reset PKA RAM */ \
+      HAL_PKA_RAMReset(&hpka); \
     }
   
 #define DEINIT_PKA_HW(hpka)     \
     HAL_PKA_DeInit(&hpka); 
     
+#define COMPILER_BARRIER() __ASM __IO("" : : : "memory")
+#if defined(RCC_RNGCLKSOURCE_HSI48)
+#define RNGCLKSOURCE_HSI RCC_RNGCLKSOURCE_HSI48
+#else
+#define RNGCLKSOURCE_HSI RCC_RNGCLKSOURCE_HSI
+#endif /* RCC_RNGCLKSOURCE_HSI48 */
       
 /* Private function prototypes -----------------------------------------------*/
 static INT8U *pECDSA_Sign_K = NULL;
 static INT8U ECDSA_Sign_K[48] = {0};
+static RNG_HandleTypeDef rnghandle;
 
-/**
-  * @brief Fill the buffer with random in size of bytes
-  * @param words  number of words to be filled (4xbytes)
-  * @retval 0 if succeed, otherwise failed
-  *                  
-*/
-static INT16U fill_random(INT8U *buf, int words)
-{
-  HAL_StatusTypeDef status;
-    
-  RNG_HandleTypeDef hrng;
-  hrng.Instance = RNG;
-  hrng.Init.ClockErrorDetection = RNG_CED_ENABLE;
-  status = HAL_RNG_Init(&hrng);    
+static uint8_t users = 0U;
+uint8_t init_ctx = 0U;
 
-  if ( status == HAL_OK )
-  {
-    while ( words > 0 )
-    {
-      status |= HAL_RNG_GenerateRandomNumber(&hrng, (uint32_t*)buf + words-1);
-      words--;
-    }    
-  }
-  
-  return status;
-}
-
-/**
-  * @brief Get the pointer to the k value for ECDSA signing 
-  *        If a pointer is set previously for k then use the existing 
-  *        Otherwise fill the Array with random and return the pointer
-  * @param size   384 for SECP384R1, 256 for SECP256R1
-  * @retval pointer to the k buffer
-  *                  
-*/
-static INT8U *get_k(INT8 size)
-{  
-  if (pECDSA_Sign_K != NULL) return pECDSA_Sign_K;
-  else
-  {
-    // TODO get data from random number 
-    if (size > 48) size = 12;
-    else if (size < 48) size = 8;
-    fill_random(ECDSA_Sign_K, size);
-    return ECDSA_Sign_K;
-  }
-}
+static uint8_t atomic_incr_u8(__IO uint8_t *valuePtr, uint8_t delta);
+static int RNG_Init(void);
+static int RNG_GetBytes(uint8_t *output, size_t length, size_t *output_length);
+static INT16U fill_random(INT8U *buf, size_t len);
+static INT8U *get_k(INT8 size);
 
 /* Public functions  -----------------------------------------------*/
 
@@ -515,7 +488,7 @@ INT8U ECDH_Generate_Key_Pair_Check_Key_Pair(INT8U ecc_curve,
     out.ptY = pPubKey + 48;
   }
   
-  ret = fill_random(pPrivKey, keysize/4);
+  ret = fill_random(pPrivKey, keysize);
   if ( ret == 0 )
   {
     /* make sure the highest bit of the private key is 1 to ensure the key length */
@@ -555,6 +528,10 @@ INT8U ECDH_Compute_Z(INT8U ecc_curve,
   
   PKA_ECCMulInTypeDef in = {0};
   PKA_ECCMulOutTypeDef out = {0};
+  PKA_PointCheckInTypeDef cin = {0};
+  PKA_MontgomeryParamInTypeDef inp = {0};
+  uint8_t montgomery[48];
+    
   INT8U outy[48];
   PKA_HandleTypeDef hpka = {0};
   INT16U ret = HAL_ERROR;
@@ -574,7 +551,7 @@ INT8U ECDH_Compute_Z(INT8U ecc_curve,
     return ret;
   }  
   
-  /* First generate random number for private key */
+  /* set up parameters according to curve type */
   if ( ecc_curve == ECC_CURVE_SECP256R1 )
   {
     keysize = 32;
@@ -584,45 +561,79 @@ INT8U ECDH_Compute_Z(INT8U ecc_curve,
     in.coefA =            prime256v1_absA;
     in.coefB =           prime256v1_B;
     in.modulus =         prime256v1_Prime;
-    in.pointX =      pPubKey;
-    in.pointY =      pPubKey+32;
     in.primeOrder =      prime256v1_Order;
   }
   else
   {
-    keysize = 48;
-    
+    keysize = 48;    
     in.scalarMulSize =  prime384v1_Order_len;
     in.modulusSize =     prime384v1_Prime_len;
     in.coefSign =        prime384v1_A_sign;
     in.coefA =            prime384v1_absA;
     in.coefB =           prime384v1_B;
     in.modulus =         prime384v1_Prime;
-    in.pointX =      pPubKey;
-    in.pointY =      pPubKey+48;
     in.primeOrder =      prime384v1_Order; 
   }
   
-  /* set the scalarMul k */
-  in.scalarMul = pPrivKey;
- 
-  /* set output point buffer, X coordinate is the shared secret */
-  out.ptX = pSharedSec;
-  out.ptY = outy;
+  in.pointX =      pPubKey;
+  in.pointY =      pPubKey+keysize;
   
-  /* Compute public key from private key */
-      
+  /** First check whether the peer public point is on the curve */
+    
+  cin.coefA = in.coefA;
+  cin.coefB = in.coefB;
+  cin.coefSign = in.coefSign;
+  cin.modulus = in.modulus;
+  cin.modulusSize = in.modulusSize;
+  cin.pointX = in.pointX;
+  cin.pointY = in.pointY;  
+    
+  /* Set Montgomery R2 input parameters */
+  inp.size = in.modulusSize;
+  inp.pOp1 = in.modulus;
+
   INIT_PKA_HW(hpka, ret);
   
-  /* Compute point */
-  ret = HAL_PKA_ECCMul(&hpka, &in, PKA_OPERATION_TIMEOUT);
-  if( ret == HAL_OK)
-  {      
-    HAL_PKA_ECCMul_GetResult(&hpka, &out);
+  /* Launch the processing */
+  ret = HAL_PKA_MontgomeryParam(&hpka, &inp,PKA_OPERATION_TIMEOUT);
+
+  /* Get Montgomery R2 parameters */
+  HAL_PKA_MontgomeryParam_GetResult(&hpka, (uint32_t *)montgomery);
+  cin.pMontgomeryParam = (uint32_t *)montgomery;
+  
+  ret = HAL_PKA_PointCheck(&hpka, &cin, PKA_OPERATION_TIMEOUT);
+  if ( ret == HAL_OK )
+  {
+    ret = HAL_PKA_PointCheck_IsOnCurve(&hpka);
+    if ( ret == 1 )
+    {
+      /** Now we are sure the peer point is on curve
+        * Then we cna compute the shared secret with scalar multiplication 
+        */
+      
+      /* set the scalarMul k */
+      in.scalarMul = pPrivKey;
+     
+      /* set output point buffer, X coordinate is the shared secret */
+      out.ptX = pSharedSec;
+      out.ptY = outy;
+      
+      /* Compute public key from private key */
+          
+      /* Compute point */
+      ret = HAL_PKA_ECCMul(&hpka, &in, PKA_OPERATION_TIMEOUT);
+      if( ret == HAL_OK)
+      {      
+        HAL_PKA_ECCMul_GetResult(&hpka, &out);
+      }
+    }
+    else
+    {
+      ret = HAL_ERROR;
+    }
   }
   
   DEINIT_PKA_HW(hpka); 
-
   
   return ret;
 }
@@ -631,7 +642,7 @@ INT8U ECDH_Compute_Z(INT8U ecc_curve,
 /**
 * @brief PKA MSP Initialization
 * This function configures the hardware resources used in this example
-* @param hpka: PKA handle pointer
+* @param hpka: PKA rnghandle pointer
 * @retval None
 */
 void HAL_PKA_MspInit(PKA_HandleTypeDef* hpka)
@@ -654,7 +665,7 @@ void HAL_PKA_MspInit(PKA_HandleTypeDef* hpka)
 /**
 * @brief PKA MSP De-Initialization
 * This function freeze the hardware resources used in this example
-* @param hpka: PKA handle pointer
+* @param hpka: PKA rnghandle pointer
 * @retval None
 */
 void HAL_PKA_MspDeInit(PKA_HandleTypeDef* hpka)
@@ -676,7 +687,7 @@ void HAL_PKA_MspDeInit(PKA_HandleTypeDef* hpka)
 /**
 * @brief RNG MSP Initialization
 * This function configures the hardware resources used in this example
-* @param hrng: RNG handle pointer
+* @param hrng: RNG rnghandle pointer
 * @retval None
 */
 void HAL_RNG_MspInit(RNG_HandleTypeDef* hrng)
@@ -707,7 +718,7 @@ void HAL_RNG_MspInit(RNG_HandleTypeDef* hrng)
 /**
 * @brief RNG MSP De-Initialization
 * This function freeze the hardware resources used in this example
-* @param hrng: RNG handle pointer
+* @param hrng: RNG rnghandle pointer
 * @retval None
 */
 void HAL_RNG_MspDeInit(RNG_HandleTypeDef* hrng)
@@ -724,4 +735,160 @@ void HAL_RNG_MspDeInit(RNG_HandleTypeDef* hrng)
   /* USER CODE END RNG_MspDeInit 1 */
   }
 
+}
+
+/* Private functions  -----------------------------------------------*/
+static uint8_t atomic_incr_u8(__IO uint8_t *valuePtr, uint8_t delta)
+{
+  COMPILER_BARRIER();
+  uint8_t newValue;
+  do
+  {
+    newValue = __LDREXB(valuePtr) + delta;
+  } while (__STREXB(newValue, valuePtr));
+  COMPILER_BARRIER();
+  return newValue;
+}
+
+static int RNG_Init(void)
+{
+  uint32_t dummy;
+  RNG_ConfigTypeDef rng_conf;
+
+  /*  We're only supporting a single user of RNG */
+  if (atomic_incr_u8(&users, 1U) > 1U)
+  {
+    return -1;
+  }
+
+  /* Select RNG clock source */
+  __HAL_RCC_RNG_CONFIG(RNGCLKSOURCE_HSI);
+
+  /* RNG Peripheral clock enable */
+  __HAL_RCC_RNG_CLK_ENABLE();
+
+  /* Initialize RNG instance */
+  rnghandle.Instance = RNG;
+  rnghandle.State = HAL_RNG_STATE_RESET;
+  rnghandle.Lock = HAL_UNLOCKED;
+
+  if (HAL_RNG_Init(&rnghandle) != HAL_OK)
+  {
+    return -1;
+  }
+
+  /* Set NIST configuration for better security */
+  rng_conf.Config1 = 0x0FUL;
+  rng_conf.Config2 = 0UL;
+  rng_conf.Config3 = 0x0DUL;
+  rng_conf.ClockDivider = RNG_CLKDIV_BY_1;
+  rng_conf.NistCompliance = RNG_NIST_COMPLIANT;
+  rng_conf.AutoReset = RNG_ARDIS_ENABLE;
+  rng_conf.HealthTest = 0x0000AEC7UL;
+  if (HAL_RNGEx_SetConfig(&rnghandle, &rng_conf) != HAL_OK)
+  {
+    return -1;
+  }
+
+  /* first random number generated after setting the RNGEN bit should not be used */
+  if (HAL_RNG_GenerateRandomNumber(&rnghandle, &dummy) != HAL_OK)
+  {
+    return -1;
+  }
+
+  return 0;
+}
+
+static int RNG_GetBytes(uint8_t *output, size_t length, size_t *output_length)
+{
+  int32_t ret = 0;
+  uint8_t try = 0U;
+  __IO uint8_t random[4];
+  *output_length = 0;
+
+  /* Get Random byte */
+  while ((*output_length < length) && (ret == 0))
+  {
+    if (HAL_RNG_GenerateRandomNumber(&rnghandle, (uint32_t *)random) != HAL_OK)
+    {
+      /* retry when random number generated are not immediately available */
+      if (try < 3U)
+      {
+        try++;
+      }
+      else
+      {
+        ret = -1;
+      }
+    }
+    else
+    {
+      for (uint8_t i = 0U; (i < 4U) && (*output_length < length) ; i++)
+      {
+        *output++ = random[i];
+        *output_length += 1U;
+        random[i] = 0;
+      }
+    }
+  }
+  /* Just be extra sure that we didn't do it wrong */
+  if ((__HAL_RNG_GET_FLAG(&rnghandle, (RNG_FLAG_CECS | RNG_FLAG_SECS))) != 0)
+  {
+    *output_length = 0;
+  }
+
+  return ret;
+}
+
+
+/**
+  * @brief Fill the buffer with random in size of bytes
+  * @param words  number of words to be filled (4xbytes)
+  * @retval 0 if succeed, otherwise failed
+  *                  
+*/
+static INT16U fill_random(INT8U *buf, size_t len)
+{
+  INT16U ret;
+  size_t olen;
+  
+  if (init_ctx == 0U)
+  {
+    ret = RNG_Init();
+    if (ret != HAL_OK)
+    {
+      return ret;
+    }
+    init_ctx = 1U;
+  }
+
+  ret = RNG_GetBytes(buf, len, &olen);
+
+  if (olen != len)
+  {
+    ret++;
+  }
+  return ret;
+}
+
+/**
+  * @brief Get the pointer to the k value for ECDSA signing 
+  *        If a pointer is set previously for k then use the existing 
+  *        Otherwise fill the Array with random and return the pointer
+  * @param size   384 for SECP384R1, 256 for SECP256R1
+  * @retval pointer to the k buffer
+  *                  
+*/
+static INT8U *get_k(INT8 size)
+{  
+  if (pECDSA_Sign_K != NULL) return pECDSA_Sign_K;
+  else
+  {
+    // TODO get data from random number 
+    if (size > 48) size = 48;
+    else if (size < 48) size = 32;
+    fill_random(&ECDSA_Sign_K[0], size);
+    
+    return &ECDSA_Sign_K[0];
+  }
 }
