@@ -203,6 +203,19 @@ const uint32_t prime384v1_Seed_len = 20;
 /* Private macros -----------------------------------------------*/
 #define PKA_OPERATION_TIMEOUT (500)
 
+#define INIT_PKA_HW(hpka, ret) \
+    hpka.Instance = PKA; \
+    ret = HAL_PKA_DeInit(&hpka); \
+    ret = HAL_PKA_Init(&hpka); \
+    if ( ret != HAL_OK) \
+    {   \
+      return ret; \
+    }
+  
+#define DEINIT_PKA_HW(hpka)     \
+    HAL_PKA_DeInit(&hpka); 
+    
+      
 /* Private function prototypes -----------------------------------------------*/
 static INT8U *pECDSA_Sign_K = NULL;
 static INT8U ECDSA_Sign_K[48] = {0};
@@ -282,7 +295,7 @@ INT16U Generate_ECDSA_With_SHA_Hash_Value(INT8U ecc_curve,
                                           INT8U *pMsgHash, 
                                           INT8U *pSig)
 {
-  PKA_HandleTypeDef hpka;
+  PKA_HandleTypeDef hpka = {0};
   INT16U ret = HAL_ERROR;
   PKA_ECDSASignInTypeDef in = {0};
   PKA_ECDSASignOutTypeDef out = {0};  
@@ -301,17 +314,7 @@ INT16U Generate_ECDSA_With_SHA_Hash_Value(INT8U ecc_curve,
     return ret;
   }
   
-  __HAL_RCC_PKA_CLK_ENABLE();
-  __HAL_RCC_PKA_FORCE_RESET();
-  /* Release PKA from reset state */
-  __HAL_RCC_PKA_RELEASE_RESET();
-  
-  hpka.Instance = PKA;
-  ret = HAL_PKA_Init(&hpka);
-  if ( ret != HAL_OK)
-  {
-    return ret;
-  }
+  INIT_PKA_HW(hpka, ret);  
   
   if ( ecc_curve == ECC_CURVE_SECP256R1 )
   {
@@ -352,12 +355,7 @@ INT16U Generate_ECDSA_With_SHA_Hash_Value(INT8U ecc_curve,
     HAL_PKA_ECDSASign_GetResult(&hpka , &out, NULL);
   }
     
-  HAL_PKA_DeInit(&hpka);
-  __HAL_RCC_PKA_FORCE_RESET();
-  /* Release PKA from reset state */
-  __HAL_RCC_PKA_RELEASE_RESET();
-  /* Peripheral clock disable */
-  __HAL_RCC_PKA_CLK_DISABLE();  
+  DEINIT_PKA_HW(hpka); 
   
   return ret;
 }
@@ -376,7 +374,7 @@ INT16U Verify_ECDSA_With_SHA_Hash_Value(INT8U ecc_curve,
                                         INT8U *pSig)
 {
   PKA_ECDSAVerifInTypeDef in = {0};
-  PKA_HandleTypeDef hpka;
+  PKA_HandleTypeDef hpka = {0};
   INT16U ret = HAL_ERROR;
   
   /* check input parameter */
@@ -393,17 +391,7 @@ INT16U Verify_ECDSA_With_SHA_Hash_Value(INT8U ecc_curve,
     return ret;
   }
   
-  __HAL_RCC_PKA_CLK_ENABLE();
-  __HAL_RCC_PKA_FORCE_RESET();
-  /* Release PKA from reset state */
-  __HAL_RCC_PKA_RELEASE_RESET();
-  
-  hpka.Instance = PKA;
-  ret = HAL_PKA_Init(&hpka);
-  if ( ret != HAL_OK)
-  {
-    return ret;
-  }
+  INIT_PKA_HW(hpka, ret);
   
   if ( ecc_curve == ECC_CURVE_SECP256R1 )
   {    
@@ -457,12 +445,7 @@ INT16U Verify_ECDSA_With_SHA_Hash_Value(INT8U ecc_curve,
     }
   }
   
-  HAL_PKA_DeInit(&hpka);
-  __HAL_RCC_PKA_FORCE_RESET();
-  /* Release PKA from reset state */
-  __HAL_RCC_PKA_RELEASE_RESET();
-  /* Peripheral clock disable */
-  __HAL_RCC_PKA_CLK_DISABLE();  
+  DEINIT_PKA_HW(hpka);  
   
   return ret;
 }
@@ -480,7 +463,7 @@ INT8U ECDH_Generate_Key_Pair_Check_Key_Pair(INT8U ecc_curve,
 {
   PKA_ECCMulInTypeDef in = {0};
   PKA_ECCMulOutTypeDef out = {0};
-  PKA_HandleTypeDef hpka;
+  PKA_HandleTypeDef hpka = {0};
   INT16U ret = HAL_ERROR;
   int keysize = 0;
   
@@ -542,18 +525,8 @@ INT8U ECDH_Generate_Key_Pair_Check_Key_Pair(INT8U ecc_curve,
     in.scalarMul = pPrivKey;
     
     /* Compute public key from private key */
-    
-    __HAL_RCC_PKA_CLK_ENABLE();
-    __HAL_RCC_PKA_FORCE_RESET();
-    /* Release PKA from reset state */
-    __HAL_RCC_PKA_RELEASE_RESET();
-    
-    hpka.Instance = PKA;
-    ret = HAL_PKA_Init(&hpka);
-    if ( ret != HAL_OK)
-    {
-      return ret;
-    }
+        
+    INIT_PKA_HW(hpka, ret);
     
     ret = HAL_PKA_ECCMul(&hpka, &in, PKA_OPERATION_TIMEOUT);
     if( ret == HAL_OK)
@@ -561,12 +534,7 @@ INT8U ECDH_Generate_Key_Pair_Check_Key_Pair(INT8U ecc_curve,
       HAL_PKA_ECCMul_GetResult(&hpka, &out);
     }
     
-    HAL_PKA_DeInit(&hpka);
-    __HAL_RCC_PKA_FORCE_RESET();
-    /* Release PKA from reset state */
-    __HAL_RCC_PKA_RELEASE_RESET();
-    /* Peripheral clock disable */
-    __HAL_RCC_PKA_CLK_DISABLE();  
+    DEINIT_PKA_HW(hpka); 
   }
   
   return ret;
@@ -584,4 +552,176 @@ INT8U ECDH_Compute_Z(INT8U ecc_curve,
                      INT8U *pPubKey, 
                      INT8U *pSharedSec)
 {
+  
+  PKA_ECCMulInTypeDef in = {0};
+  PKA_ECCMulOutTypeDef out = {0};
+  INT8U outy[48];
+  PKA_HandleTypeDef hpka = {0};
+  INT16U ret = HAL_ERROR;
+  int keysize = 0;
+  
+  /* check input parameter */
+  if( pPubKey == NULL ||
+      pPrivKey == NULL ||
+      pSharedSec == NULL )
+  {
+    return ret;
+  }
+  
+  if ( ecc_curve != ECC_CURVE_SECP256R1 && 
+       ecc_curve != ECC_CURVE_SECP384R1)
+  {
+    return ret;
+  }  
+  
+  /* First generate random number for private key */
+  if ( ecc_curve == ECC_CURVE_SECP256R1 )
+  {
+    keysize = 32;
+    in.scalarMulSize =  prime256v1_Order_len;
+    in.modulusSize =     prime256v1_Prime_len;
+    in.coefSign =        prime256v1_A_sign;
+    in.coefA =            prime256v1_absA;
+    in.coefB =           prime256v1_B;
+    in.modulus =         prime256v1_Prime;
+    in.pointX =      pPubKey;
+    in.pointY =      pPubKey+32;
+    in.primeOrder =      prime256v1_Order;
+  }
+  else
+  {
+    keysize = 48;
+    
+    in.scalarMulSize =  prime384v1_Order_len;
+    in.modulusSize =     prime384v1_Prime_len;
+    in.coefSign =        prime384v1_A_sign;
+    in.coefA =            prime384v1_absA;
+    in.coefB =           prime384v1_B;
+    in.modulus =         prime384v1_Prime;
+    in.pointX =      pPubKey;
+    in.pointY =      pPubKey+48;
+    in.primeOrder =      prime384v1_Order; 
+  }
+  
+  /* set the scalarMul k */
+  in.scalarMul = pPrivKey;
+ 
+  /* set output point buffer, X coordinate is the shared secret */
+  out.ptX = pSharedSec;
+  out.ptY = outy;
+  
+  /* Compute public key from private key */
+      
+  INIT_PKA_HW(hpka, ret);
+  
+  /* Compute point */
+  ret = HAL_PKA_ECCMul(&hpka, &in, PKA_OPERATION_TIMEOUT);
+  if( ret == HAL_OK)
+  {      
+    HAL_PKA_ECCMul_GetResult(&hpka, &out);
+  }
+  
+  DEINIT_PKA_HW(hpka); 
+
+  
+  return ret;
+}
+
+
+/**
+* @brief PKA MSP Initialization
+* This function configures the hardware resources used in this example
+* @param hpka: PKA handle pointer
+* @retval None
+*/
+void HAL_PKA_MspInit(PKA_HandleTypeDef* hpka)
+{
+  if(hpka->Instance==PKA)
+  {
+  /* USER CODE BEGIN PKA_MspInit 0 */
+
+  /* USER CODE END PKA_MspInit 0 */
+    /* Peripheral clock enable */
+    __HAL_RCC_PKA_CLK_ENABLE();
+  /* USER CODE BEGIN PKA_MspInit 1 */
+
+  /* USER CODE END PKA_MspInit 1 */
+
+  }
+
+}
+
+/**
+* @brief PKA MSP De-Initialization
+* This function freeze the hardware resources used in this example
+* @param hpka: PKA handle pointer
+* @retval None
+*/
+void HAL_PKA_MspDeInit(PKA_HandleTypeDef* hpka)
+{
+  if(hpka->Instance==PKA)
+  {
+  /* USER CODE BEGIN PKA_MspDeInit 0 */
+    HAL_PKA_RAMReset(hpka);
+  /* USER CODE END PKA_MspDeInit 0 */
+    /* Peripheral clock disable */
+    __HAL_RCC_PKA_CLK_DISABLE();
+  /* USER CODE BEGIN PKA_MspDeInit 1 */
+
+  /* USER CODE END PKA_MspDeInit 1 */
+  }
+
+}
+
+/**
+* @brief RNG MSP Initialization
+* This function configures the hardware resources used in this example
+* @param hrng: RNG handle pointer
+* @retval None
+*/
+void HAL_RNG_MspInit(RNG_HandleTypeDef* hrng)
+{
+  RCC_PeriphCLKInitTypeDef PeriphClkInit = {0};
+  if(hrng->Instance==RNG)
+  {
+  /* USER CODE BEGIN RNG_MspInit 0 */
+
+  /* USER CODE END RNG_MspInit 0 */
+
+  /** Initializes the peripherals clock
+  */
+    PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_RNG;
+    PeriphClkInit.RngClockSelection = RCC_RNGCLKSOURCE_HSI48;
+    HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit);
+    
+    /* Peripheral clock enable */
+    __HAL_RCC_RNG_CLK_ENABLE();
+  /* USER CODE BEGIN RNG_MspInit 1 */
+
+  /* USER CODE END RNG_MspInit 1 */
+
+  }
+
+}
+
+/**
+* @brief RNG MSP De-Initialization
+* This function freeze the hardware resources used in this example
+* @param hrng: RNG handle pointer
+* @retval None
+*/
+void HAL_RNG_MspDeInit(RNG_HandleTypeDef* hrng)
+{
+  if(hrng->Instance==RNG)
+  {
+  /* USER CODE BEGIN RNG_MspDeInit 0 */
+
+  /* USER CODE END RNG_MspDeInit 0 */
+    /* Peripheral clock disable */
+    __HAL_RCC_RNG_CLK_DISABLE();
+  /* USER CODE BEGIN RNG_MspDeInit 1 */
+
+  /* USER CODE END RNG_MspDeInit 1 */
+  }
+
 }

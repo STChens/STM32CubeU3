@@ -802,18 +802,15 @@ static void MX_ICACHE_Init(void)
   */
 static void MX_PKA_Init(void)
 {
-
+  
   /* USER CODE BEGIN PKA_Init 0 */
-  __HAL_RCC_PKA_CLK_ENABLE();
-  __HAL_RCC_PKA_FORCE_RESET();
-  /* Release PKA from reset state */
-  __HAL_RCC_PKA_RELEASE_RESET();
   /* USER CODE END PKA_Init 0 */
 
   /* USER CODE BEGIN PKA_Init 1 */
 
   /* USER CODE END PKA_Init 1 */
   hpka.Instance = PKA;
+  HAL_PKA_DeInit(&hpka);  
   if (HAL_PKA_Init(&hpka) != HAL_OK)
   {
     Error_Handler();
@@ -828,9 +825,6 @@ static void MX_PKA_DeInit(void)
 {
 
   HAL_PKA_DeInit(&hpka);
-  __HAL_RCC_PKA_FORCE_RESET();
-  /* Release PKA from reset state */
-  __HAL_RCC_PKA_RELEASE_RESET();
   /* Peripheral clock disable */
   __HAL_RCC_PKA_CLK_DISABLE(); 
 }
