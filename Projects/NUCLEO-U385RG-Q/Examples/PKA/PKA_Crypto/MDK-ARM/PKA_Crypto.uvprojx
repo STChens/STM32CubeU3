@@ -7,16 +7,17 @@
 
   <Targets>
     <Target>
-      <TargetName>PKA_ECDSA_Sign</TargetName>
+      <TargetName>PKA_Crypto</TargetName>
       <ToolsetNumber>0x4</ToolsetNumber>
       <ToolsetName>ARM-ADS</ToolsetName>
+      <pArmCC>6210000::V6.21::ARMCLANG</pArmCC>
       <pCCUsed>6210000::V6.21::ARMCLANG</pCCUsed>
       <uAC6>1</uAC6>
       <TargetOption>
         <TargetCommonOption>
           <Device>STM32U385RGTxQ</Device>
           <Vendor>STMicroelectronics</Vendor>
-          <PackID>Keil.STM32U3xx_DFP.0.2.0</PackID>
+          <PackID>Keil.STM32U3xx_DFP.1.0.0</PackID>
           <PackURL>https://www.keil.com/pack/</PackURL>
           <Cpu>IRAM(0x20000000-0x2002FFFF) IRAM2(0x20030000-0x2003FFFF) IROM(0x08000000-0x80FFFFF) CLOCK(8000000) FPU3(SFPU) CPUTYPE("Cortex-M33") ELITTLE TZ DSP</Cpu>
           <FlashUtilSpec></FlashUtilSpec>
@@ -48,8 +49,8 @@
             <NotGenerated>0</NotGenerated>
             <InvalidFlash>1</InvalidFlash>
           </TargetStatus>
-          <OutputDirectory>PKA_ECDSA_Sign\</OutputDirectory>
-          <OutputName>PKA_ECDSA_Sign</OutputName>
+          <OutputDirectory>PKA_Crypto\</OutputDirectory>
+          <OutputName>PKA_Crypto</OutputName>
           <CreateExecutable>1</CreateExecutable>
           <CreateLib>0</CreateLib>
           <CreateHexFile>1</CreateHexFile>
@@ -81,7 +82,7 @@
           </BeforeMake>
           <AfterMake>
             <RunUserProg1>0</RunUserProg1>
-            <RunUserProg2>1</RunUserProg2>
+            <RunUserProg2>0</RunUserProg2>
             <UserProg1Name></UserProg1Name>
             <UserProg2Name></UserProg2Name>
             <UserProg1Dos16Mode>0</UserProg1Dos16Mode>
@@ -134,11 +135,11 @@
             <RunIndependent>0</RunIndependent>
             <UpdateFlashBeforeDebugging>1</UpdateFlashBeforeDebugging>
             <Capability>1</Capability>
-            <DriverSelection>4101</DriverSelection>
+            <DriverSelection>4098</DriverSelection>
           </Flash1>
           <bUseTDR>1</bUseTDR>
-          <Flash2>BIN\UL2V8M.DLL</Flash2>
-          <Flash3></Flash3>
+          <Flash2>STLink\ST-LINKIII-KEIL_SWO.dll</Flash2>
+          <Flash3>"" ()</Flash3>
           <Flash4></Flash4>
           <pFcarmOut></pFcarmOut>
           <pFcarmGrp></pFcarmGrp>
@@ -187,7 +188,7 @@
             <RvdsMve>0</RvdsMve>
             <RvdsCdeCp>0</RvdsCdeCp>
             <nBranchProt>0</nBranchProt>
-            <hadIRAM2>0</hadIRAM2>
+            <hadIRAM2>1</hadIRAM2>
             <hadIROM2>0</hadIROM2>
             <StupSel>8</StupSel>
             <useUlib>0</useUlib>
@@ -207,7 +208,7 @@
             <Ro2Chk>0</Ro2Chk>
             <Ro3Chk>0</Ro3Chk>
             <Ir1Chk>1</Ir1Chk>
-            <Ir2Chk>1</Ir2Chk>
+            <Ir2Chk>0</Ir2Chk>
             <Ra1Chk>0</Ra1Chk>
             <Ra2Chk>0</Ra2Chk>
             <Ra3Chk>0</Ra3Chk>
@@ -247,7 +248,7 @@
               <IRAM>
                 <Type>0</Type>
                 <StartAddress>0x20000000</StartAddress>
-                <Size>0x40000</Size>
+                <Size>0x30000</Size>
               </IRAM>
               <IROM>
                 <Type>1</Type>
@@ -410,14 +411,29 @@
               <FilePath>../Src/stm32u3xx_it.c</FilePath>
             </File>
             <File>
-              <FileName>prime256v1.c</FileName>
+              <FileName>crypto.c</FileName>
               <FileType>1</FileType>
-              <FilePath>../Src/prime256v1.c</FilePath>
+              <FilePath>..\Src\crypto.c</FilePath>
             </File>
             <File>
-              <FileName>SigGen.c</FileName>
+              <FileName>crypto_test.c</FileName>
               <FileType>1</FileType>
-              <FilePath>../Src/SigGen.c</FilePath>
+              <FilePath>..\Src\crypto_test.c</FilePath>
+            </File>
+            <File>
+              <FileName>ECDH_TestVector.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\ECDH_TestVector.c</FilePath>
+            </File>
+            <File>
+              <FileName>SigGen_TestVector.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\SigGen_TestVector.c</FilePath>
+            </File>
+            <File>
+              <FileName>SigVer_TestVector.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\SigVer_TestVector.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -544,6 +560,16 @@
               <FileType>1</FileType>
               <FilePath>../../../../../../Drivers/STM32U3xx_HAL_Driver/Src/stm32u3xx_hal_tim_ex.c</FilePath>
             </File>
+            <File>
+              <FileName>stm32u3xx_hal_uart.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\..\..\Drivers\STM32U3xx_HAL_Driver\Src\stm32u3xx_hal_uart.c</FilePath>
+            </File>
+            <File>
+              <FileName>stm32u3xx_hal_uart_ex.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\..\..\Drivers\STM32U3xx_HAL_Driver\Src\stm32u3xx_hal_uart_ex.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -569,7 +595,7 @@
       <component Cclass="CMSIS" Cgroup="CORE" Cvendor="ARM" Cversion="5.6.0" condition="CMSIS Core">
         <package name="CMSIS" schemaVersion="1.3" url="http://www.keil.com/pack/" vendor="ARM" version="5.9.0"/>
         <targetInfos>
-          <targetInfo name="PKA_ECDSA_Sign"/>
+          <targetInfo name="PKA_Crypto"/>
         </targetInfos>
       </component>
     </components>

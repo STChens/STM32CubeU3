@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <projectDescription>
-	<name>PKA_ECDSA_Sign</name>
+	<name>PKA_Crypto</name>
 	<comment></comment>
 	<projects>
 	</projects>
@@ -33,29 +33,39 @@
 	</natures>
 	<linkedResources>
 		<link>
-			<name>PKA_ECDSA_Sign.ioc</name>
+			<name>PKA_Crypto.ioc</name>
 			<type>1</type>
-			<locationURI>PARENT-1-PROJECT_LOC/PKA_ECDSA_Sign.ioc</locationURI>
+			<locationURI>PARENT-1-PROJECT_LOC/PKA_Crypto.ioc</locationURI>
 		</link>
 		<link>
-			<name>Doc/README.md</name>
+			<name>Application/User/ECDH_TestVector.c</name>
 			<type>1</type>
-			<locationURI>PARENT-1-PROJECT_LOC/README.md</locationURI>
+			<locationURI>PARENT-1-PROJECT_LOC/Src/ECDH_TestVector.c</locationURI>
 		</link>
 		<link>
-			<name>Application/User/SigGen.c</name>
+			<name>Application/User/SigGen_TestVector.c</name>
 			<type>1</type>
-			<locationURI>PARENT-1-PROJECT_LOC/Src/SigGen.c</locationURI>
+			<locationURI>PARENT-1-PROJECT_LOC/Src/SigGen_TestVector.c</locationURI>
+		</link>
+		<link>
+			<name>Application/User/SigVer_TestVector.c</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/Src/SigVer_TestVector.c</locationURI>
+		</link>
+		<link>
+			<name>Application/User/crypto.c</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/Src/crypto.c</locationURI>
+		</link>
+		<link>
+			<name>Application/User/crypto_test.c</name>
+			<type>1</type>
+			<locationURI>PARENT-1-PROJECT_LOC/Src/crypto_test.c</locationURI>
 		</link>
 		<link>
 			<name>Application/User/main.c</name>
 			<type>1</type>
 			<locationURI>PARENT-1-PROJECT_LOC/Src/main.c</locationURI>
-		</link>
-		<link>
-			<name>Application/User/prime256v1.c</name>
-			<type>1</type>
-			<locationURI>PARENT-1-PROJECT_LOC/Src/prime256v1.c</locationURI>
 		</link>
 		<link>
 			<name>Application/User/stm32u3xx_hal_msp.c</name>
@@ -166,6 +176,16 @@
 			<name>Drivers/STM32U3xx_HAL_Driver/stm32u3xx_hal_tim_ex.c</name>
 			<type>1</type>
 			<locationURI>PARENT-6-PROJECT_LOC/Drivers/STM32U3xx_HAL_Driver/Src/stm32u3xx_hal_tim_ex.c</locationURI>
+		</link>
+		<link>
+			<name>Drivers/STM32U3xx_HAL_Driver/stm32u3xx_hal_uart.c</name>
+			<type>1</type>
+			<locationURI>PARENT-6-PROJECT_LOC/Drivers/STM32U3xx_HAL_Driver/Src/stm32u3xx_hal_uart.c</locationURI>
+		</link>
+		<link>
+			<name>Drivers/STM32U3xx_HAL_Driver/stm32u3xx_hal_uart_ex.c</name>
+			<type>1</type>
+			<locationURI>PARENT-6-PROJECT_LOC/Drivers/STM32U3xx_HAL_Driver/Src/stm32u3xx_hal_uart_ex.c</locationURI>
 		</link>
 		<link>
 			<name>Drivers/STM32U3xx_HAL_Driver/stm32u3xx_ll_pka.c</name>

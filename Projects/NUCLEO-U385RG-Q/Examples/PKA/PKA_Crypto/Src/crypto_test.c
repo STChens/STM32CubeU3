@@ -774,7 +774,7 @@ void ECDHTest_CRYPTOAPI(void)
 static void Print_ECC_Test_Menu(void)
 {
   printf("\r\n===========================================================\r\n");
-  printf("            ECC Test Menu\r\n");
+  printf("                     ECC Test Menu\r\n");
   printf("===========================================================\r\n");
   printf(BRIGHT_YELLOW"ECDSA Sign Test (P-256) with HAL API    ------------------1\r\n"RESET_COLOR);
   printf(BRIGHT_YELLOW"ECDSA Sign Test (P-384) with HAL API    ------------------2\r\n"RESET_COLOR);
@@ -806,7 +806,7 @@ void ECC_Test_Run(UART_HandleTypeDef *phuart)
   while(loop == 1)
   {
     Print_ECC_Test_Menu();
-    if (HAL_UART_Receive(phuart, &c, 1, HAL_MAX_DELAY) == HAL_OK)
+    if (HAL_UART_Receive(phuart, (uint8_t*)&c, 1, HAL_MAX_DELAY) == HAL_OK)
     {
       printf("Your input is: %c\r\n", c);
       switch(c)
