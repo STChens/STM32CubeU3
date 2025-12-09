@@ -41,7 +41,11 @@
 
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
-
+#define BRIGHT_RED "\033[91m"
+#define BRIGHT_GREEN "\033[92m"
+#define BRIGHT_YELLOW "\033[93m"
+#define BRIGHT_BLUE "\033[96m"
+#define RESET_COLOR "\033[0m"
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
@@ -133,13 +137,30 @@ static void print_buf(char* str, const uint8_t *buf, int size)
 #define AES_GCM_MODE_ENCRYPTION 0x00
 #define AES_GCM_MODE_DECRYPTION 0x01
     
+/**
+ * @brief function to compute AES GCM encryption/decryption and tag
+ * @param mode          AES_GCM_MODE_ENCRYPTION for encryption, AES_GCM_MODE_DECRYPTION for decryption
+ * @param pKey          pointer to the key buffer
+ * @param key_size      key size in byte, must be 16 or 32
+ * @param input         pointer to the input data for denc/dec
+ * @param input_length  input data length in bytes
+ * @param pIv           pointer to the iv buffer
+ * @param iv_size       length of iv data in bytes, only 12 bytes IV is supported
+ * @param pAuthData     pointer to additional data for authentication
+ * @param auth_data_size        length of additional authentication data in bytes
+ * @param output        pointer to the output data buffer
+ *                      Assummption here is that the output buffer is big enough to hold the encrypted/decrypted data
+ * @param pTag          pointer to the output tag buffer
+ *                      Assumption here is that the tag buffer is big enough to hold 16 byte gcm tag
+ */    
 static uint32_t aes_gcm_encrypt(int mode,
-                                uint8_t *pKey, size_t key_size,
+                                uint8_t *pKey, size_t key_size, 
                                 uint8_t *input, size_t input_length, 
-                                uint8_t *pIv, size_t iv_size,
+                                uint8_t *pIv, size_t iv_size, 
                                 uint8_t *pAuthData, size_t auth_data_size,
-                                uint8_t *output, size_t output_length,
-                                uint8_t *pTag, size_t tag_size)
+                                uint8_t *output,
+                                uint8_t *pTag 
+                                  )
 {
   uint32_t ret = HAL_ERROR;
   CRYP_HandleTypeDef haes;
@@ -154,10 +175,10 @@ static uint32_t aes_gcm_encrypt(int mode,
   uint16_t work_buf_len = 0;
   
   if(input == NULL || input_length == 0) return ret;
-  if(pIv == NULL || iv_size == 0) return ret;
+  if(pIv == NULL || iv_size != 12) return ret;
   if(pAuthData == NULL && auth_data_size > 0) return ret;
   if(pAuthData != NULL && auth_data_size == 0) return ret;
-  if(output == NULL || output_length == 0) return ret;
+  if(output == NULL) return ret;
   
   /* check and set key */
   if(pKey == NULL) return ret;
@@ -297,7 +318,7 @@ last_data_word:
   }
   
 finish:  
-  if ( tag_size > 0 )
+  if ( pTag != NULL )
   {
     ret = HAL_CRYPEx_AESGCM_GenerateAuthTAG(&haes,(uint32_t*)pTag, TIMEOUT_VALUE);
   }  
@@ -308,6 +329,9 @@ exit:
   return ret;
 }
                                   
+/**
+ * @brief function to run AES GCM encryption test uisng NIST test vector
+ */
 static void aes_gcm_test1(void)
 {
   /** Extract from NIST Special Publication 800-38D
@@ -362,7 +386,7 @@ static void aes_gcm_test1(void)
   uint8_t output_data[51] = {0};
   uint8_t tag[16] = {0};
     
-  printf("\r\n\r\nAES GCM TEST CASE 1 =============> [Encryption test]\r\n\r\n");
+  printf(BRIGHT_YELLOW"\r\n\r\nAES GCM TEST CASE 1 ========> [Encryption test]\r\n\r\n"RESET_COLOR);
 
   print_buf("AES Key:", (uint8_t *)Key, 32);
   print_buf("IV data:", (uint8_t *)IV, sizeof(IV));
@@ -372,16 +396,44 @@ static void aes_gcm_test1(void)
   aes_gcm_encrypt(AES_GCM_MODE_ENCRYPTION,
                   (uint8_t *)Key, sizeof(Key), (uint8_t *)InputData, sizeof(InputData), 
                   (uint8_t *)IV, sizeof(IV), (uint8_t *)AddData, sizeof(AddData), 
-                  output_data, sizeof(output_data), 
-                  tag, sizeof(tag));
+                  output_data, tag);
   
   print_buf("Expected cipher text:", (uint8_t *)Expected_Output, sizeof(Expected_Output));
-  print_buf("Cipher text:", (uint8_t *)output_data, sizeof(Expected_Output));
-  
+  print_buf("Computed Cipher text:", (uint8_t *)output_data, sizeof(Expected_Output));
+    
+  /*Compare results with expected buffer*/
+  if(memcmp(Expected_Output, output_data, sizeof(Expected_Output)) != 0)
+  {
+    /* Processing Error */
+    printf(BRIGHT_RED"Computed output is NOT the same as expected output!\r\n"RESET_COLOR);
+    printf(BRIGHT_RED"Test failed!\r\n"RESET_COLOR);
+  }
+  else
+  {
+    printf(BRIGHT_GREEN"Computed output is the same as expected output!\r\n"RESET_COLOR);
+    printf(BRIGHT_GREEN"Test OK!\r\n"RESET_COLOR);    
+  }
   print_buf("Expected GCM tag:", (uint8_t *)Expected_Tag, sizeof(Expected_Tag));
-  print_buf("GCM tag:", (uint8_t *)tag, sizeof(Expected_Tag));
+  print_buf("Computed GCM tag:", (uint8_t *)tag, sizeof(Expected_Tag));
+  
+  /*Compare results with expected buffer*/
+  if(memcmp(Expected_Tag, tag, sizeof(Expected_Tag)) != 0)
+  {
+    /* Processing Error */
+    printf(BRIGHT_RED"Computed tag is NOT the same as expected tag!\r\n"RESET_COLOR);
+    printf(BRIGHT_RED"Test failed!\r\n"RESET_COLOR);
+  }
+  else
+  {
+    printf(BRIGHT_GREEN"Computed tag is the same as expected tag!\r\n"RESET_COLOR);
+    printf(BRIGHT_GREEN"Test OK!\r\n"RESET_COLOR);    
+  }
 }
 
+                                  
+/**
+ * @brief function to run AES GCM decryption test uisng CTM test vector
+ */
 static void aes_gcm_test2(void)
 {
   const uint8_t Key[] =
@@ -411,24 +463,47 @@ static void aes_gcm_test2(void)
   uint8_t output_data[14] = {0};
   uint8_t tag[16] = {0};
   
-  printf("\r\n\r\nAES GCM TEST CASE 2 =============> [Decryption test]\r\n\r\n");
+  printf(BRIGHT_BLUE"\r\n\r\nAES GCM TEST CASE 2 ========> [Decryption test]\r\n\r\n"RESET_COLOR);
   
   print_buf("AES Key:", (uint8_t *)Key, 16);
   print_buf("IV data:", (uint8_t *)IV, sizeof(IV));
   print_buf("Auth data:", (uint8_t *)AddData, sizeof(AddData));
-  print_buf("Plain text:", (uint8_t *)InputData, sizeof(InputData));
+  print_buf("Cipher text:", (uint8_t *)InputData, sizeof(InputData));
 
   aes_gcm_encrypt(AES_GCM_MODE_DECRYPTION,
                   (uint8_t *)Key, sizeof(Key), (uint8_t *)InputData, sizeof(InputData), 
                   (uint8_t *)IV, sizeof(IV), (uint8_t *)AddData, sizeof(AddData), 
-                  output_data, sizeof(output_data), 
-                  tag, sizeof(tag));
+                  output_data, tag);
   
-  print_buf("Expected cipher text:", (uint8_t *)Expected_Output, sizeof(Expected_Output));
-  print_buf("Cipher text:", (uint8_t *)output_data, sizeof(Expected_Output));
-  
+  print_buf("Expected plain text:", (uint8_t *)Expected_Output, sizeof(Expected_Output));
+  print_buf("Computed plain text:", (uint8_t *)output_data, sizeof(Expected_Output));
+  /*Compare results with expected buffer*/
+  if(memcmp(Expected_Output, output_data, sizeof(Expected_Output)) != 0)
+  {
+    /* Processing Error */
+    printf(BRIGHT_RED"Computed output is NOT the same as expected output!\r\n"RESET_COLOR);
+    printf(BRIGHT_RED"Test failed!\r\n"RESET_COLOR);
+  }
+  else
+  {
+    printf(BRIGHT_GREEN"Computed output is the same as expected output!\r\n"RESET_COLOR);
+    printf(BRIGHT_GREEN"Test OK!\r\n"RESET_COLOR);    
+  }
   print_buf("Expected GCM tag:", (uint8_t *)Expected_Tag, sizeof(Expected_Tag));
-  print_buf("GCM tag:", (uint8_t *)tag, sizeof(Expected_Tag));
+  print_buf("Computed GCM tag:", (uint8_t *)tag, sizeof(Expected_Tag));
+  
+  /*Compare results with expected buffer*/
+  if(memcmp(Expected_Tag, tag, sizeof(Expected_Tag)) != 0)
+  {
+    /* Processing Error */
+    printf(BRIGHT_RED"Computed tag is NOT the same as expected tag!\r\n"RESET_COLOR);
+    printf(BRIGHT_RED"Test failed!\r\n"RESET_COLOR);
+  }
+  else
+  {
+    printf(BRIGHT_GREEN"Computed tag is the same as expected tag!\r\n"RESET_COLOR);
+    printf(BRIGHT_GREEN"Test OK!\r\n"RESET_COLOR);    
+  }
 }
 
 /* USER CODE END 0 */
@@ -479,7 +554,7 @@ int main(void)
   BSP_COM_Init(COM1, &COM_Init);
   
   printf("COM Init done.\r\n");
-  
+#if 0  
   print_buf("AES Key:", (uint8_t *)pKeyAES, 16);
   print_buf("IV data:", (uint8_t *)pInitVectAES, sizeof(pInitVectAES));
   print_buf("Auth data:", (uint8_t *)HeaderAES, sizeof(HeaderAES));
@@ -491,7 +566,7 @@ int main(void)
     Error_Handler();
   }
   print_buf("Expected cipher text:", (uint8_t *)Ciphertext, 16);
-  print_buf("Cipher text:", (uint8_t *)EncryptedText, 16);
+  print_buf("Computed cipher text:", (uint8_t *)EncryptedText, 16);
   /*Compare results with expected buffer*/
   if(memcmp(EncryptedText, Ciphertext, 16) != 0)
   {
@@ -505,7 +580,7 @@ int main(void)
     Error_Handler();
   }
   print_buf("Expected GCM tag:", (uint8_t *)ExpectedTAG, 16);
-  print_buf("GCM tag:", (uint8_t *)TAG, 16);
+  print_buf("Computed GCM tag:", (uint8_t *)TAG, 16);
   /*Compare results with expected buffer*/
   if(memcmp(TAG, ExpectedTAG, 16) != 0)
   {
@@ -541,7 +616,7 @@ int main(void)
     /* Processing Error */
     Error_Handler();
   }
-  
+#endif  
   aes_gcm_test1();
   aes_gcm_test2();
   /* USER CODE END 2 */

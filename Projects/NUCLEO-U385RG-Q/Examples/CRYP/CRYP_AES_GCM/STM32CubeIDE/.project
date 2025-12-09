@@ -153,6 +153,16 @@
 			<locationURI>PARENT-6-PROJECT_LOC/Drivers/STM32U3xx_HAL_Driver/Src/stm32u3xx_hal_tim_ex.c</locationURI>
 		</link>
 		<link>
+			<name>Drivers/STM32U3xx_HAL_Driver/stm32u3xx_hal_uart.c</name>
+			<type>1</type>
+			<locationURI>PARENT-6-PROJECT_LOC/Drivers/STM32U3xx_HAL_Driver/Src/stm32u3xx_hal_uart.c</locationURI>
+		</link>
+		<link>
+			<name>Drivers/STM32U3xx_HAL_Driver/stm32u3xx_hal_uart_ex.c</name>
+			<type>1</type>
+			<locationURI>PARENT-6-PROJECT_LOC/Drivers/STM32U3xx_HAL_Driver/Src/stm32u3xx_hal_uart_ex.c</locationURI>
+		</link>
+		<link>
 			<name>Drivers/BSP/STM32U3xx_Nucleo/stm32u3xx_nucleo.c</name>
 			<type>1</type>
 			<locationURI>PARENT-6-PROJECT_LOC/Drivers/BSP/STM32U3xx_Nucleo/stm32u3xx_nucleo.c</locationURI>
