@@ -130,12 +130,15 @@ static void print_buf(char* str, const uint8_t *buf, int size)
 #endif /* !PUT_UINT32_BE */
     
 #define ST_GCM_TIMEOUT    0xFFU
+#define AES_GCM_MODE_ENCRYPTION 0x00
+#define AES_GCM_MODE_DECRYPTION 0x01
     
-static uint32_t aes_gcm_encrypt(uint8_t *pKey, size_t key_size,
+static uint32_t aes_gcm_encrypt(int mode,
+                                uint8_t *pKey, size_t key_size,
                                 uint8_t *input, size_t input_length, 
                                 uint8_t *pIv, size_t iv_size,
                                 uint8_t *pAuthData, size_t auth_data_size,
-                                uint8_t *pCipher, size_t cipher_size,
+                                uint8_t *output, size_t output_length,
                                 uint8_t *pTag, size_t tag_size)
 {
   uint32_t ret = HAL_ERROR;
@@ -154,7 +157,7 @@ static uint32_t aes_gcm_encrypt(uint8_t *pKey, size_t key_size,
   if(pIv == NULL || iv_size == 0) return ret;
   if(pAuthData == NULL && auth_data_size > 0) return ret;
   if(pAuthData != NULL && auth_data_size == 0) return ret;
-  if(pCipher == NULL || cipher_size == 0) return ret;
+  if(output == NULL || output_length == 0) return ret;
   
   /* check and set key */
   if(pKey == NULL) return ret;
@@ -227,11 +230,23 @@ static uint32_t aes_gcm_encrypt(uint8_t *pKey, size_t key_size,
     /* Convert in bytes */
     wordlen = wordnb * 16U;
 
-    ret = HAL_CRYP_Encrypt(&haes,
-                         (uint32_t *)input,
-                         wordlen,
-                         (uint32_t *)pCipher,
-                         ST_GCM_TIMEOUT);
+    if ( mode == AES_GCM_MODE_DECRYPTION )
+    {
+      ret = HAL_CRYP_Decrypt(&haes,
+                           (uint32_t *)input,
+                           wordlen,
+                           (uint32_t *)output,
+                           ST_GCM_TIMEOUT);
+    }
+    else
+    {
+      ret = HAL_CRYP_Encrypt(&haes,
+                           (uint32_t *)input,
+                           wordlen,
+                           (uint32_t *)output,
+                           ST_GCM_TIMEOUT);
+
+    }
     if ( ret != HAL_OK)
     {
       goto exit;
@@ -259,11 +274,23 @@ last_data_word:
   memset(work_buf, 0, sizeof(work_buf));
   memcpy(work_buf, input + in_datalen, work_buf_len);
 
-  ret = HAL_CRYP_Encrypt(&haes,
+  if ( mode == AES_GCM_MODE_DECRYPTION )
+  {
+    ret = HAL_CRYP_Decrypt(&haes,
+                         (uint32_t *)work_buf,
+                         work_buf_len,
+                         (uint32_t *)(output + in_datalen),
+                         ST_GCM_TIMEOUT);
+  }
+  else
+  {
+      ret = HAL_CRYP_Encrypt(&haes,
                        (uint32_t *)work_buf,
                        work_buf_len,
-                       (uint32_t *)(pCipher + in_datalen),
+                       (uint32_t *)(output + in_datalen),
                        ST_GCM_TIMEOUT);
+  }
+  
   if ( ret != HAL_OK)
   {
     goto exit;
@@ -308,7 +335,7 @@ static void aes_gcm_test1(void)
   {
     0x61, 0x1c, 0xe6, 0xf9, 0xa6, 0x88, 0x07, 0x50, 0xde, 0x7d, 0xa6, 0xcb
   };
-  const uint8_t TestPlainText[] =
+  const uint8_t InputData[] =
   {
     0xe7, 0xd1, 0xdc, 0xf6, 0x68, 0xe2, 0x87, 0x68, 0x61, 0x94, 0x0e, 0x01, 0x2f, 0xe5, 0x2a, 0x98,
     0xda, 0xcb, 0xd7, 0x8a, 0xb6, 0x3c, 0x08, 0x84, 0x2c, 0xc9, 0x80, 0x1e, 0xa5, 0x81, 0x68, 0x2a,
@@ -321,7 +348,7 @@ static void aes_gcm_test1(void)
     0xe5, 0xa5, 0x0c, 0xea, 0xd3, 0x57, 0x58, 0x49, 0x99, 0x0c, 0xdd, 0x2e, 0xa9, 0xb3, 0x59, 0x77,
     0x49, 0x40, 0x3e, 0xfb, 0x4a, 0x56, 0x68, 0x4f, 0x0c, 0x6b, 0xde, 0x35, 0x2d, 0x4a, 0xee, 0xc5
   };
-  const uint8_t Expected_Ciphertext[] =
+  const uint8_t Expected_Output[] =
   {
     0x88, 0x86, 0xe1, 0x96, 0x01, 0x0c, 0xb3, 0x84, 0x9d, 0x9c, 0x1a, 0x18, 0x2a, 0xbe, 0x1e, 0xea,
     0xb0, 0xa5, 0xf3, 0xca, 0x42, 0x3c, 0x36, 0x69, 0xa4, 0xa8, 0x70, 0x3c, 0x0f, 0x14, 0x6e, 0x8e,
@@ -332,23 +359,24 @@ static void aes_gcm_test1(void)
   {
     0x24, 0x69, 0xce, 0xcd, 0x70, 0xfd, 0x98, 0xfe, 0xc9, 0x26, 0x4f, 0x71, 0xdf, 0x1a, 0xee, 0x9a
   };
-  uint8_t encrypted_data[51] = {0};
+  uint8_t output_data[51] = {0};
   uint8_t tag[16] = {0};
     
-  printf("\r\n\r\nAES GCM TEST CASE 2 =============>.\r\n\r\n");
+  printf("\r\n\r\nAES GCM TEST CASE 1 =============> [Encryption test]\r\n\r\n");
 
   print_buf("AES Key:", (uint8_t *)Key, 32);
   print_buf("IV data:", (uint8_t *)IV, sizeof(IV));
   print_buf("Auth data:", (uint8_t *)AddData, sizeof(AddData));
-  print_buf("Plain text:", (uint8_t *)TestPlainText, sizeof(TestPlainText));
+  print_buf("Plain text:", (uint8_t *)InputData, sizeof(InputData));
 
-  aes_gcm_encrypt((uint8_t *)Key, sizeof(Key), (uint8_t *)TestPlainText, sizeof(TestPlainText), 
+  aes_gcm_encrypt(AES_GCM_MODE_ENCRYPTION,
+                  (uint8_t *)Key, sizeof(Key), (uint8_t *)InputData, sizeof(InputData), 
                   (uint8_t *)IV, sizeof(IV), (uint8_t *)AddData, sizeof(AddData), 
-                  encrypted_data, sizeof(encrypted_data), 
+                  output_data, sizeof(output_data), 
                   tag, sizeof(tag));
   
-  print_buf("Expected cipher text:", (uint8_t *)Expected_Ciphertext, sizeof(Expected_Ciphertext));
-  print_buf("Cipher text:", (uint8_t *)encrypted_data, sizeof(Expected_Ciphertext));
+  print_buf("Expected cipher text:", (uint8_t *)Expected_Output, sizeof(Expected_Output));
+  print_buf("Cipher text:", (uint8_t *)output_data, sizeof(Expected_Output));
   
   print_buf("Expected GCM tag:", (uint8_t *)Expected_Tag, sizeof(Expected_Tag));
   print_buf("GCM tag:", (uint8_t *)tag, sizeof(Expected_Tag));
@@ -364,7 +392,7 @@ static void aes_gcm_test2(void)
   {
     0x57, 0x53, 0x45, 0x30, 0x30, 0x30, 0x30, 0x31, 0x00, 0x00, 0x00, 0x01
   };
-  const uint8_t TestPlainText[] =
+  const uint8_t InputData[] =
   {
     0xFE, 0x64, 0x8D, 0x05, 0x03, 0xA5, 0x35, 0xAA, 0x18, 0x62, 0xBB, 0x58, 0x3A, 0x79
   };
@@ -372,7 +400,7 @@ static void aes_gcm_test2(void)
   {
     0x30, 0xD0, 0xD1, 0xD2, 0xD3, 0xD4, 0xD5, 0xD6, 0xD7, 0xD8, 0xD9, 0xDA, 0xDB, 0xDC, 0xDD, 0xDE, 0xDF
   };
-  const uint8_t Expected_Ciphertext[] =
+  const uint8_t Expected_Output[] =
   {
     0x01, 0x00, 0x00, 0x00, 0x06, 0x5F, 0x1F, 0x04, 0x00, 0xFF, 0xFF, 0xFF, 0x04, 0xFD
   };
@@ -380,23 +408,24 @@ static void aes_gcm_test2(void)
   {
     0x6A, 0x42, 0xEF, 0xA1, 0x61, 0x8B, 0x0F, 0x8F, 0x95, 0xC8, 0x6E, 0x2A, 0x85, 0x4F, 0x3B, 0xB5
   };
-  uint8_t encrypted_data[14] = {0};
+  uint8_t output_data[14] = {0};
   uint8_t tag[16] = {0};
   
-  printf("\r\n\r\nAES GCM TEST CASE 2 =============>.\r\n\r\n");
+  printf("\r\n\r\nAES GCM TEST CASE 2 =============> [Decryption test]\r\n\r\n");
   
-  print_buf("AES Key:", (uint8_t *)Key, 32);
+  print_buf("AES Key:", (uint8_t *)Key, 16);
   print_buf("IV data:", (uint8_t *)IV, sizeof(IV));
   print_buf("Auth data:", (uint8_t *)AddData, sizeof(AddData));
-  print_buf("Plain text:", (uint8_t *)TestPlainText, sizeof(TestPlainText));
+  print_buf("Plain text:", (uint8_t *)InputData, sizeof(InputData));
 
-  aes_gcm_encrypt((uint8_t *)Key, sizeof(Key), (uint8_t *)TestPlainText, sizeof(TestPlainText), 
+  aes_gcm_encrypt(AES_GCM_MODE_DECRYPTION,
+                  (uint8_t *)Key, sizeof(Key), (uint8_t *)InputData, sizeof(InputData), 
                   (uint8_t *)IV, sizeof(IV), (uint8_t *)AddData, sizeof(AddData), 
-                  encrypted_data, sizeof(encrypted_data), 
+                  output_data, sizeof(output_data), 
                   tag, sizeof(tag));
   
-  print_buf("Expected cipher text:", (uint8_t *)Expected_Ciphertext, sizeof(Expected_Ciphertext));
-  print_buf("Cipher text:", (uint8_t *)encrypted_data, sizeof(Expected_Ciphertext));
+  print_buf("Expected cipher text:", (uint8_t *)Expected_Output, sizeof(Expected_Output));
+  print_buf("Cipher text:", (uint8_t *)output_data, sizeof(Expected_Output));
   
   print_buf("Expected GCM tag:", (uint8_t *)Expected_Tag, sizeof(Expected_Tag));
   print_buf("GCM tag:", (uint8_t *)tag, sizeof(Expected_Tag));
