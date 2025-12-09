@@ -21,7 +21,8 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "string.h"
+#include "stdio.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -79,6 +80,327 @@ static void MX_ICACHE_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+/**
+ * @brief function to print data of a buffer
+ */
+static void print_buf(char* str, const uint8_t *buf, int size)
+{
+  int i;
+  
+  printf("\r\n-----------------------------------------------\r\n");
+  if(str != NULL)
+  {
+    printf("%s\r\n", str);
+    printf("-----------------------------------------------\r\n");
+  }
+  for(i = 0; i<size; i++)
+  {
+    printf("%02x ", buf[i]);
+    if((i+1)%16 == 0)
+    {
+      printf("\r\n");
+    }
+  }
+  if ( i % 16 != 0) printf("\r\n");
+  printf("===============================================\r\n");
+  
+}
+
+/*
+ * 32-bit integer manipulation macros (big endian)
+ */
+#ifndef GET_UINT32_BE
+#define GET_UINT32_BE(n,b,i)                            \
+  do {                                                  \
+    (n) = ( (uint32_t) (b)[(i)    ] << 24 )             \
+          | ( (uint32_t) (b)[(i) + 1] << 16 )           \
+          | ( (uint32_t) (b)[(i) + 2] <<  8 )           \
+          | ( (uint32_t) (b)[(i) + 3]       );          \
+  } while( 0 )
+#endif /* !GET_UINT32_BE */
+
+#ifndef PUT_UINT32_BE
+#define PUT_UINT32_BE(n,b,i)                            \
+  do {                                                  \
+    (b)[(i)    ] = (unsigned char) ( (n) >> 24 );       \
+    (b)[(i) + 1] = (unsigned char) ( (n) >> 16 );       \
+    (b)[(i) + 2] = (unsigned char) ( (n) >>  8 );       \
+    (b)[(i) + 3] = (unsigned char) ( (n)       );       \
+  } while( 0 )
+#endif /* !PUT_UINT32_BE */
+    
+#define ST_GCM_TIMEOUT    0xFFU
+    
+static uint32_t aes_gcm_encrypt(uint8_t *pKey, size_t key_size,
+                                uint8_t *input, size_t input_length, 
+                                uint8_t *pIv, size_t iv_size,
+                                uint8_t *pAuthData, size_t auth_data_size,
+                                uint8_t *pCipher, size_t cipher_size,
+                                uint8_t *pTag, size_t tag_size)
+{
+  uint32_t ret = HAL_ERROR;
+  CRYP_HandleTypeDef haes;
+  int i;
+  uint32_t keyword[8];
+  uint32_t ivword[4];
+  
+  uint16_t wordnb = 0;          /* number of four data words */
+  uint16_t wordlen = 0;         /* length (in bytes) of four data words */
+  uint16_t in_datalen = 0;  /* length (in bytes) of processed data within input buffer */
+  __ALIGN_BEGIN unsigned char work_buf[16] __ALIGN_END;
+  uint16_t work_buf_len = 0;
+  
+  if(input == NULL || input_length == 0) return ret;
+  if(pIv == NULL || iv_size == 0) return ret;
+  if(pAuthData == NULL && auth_data_size > 0) return ret;
+  if(pAuthData != NULL && auth_data_size == 0) return ret;
+  if(pCipher == NULL || cipher_size == 0) return ret;
+  
+  /* check and set key */
+  if(pKey == NULL) return ret;
+  switch(key_size)
+  {
+  case 16: haes.Init.KeySize = CRYP_KEYSIZE_128B;
+    break;
+  case 32: haes.Init.KeySize = CRYP_KEYSIZE_256B;
+    break;
+  default: return ret;    
+  }
+
+  /* Format and fill AES key  */
+  for (i = 0; i < (key_size / 4); i++)
+  {
+    GET_UINT32_BE(keyword[i], pKey, 4 * i);
+  }
+  
+  haes.Init.pKey = keyword;
+  haes.Init.KeyMode = CRYP_KEYMODE_NORMAL;
+  
+  /* Set IV with invert endianness */
+  for (i = 0; i < iv_size / 4U; i++)
+  {
+    GET_UINT32_BE(ivword[i], pIv, 4 * i);
+  }
+
+  /* counter value must be set to 2 when processing the first block of payload */
+  ivword[3] = 0x00000002;
+
+  haes.Init.pInitVect = (uint32_t *)ivword;
+
+  /* Do not Allow IV reconfiguration at every gcm update */
+  haes.Init.KeyIVConfigSkip = CRYP_KEYIVCONFIG_ONCE;
+  
+  haes.Instance = AES;
+  haes.Init.Algorithm = CRYP_AES_GCM_GMAC;  
+  haes.Init.DataWidthUnit = CRYP_DATAWIDTHUNIT_BYTE;
+  haes.Init.DataType = CRYP_BYTE_SWAP;
+  
+  if ( auth_data_size > 0 )
+  {
+    haes.Init.Header = (uint32_t *)pAuthData;
+    haes.Init.HeaderSize = auth_data_size;
+  }
+  else
+  {
+    haes.Init.Header = NULL;
+    haes.Init.HeaderSize = 0;
+  }
+  /* Additional Authentication Data in bytes unit */
+  haes.Init.HeaderWidthUnit = CRYP_HEADERWIDTHUNIT_BYTE;
+  
+  HAL_CRYP_DeInit(&haes);
+  /* Enable AES clock */
+  __HAL_RCC_AES_CLK_ENABLE();
+  ret = HAL_CRYP_Init(&haes);
+  
+  if ( ret != HAL_OK)
+  {
+    return ret;
+  }   
+    
+  /* Calculate number of four data words */
+  wordnb = input_length / 16U;
+
+  /* if available, process them */
+  if (wordnb)
+  {
+    /* Convert in bytes */
+    wordlen = wordnb * 16U;
+
+    ret = HAL_CRYP_Encrypt(&haes,
+                         (uint32_t *)input,
+                         wordlen,
+                         (uint32_t *)pCipher,
+                         ST_GCM_TIMEOUT);
+    if ( ret != HAL_OK)
+    {
+      goto exit;
+    }    
+
+    /* update total length */
+    in_datalen += wordlen;
+
+    if (in_datalen < input_length)
+    {
+      /* Process them into a last four data word */
+      goto last_data_word;
+    }
+    else
+    {
+      goto finish;
+    }
+  }
+
+last_data_word:
+  /* Calculate remaining bytes */
+  /* Can have a null length when payload is omitted (GMAC) */
+  work_buf_len = (uint16_t)((input_length - in_datalen) % 16U);
+
+  memset(work_buf, 0, sizeof(work_buf));
+  memcpy(work_buf, input + in_datalen, work_buf_len);
+
+  ret = HAL_CRYP_Encrypt(&haes,
+                       (uint32_t *)work_buf,
+                       work_buf_len,
+                       (uint32_t *)(pCipher + in_datalen),
+                       ST_GCM_TIMEOUT);
+  if ( ret != HAL_OK)
+  {
+    goto exit;
+  }
+  
+finish:  
+  if ( tag_size > 0 )
+  {
+    ret = HAL_CRYPEx_AESGCM_GenerateAuthTAG(&haes,(uint32_t*)pTag, TIMEOUT_VALUE);
+  }  
+  
+exit:
+  HAL_CRYP_DeInit(&haes);
+  
+  return ret;
+}
+                                  
+static void aes_gcm_test1(void)
+{
+  /** Extract from NIST Special Publication 800-38D
+    * gcmEncryptExtIV256.rsp
+  [Keylen = 128]
+  [IVlen = 96]
+  [PTlen = 408]
+  [AADlen = 384]
+  [Taglen = 128]
+
+  Count = 0
+  Key = 463b412911767d57a0b33969e674ffe7845d313b88c6fe312f3d724be68e1fca
+  IV = 611ce6f9a6880750de7da6cb
+  PT = e7d1dcf668e2876861940e012fe52a98dacbd78ab63c08842cc9801ea581682ad54af0c34d0d7f6f59e8ee0bf4900e0fd85042
+  AAD = 0a682fbc6192e1b47a5e0868787ffdafe5a50cead3575849990cdd2ea9b3597749403efb4a56684f0c6bde352d4aeec5
+  CT = 8886e196010cb3849d9c1a182abe1eeab0a5f3ca423c3669a4a8703c0f146e8e956fb122e0d721b869d2b6fcd4216d7d4d3758
+  Tag = 2469cecd70fd98fec9264f71df1aee9a
+    */
+  const uint8_t Key[] =
+  {
+    0x46, 0x3b, 0x41, 0x29, 0x11, 0x76, 0x7d, 0x57, 0xa0, 0xb3, 0x39, 0x69, 0xe6, 0x74, 0xff, 0xe7,
+    0x84, 0x5d, 0x31, 0x3b, 0x88, 0xc6, 0xfe, 0x31, 0x2f, 0x3d, 0x72, 0x4b, 0xe6, 0x8e, 0x1f, 0xca
+  };
+  const uint8_t IV[] =
+  {
+    0x61, 0x1c, 0xe6, 0xf9, 0xa6, 0x88, 0x07, 0x50, 0xde, 0x7d, 0xa6, 0xcb
+  };
+  const uint8_t TestPlainText[] =
+  {
+    0xe7, 0xd1, 0xdc, 0xf6, 0x68, 0xe2, 0x87, 0x68, 0x61, 0x94, 0x0e, 0x01, 0x2f, 0xe5, 0x2a, 0x98,
+    0xda, 0xcb, 0xd7, 0x8a, 0xb6, 0x3c, 0x08, 0x84, 0x2c, 0xc9, 0x80, 0x1e, 0xa5, 0x81, 0x68, 0x2a,
+    0xd5, 0x4a, 0xf0, 0xc3, 0x4d, 0x0d, 0x7f, 0x6f, 0x59, 0xe8, 0xee, 0x0b, 0xf4, 0x90, 0x0e, 0x0f,
+    0xd8, 0x50, 0x42
+  };
+  const uint8_t AddData[] =
+  {
+    0x0a, 0x68, 0x2f, 0xbc, 0x61, 0x92, 0xe1, 0xb4, 0x7a, 0x5e, 0x08, 0x68, 0x78, 0x7f, 0xfd, 0xaf,
+    0xe5, 0xa5, 0x0c, 0xea, 0xd3, 0x57, 0x58, 0x49, 0x99, 0x0c, 0xdd, 0x2e, 0xa9, 0xb3, 0x59, 0x77,
+    0x49, 0x40, 0x3e, 0xfb, 0x4a, 0x56, 0x68, 0x4f, 0x0c, 0x6b, 0xde, 0x35, 0x2d, 0x4a, 0xee, 0xc5
+  };
+  const uint8_t Expected_Ciphertext[] =
+  {
+    0x88, 0x86, 0xe1, 0x96, 0x01, 0x0c, 0xb3, 0x84, 0x9d, 0x9c, 0x1a, 0x18, 0x2a, 0xbe, 0x1e, 0xea,
+    0xb0, 0xa5, 0xf3, 0xca, 0x42, 0x3c, 0x36, 0x69, 0xa4, 0xa8, 0x70, 0x3c, 0x0f, 0x14, 0x6e, 0x8e,
+    0x95, 0x6f, 0xb1, 0x22, 0xe0, 0xd7, 0x21, 0xb8, 0x69, 0xd2, 0xb6, 0xfc, 0xd4, 0x21, 0x6d, 0x7d,
+    0x4d, 0x37, 0x58,
+  };
+  const uint8_t Expected_Tag[] =
+  {
+    0x24, 0x69, 0xce, 0xcd, 0x70, 0xfd, 0x98, 0xfe, 0xc9, 0x26, 0x4f, 0x71, 0xdf, 0x1a, 0xee, 0x9a
+  };
+  uint8_t encrypted_data[51] = {0};
+  uint8_t tag[16] = {0};
+    
+  printf("\r\n\r\nAES GCM TEST CASE 2 =============>.\r\n\r\n");
+
+  print_buf("AES Key:", (uint8_t *)Key, 32);
+  print_buf("IV data:", (uint8_t *)IV, sizeof(IV));
+  print_buf("Auth data:", (uint8_t *)AddData, sizeof(AddData));
+  print_buf("Plain text:", (uint8_t *)TestPlainText, sizeof(TestPlainText));
+
+  aes_gcm_encrypt((uint8_t *)Key, sizeof(Key), (uint8_t *)TestPlainText, sizeof(TestPlainText), 
+                  (uint8_t *)IV, sizeof(IV), (uint8_t *)AddData, sizeof(AddData), 
+                  encrypted_data, sizeof(encrypted_data), 
+                  tag, sizeof(tag));
+  
+  print_buf("Expected cipher text:", (uint8_t *)Expected_Ciphertext, sizeof(Expected_Ciphertext));
+  print_buf("Cipher text:", (uint8_t *)encrypted_data, sizeof(Expected_Ciphertext));
+  
+  print_buf("Expected GCM tag:", (uint8_t *)Expected_Tag, sizeof(Expected_Tag));
+  print_buf("GCM tag:", (uint8_t *)tag, sizeof(Expected_Tag));
+}
+
+static void aes_gcm_test2(void)
+{
+  const uint8_t Key[] =
+  {
+    0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f
+  };
+  const uint8_t IV[] =
+  {
+    0x57, 0x53, 0x45, 0x30, 0x30, 0x30, 0x30, 0x31, 0x00, 0x00, 0x00, 0x01
+  };
+  const uint8_t TestPlainText[] =
+  {
+    0xFE, 0x64, 0x8D, 0x05, 0x03, 0xA5, 0x35, 0xAA, 0x18, 0x62, 0xBB, 0x58, 0x3A, 0x79
+  };
+  const uint8_t AddData[] =
+  {
+    0x30, 0xD0, 0xD1, 0xD2, 0xD3, 0xD4, 0xD5, 0xD6, 0xD7, 0xD8, 0xD9, 0xDA, 0xDB, 0xDC, 0xDD, 0xDE, 0xDF
+  };
+  const uint8_t Expected_Ciphertext[] =
+  {
+    0x01, 0x00, 0x00, 0x00, 0x06, 0x5F, 0x1F, 0x04, 0x00, 0xFF, 0xFF, 0xFF, 0x04, 0xFD
+  };
+  const uint8_t Expected_Tag[] =
+  {
+    0x6A, 0x42, 0xEF, 0xA1, 0x61, 0x8B, 0x0F, 0x8F, 0x95, 0xC8, 0x6E, 0x2A, 0x85, 0x4F, 0x3B, 0xB5
+  };
+  uint8_t encrypted_data[14] = {0};
+  uint8_t tag[16] = {0};
+  
+  printf("\r\n\r\nAES GCM TEST CASE 2 =============>.\r\n\r\n");
+  
+  print_buf("AES Key:", (uint8_t *)Key, 32);
+  print_buf("IV data:", (uint8_t *)IV, sizeof(IV));
+  print_buf("Auth data:", (uint8_t *)AddData, sizeof(AddData));
+  print_buf("Plain text:", (uint8_t *)TestPlainText, sizeof(TestPlainText));
+
+  aes_gcm_encrypt((uint8_t *)Key, sizeof(Key), (uint8_t *)TestPlainText, sizeof(TestPlainText), 
+                  (uint8_t *)IV, sizeof(IV), (uint8_t *)AddData, sizeof(AddData), 
+                  encrypted_data, sizeof(encrypted_data), 
+                  tag, sizeof(tag));
+  
+  print_buf("Expected cipher text:", (uint8_t *)Expected_Ciphertext, sizeof(Expected_Ciphertext));
+  print_buf("Cipher text:", (uint8_t *)encrypted_data, sizeof(Expected_Ciphertext));
+  
+  print_buf("Expected GCM tag:", (uint8_t *)Expected_Tag, sizeof(Expected_Tag));
+  print_buf("GCM tag:", (uint8_t *)tag, sizeof(Expected_Tag));
+}
 
 /* USER CODE END 0 */
 
@@ -119,12 +441,28 @@ int main(void)
   MX_AES_Init();
   MX_ICACHE_Init();
   /* USER CODE BEGIN 2 */
+  COM_InitTypeDef COM_Init;
+  COM_Init.BaudRate = 115200;
+  COM_Init.HwFlowCtl = COM_HWCONTROL_NONE;
+  COM_Init.Parity = COM_PARITY_NONE;
+  COM_Init.StopBits = COM_STOPBITS_1;
+  COM_Init.WordLength = COM_WORDLENGTH_8B;
+  BSP_COM_Init(COM1, &COM_Init);
+  
+  printf("COM Init done.\r\n");
+  
+  print_buf("AES Key:", (uint8_t *)pKeyAES, 16);
+  print_buf("IV data:", (uint8_t *)pInitVectAES, sizeof(pInitVectAES));
+  print_buf("Auth data:", (uint8_t *)HeaderAES, sizeof(HeaderAES));
+  print_buf("Plain text:", (uint8_t *)Plaintext, PLAINTEXT_SIZE*4);
   /*##-2- Encryption Phase #################################################*/
   if (HAL_CRYP_Encrypt(&hcryp, Plaintext, PLAINTEXT_SIZE, EncryptedText, TIMEOUT_VALUE) != HAL_OK)
   {
     /* Processing Error */
     Error_Handler();
   }
+  print_buf("Expected cipher text:", (uint8_t *)Ciphertext, 16);
+  print_buf("Cipher text:", (uint8_t *)EncryptedText, 16);
   /*Compare results with expected buffer*/
   if(memcmp(EncryptedText, Ciphertext, 16) != 0)
   {
@@ -137,6 +475,8 @@ int main(void)
     /* Processing Error */
     Error_Handler();
   }
+  print_buf("Expected GCM tag:", (uint8_t *)ExpectedTAG, 16);
+  print_buf("GCM tag:", (uint8_t *)TAG, 16);
   /*Compare results with expected buffer*/
   if(memcmp(TAG, ExpectedTAG, 16) != 0)
   {
@@ -172,6 +512,9 @@ int main(void)
     /* Processing Error */
     Error_Handler();
   }
+  
+  aes_gcm_test1();
+  aes_gcm_test2();
   /* USER CODE END 2 */
 
   /* Infinite loop */
