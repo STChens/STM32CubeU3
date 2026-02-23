@@ -54,6 +54,9 @@ static void MX_ICACHE_Init(void);
 static void MX_USART1_UART_Init(void);
 /* USER CODE BEGIN PFP */
 #if defined(__ICCARM__)
+__ATTRIBUTES size_t __write(int, const unsigned char *, size_t);
+#endif /* __ICCARM__ */
+#if defined(__ICCARM__)
 /* New definition from EWARM V9, compatible with EWARM8 */
 int iar_fputc(int ch);
 #define PUTCHAR_PROTOTYPE int iar_fputc(int ch)
@@ -157,6 +160,13 @@ void SystemClock_Config(void)
 {
   RCC_OscInitTypeDef RCC_OscInitStruct = {0};
   RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
+
+  /** Configure the System Power Supply
+  */
+  if (HAL_PWREx_ConfigSupply(PWR_SMPS_SUPPLY) != HAL_OK)
+  {
+    Error_Handler();
+  }
 
   /** Enable Epod Booster
   */

@@ -153,7 +153,7 @@ SECTIONS
   } > RAM
   Image$$ER_CODE$$Base = __Vectors ;
 
-  /* Uninitialized data not overwriten at startup. section into "RAM" Ram type memory */
+  /* Uninitialized data not overwritten at startup. section into "RAM" Ram type memory */
   .bss.NoInit (NOLOAD) :
   {
     . = ALIGN(4);

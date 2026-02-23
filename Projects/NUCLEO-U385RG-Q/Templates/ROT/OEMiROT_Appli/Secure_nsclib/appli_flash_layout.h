@@ -2,7 +2,7 @@
   ******************************************************************************
   * @file    appli_flash_layout.h
   * @author  MCD Application Team
-  * @brief   This file contains definitions of memory regions for stm32wbaxx.
+  * @brief   This file contains definitions of memory regions.
   ******************************************************************************
   * @attention
   *
@@ -20,17 +20,6 @@
 #define __APPLI_FLASH_LAYOUT_H__
 
 /********** Application Flash layout configuration : begin **********/
-
-#define S_HEAP_SIZE                    0x0000200  /* EWARM / MDK-ARM / STM32CubeIDE */
-#define S_C_STACK_SIZE                 0x0000400  /* EWARM / STM32CubeIDE */
-
-#define S_MSP_STACK_SIZE               0x0000200  /* MDK-ARM */
-#define S_PSP_STACK_SIZE               0x0000700  /* MDK-ARM */
-
-#define NS_HEAP_SIZE                   0x0001000  /* EWARM / MDK-ARM / STM32CubeIDE */
-#define NS_C_STACK_SIZE                0x0000400  /* EWARM / STM32CubeIDE */
-#define NS_MSP_STACK_SIZE              0x0000C00  /* MDK-ARM */
-#define NS_PSP_STACK_SIZE              0x0000C00  /* MDK-ARM */
 
 #define NSC_CODE_SIZE                  0x400
 
@@ -115,16 +104,10 @@
 
 #define S_IMAGE_PRIMARY_PARTITION_OFFSET           FLASH_AREA_0_OFFSET
 #define S_IMAGE_SECONDARY_PARTITION_OFFSET         FLASH_AREA_2_OFFSET
-#define NS_IMAGE_PRIMARY_PARTITION_OFFSET          FLASH_AREA_0_OFFSET + FLASH_S_PARTITION_SIZE
-#define NS_IMAGE_SECONDARY_PARTITION_OFFSET        FLASH_AREA_2_OFFSET + FLASH_S_PARTITION_SIZE
 #if (MCUBOOT_S_DATA_IMAGE_NUMBER == 1)
 #define S_DATA_IMAGE_PRIMARY_PARTITION_OFFSET      FLASH_AREA_4_OFFSET
 #define S_DATA_IMAGE_SECONDARY_PARTITION_OFFSET    FLASH_AREA_6_OFFSET
 #endif /* MCUBOOT_S_DATA_IMAGE_NUMBER == 1 */
-#if (MCUBOOT_NS_DATA_IMAGE_NUMBER == 1)
-#define NS_DATA_IMAGE_PRIMARY_PARTITION_OFFSET     FLASH_AREA_5_OFFSET
-#define NS_DATA_IMAGE_SECONDARY_PARTITION_OFFSET   FLASH_AREA_7_OFFSET
-#endif /* MCUBOOT_NS_DATA_IMAGE_NUMBER == 1 */
 
 /*
  * Flash device name

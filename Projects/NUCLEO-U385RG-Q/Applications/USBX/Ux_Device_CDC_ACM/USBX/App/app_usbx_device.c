@@ -33,7 +33,8 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-
+#define VBUS_ATTACH_THRESHOLD  600u  /* Adjust after measuring actual divider output */
+#define VBUS_DETACH_THRESHOLD  100u   /* Hysteresis lower threshold */
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -54,13 +55,18 @@ static TX_THREAD ux_cdc_read_thread;
 static TX_THREAD ux_cdc_write_thread;
 TX_EVENT_FLAGS_GROUP EventFlag;
 extern PCD_HandleTypeDef           hpcd_USB_DRD_FS;
+extern ADC_HandleTypeDef hadc2;
+
+/* State machine for VBUS monitoring */
+__IO Device_State device_state = Device_VBUS_SENSING;
+uint32_t vbus_on =1;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
 static VOID app_ux_device_thread_entry(ULONG thread_input);
 static UINT USBD_ChangeFunction(ULONG Device_State);
 /* USER CODE BEGIN PFP */
-
+static VOID VBUS_Detect_Process(uint32_t raw);
 /* USER CODE END PFP */
 
 /**
@@ -68,6 +74,7 @@ static UINT USBD_ChangeFunction(ULONG Device_State);
   * @param  memory_ptr: memory pointer
   * @retval status
   */
+
 UINT MX_USBX_Device_Init(VOID *memory_ptr)
 {
   UINT ret = UX_SUCCESS;
@@ -231,10 +238,21 @@ UINT MX_USBX_Device_Init(VOID *memory_ptr)
 static VOID app_ux_device_thread_entry(ULONG thread_input)
 {
   /* USER CODE BEGIN app_ux_device_thread_entry */
-
+  uint32_t raw;
   /* Initialization of USB device */
   USBX_APP_Device_Init();
 
+  for (;;)
+  {
+    /* Start a new ADC conversion and wait for it to complete */
+    HAL_ADC_Start(&hadc2);
+    if (HAL_ADC_PollForConversion(&hadc2, 10) == HAL_OK)
+    {
+      raw = HAL_ADC_GetValue(&hadc2);
+      VBUS_Detect_Process(raw);
+    }
+    tx_thread_sleep(MS_TO_TICK(10));
+  }
   /* USER CODE END app_ux_device_thread_entry */
 }
 
@@ -355,9 +373,6 @@ VOID USBX_APP_Device_Init(VOID)
   /* Initialize and link controller HAL driver */
   ux_dcd_stm32_initialize((ULONG)USB_DRD_FS, (ULONG)&hpcd_USB_DRD_FS);
 
-  /* Start the USB device */
-  HAL_PCD_Start(&hpcd_USB_DRD_FS);
-
   /* USER CODE BEGIN USB_Device_Init_PostTreatment */
 
   /* USER CODE END USB_Device_Init_PostTreatment */
@@ -375,6 +390,59 @@ VOID USBX_APP_UART_Init(UART_HandleTypeDef **huart)
   MX_USART1_UART_Init();
   *huart = &huart1;
   /* USER CODE END USBX_APP_UART_Init */
+}
+
+/**
+  * @brief  VBUS state machine processor
+  *         Handles USB device attach/detach transitions based on ADC value from VBUS pin.
+  *         Starts or stops the USB device and triggers logical disconnect as needed.
+  * @param  raw: ADC value sampled from VBUS pin.
+  * @retval none
+  */
+static VOID VBUS_Detect_Process(uint32_t raw)
+{
+  switch (device_state)
+  {
+  case Device_VBUS_SENSING:
+    if (raw >= VBUS_ATTACH_THRESHOLD)
+    {
+      device_state = Device_Connection;
+    }
+    else if (raw <= VBUS_DETACH_THRESHOLD)
+    {
+      device_state = Device_Disconnection;
+    }
+    break;
+
+  case Device_Connection:
+    if (vbus_on == 1)
+    {
+      if (HAL_PCD_Start(&hpcd_USB_DRD_FS) != HAL_OK)
+      {
+        Error_Handler();
+      }
+      vbus_on = 0;
+    }
+    device_state = Device_VBUS_SENSING;
+    break;
+
+  case Device_Disconnection:
+    if (vbus_on == 0)
+    {
+      ux_device_stack_disconnect();
+      if (HAL_PCD_Stop(&hpcd_USB_DRD_FS) != HAL_OK)
+      {
+        Error_Handler();
+      }
+      vbus_on = 1;
+    }
+    device_state = Device_VBUS_SENSING;
+    break;
+
+  default:
+    device_state = Device_VBUS_SENSING;
+    break;
+  }
 }
 
 /* USER CODE END 1 */

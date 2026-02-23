@@ -101,11 +101,7 @@ int main(void)
 
   /* USER CODE BEGIN SysInit */
 
-  /* Enable the SMPS regulator to improve power efficiency*/
-  if(HAL_PWREx_ConfigSupply(PWR_SMPS_SUPPLY) != HAL_OK)
-  {
-    Error_Handler();
-  }
+
 
   /* USER CODE END SysInit */
 
@@ -185,6 +181,13 @@ void SystemClock_Config(void)
 {
   RCC_OscInitTypeDef RCC_OscInitStruct = {0};
   RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
+
+  /** Configure the System Power Supply
+  */
+  if (HAL_PWREx_ConfigSupply(PWR_SMPS_SUPPLY) != HAL_OK)
+  {
+    Error_Handler();
+  }
 
   /** Enable Epod Booster
   */

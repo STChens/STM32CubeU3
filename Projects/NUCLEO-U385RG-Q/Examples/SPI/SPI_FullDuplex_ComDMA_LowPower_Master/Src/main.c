@@ -108,6 +108,7 @@ int main(void)
   /* USER CODE BEGIN SysInit */
   /* Configure LED2 */
   BSP_LED_Init(LD2);
+  
   /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */
@@ -118,11 +119,7 @@ int main(void)
   MX_RTC_Init();
   /* USER CODE BEGIN 2 */
 
-  /* Disable debug to avoid some buses to stay awake */
-  HAL_DBGMCU_DisableDBGStopMode();
-
-  /* Enter in low power mode(STOP1) and wait RTC interrupt to wakeup from stop mode */
-  HAL_PWR_EnterSTOPMode(PWR_LOWPOWERMODE_STOP1, PWR_STOPENTRY_WFI);
+  __HAL_RTC_CLEAR_FLAG(hrtc, RTC_CLEAR_WUTF);
 
     /*##-2- Start the Full Duplex Communication process ########################*/
   /* While the SPI in TransmitReceive process, user can transmit data through
@@ -133,12 +130,23 @@ int main(void)
     Error_Handler();
   }
 
+  /* Disable debug to avoid some buses to stay awake */
+  HAL_DBGMCU_DisableDBGStopMode();
+  
+  /* Suspend Tick increment */
+  HAL_SuspendTick();
+
+  /* Enter in low power mode(STOP1) and wait for the SPI end of transfer interrupt to be awoken.
+    The DMA transfer is triggered by the RTC timer, the MCU is in low power mode during the RTC
+    count down and during the DMA transfer */
+  HAL_PWR_EnterSTOPMode(PWR_LOWPOWERMODE_STOP1, PWR_STOPENTRY_WFI);
+
+  /* Resume Tick increment */
+  HAL_ResumeTick();
+
   /*##-3- Wait for the end of the transfer ###################################*/
   /*  Before starting a new communication transfer, you must wait the callback call
-      to get the transfer complete confirmation or an error detection.
-      For simplicity reasons, this example is just waiting till the end of the
-      transfer, but application may perform other tasks while transfer operation
-      is ongoing. */
+      to get the transfer complete confirmation or an error detection. */
   while (wTransferState == TRANSFER_WAIT)
   {
   }
@@ -179,6 +187,13 @@ void SystemClock_Config(void)
   RCC_OscInitTypeDef RCC_OscInitStruct = {0};
   RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
 
+  /** Configure the System Power Supply
+  */
+  if (HAL_PWREx_ConfigSupply(PWR_SMPS_SUPPLY) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
   /** Configure the main internal regulator output voltage
   */
   if (HAL_PWREx_ControlVoltageScaling(PWR_REGULATOR_VOLTAGE_SCALE2) != HAL_OK)
@@ -193,11 +208,16 @@ void SystemClock_Config(void)
 
   /** Initializes the CPU, AHB and APB buses clocks
   */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_LSE|RCC_OSCILLATORTYPE_MSIS;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_LSE|RCC_OSCILLATORTYPE_MSIS
+                              |RCC_OSCILLATORTYPE_MSIK;
   RCC_OscInitStruct.LSEState = RCC_LSE_ON;
   RCC_OscInitStruct.MSISState = RCC_MSI_ON;
   RCC_OscInitStruct.MSISSource = RCC_MSI_RC1;
   RCC_OscInitStruct.MSISDiv = RCC_MSI_DIV1;
+  RCC_OscInitStruct.MSIKState = RCC_MSI_ON;
+  RCC_OscInitStruct.MSIKSource = RCC_MSI_RC1;
+  RCC_OscInitStruct.MSIKDiv = RCC_MSI_DIV1;
+
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
     Error_Handler();
@@ -327,7 +347,7 @@ static void MX_RTC_Init(void)
 
   /** Enable the WakeUp
   */
-  if (HAL_RTCEx_SetWakeUpTimer_IT(&hrtc, 10240, RTC_WAKEUPCLOCK_RTCCLK_DIV16, 0) != HAL_OK)
+  if (HAL_RTCEx_SetWakeUpTimer(&hrtc, 10240, RTC_WAKEUPCLOCK_RTCCLK_DIV16) != HAL_OK)
   {
     Error_Handler();
   }
@@ -384,8 +404,8 @@ static void MX_SPI1_Init(void)
   {
     Error_Handler();
   }
-  HAL_SPI_AutonomousMode_Cfg_Struct.TriggerState = SPI_AUTO_MODE_DISABLE;
-  HAL_SPI_AutonomousMode_Cfg_Struct.TriggerSelection = SPI_GRP1_GPDMA_CH0_TCF_TRG;
+  HAL_SPI_AutonomousMode_Cfg_Struct.TriggerState = SPI_AUTO_MODE_ENABLE;
+  HAL_SPI_AutonomousMode_Cfg_Struct.TriggerSelection = SPI_GRP1_RTC_WUT_TRG;
   HAL_SPI_AutonomousMode_Cfg_Struct.TriggerPolarity = SPI_TRIG_POLARITY_RISING;
   if (HAL_SPIEx_SetConfigAutonomousMode(&hspi1, &HAL_SPI_AutonomousMode_Cfg_Struct) != HAL_OK)
   {
@@ -404,15 +424,14 @@ static void MX_SPI1_Init(void)
   */
 static void MX_GPIO_Init(void)
 {
-/* USER CODE BEGIN MX_GPIO_Init_1 */
-/* USER CODE END MX_GPIO_Init_1 */
+  /* USER CODE BEGIN MX_GPIO_Init_1 */
+  /* USER CODE END MX_GPIO_Init_1 */
 
   /* GPIO Ports Clock Enable */
-  __HAL_RCC_GPIOC_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
 
-/* USER CODE BEGIN MX_GPIO_Init_2 */
-/* USER CODE END MX_GPIO_Init_2 */
+  /* USER CODE BEGIN MX_GPIO_Init_2 */
+  /* USER CODE END MX_GPIO_Init_2 */
 }
 
 /* USER CODE BEGIN 4 */
@@ -485,8 +504,7 @@ void Error_Handler(void)
   }
   /* USER CODE END Error_Handler_Debug */
 }
-
-#ifdef  USE_FULL_ASSERT
+#ifdef USE_FULL_ASSERT
 /**
   * @brief  Reports the name of the source file and the source line number
   *         where the assert_param error has occurred.

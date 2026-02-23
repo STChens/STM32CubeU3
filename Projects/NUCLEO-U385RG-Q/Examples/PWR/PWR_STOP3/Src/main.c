@@ -50,7 +50,6 @@ static __IO uint32_t TimingDelay;
 
 /* Private function prototypes -----------------------------------------------*/
 void SystemClock_Config(void);
-static void MX_GPIO_Init(void);
 static void MX_ICACHE_Init(void);
 /* USER CODE BEGIN PFP */
 /* Private function prototypes -----------------------------------------------*/
@@ -87,11 +86,7 @@ int main(void)
 
   /* USER CODE BEGIN SysInit */
 
-  /* Enable the SMPS regulator to improve power efficiency*/
-  if(HAL_PWREx_ConfigSupply(PWR_SMPS_SUPPLY) != HAL_OK)
-  {
-    Error_Handler();
-  }
+
 
   /* User push-button (External line 13) will be used to wakeup the system from Stop 3 mode */
   HAL_PWR_EnableWakeUpLine(PWR_WAKEUP_LINE2, PWR_WAKEUP_SELECT_1, PWR_WAKEUP_POLARITY_HIGH);
@@ -102,7 +97,6 @@ int main(void)
   /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */
-  MX_GPIO_Init();
   MX_ICACHE_Init();
   /* USER CODE BEGIN 2 */
 
@@ -151,13 +145,19 @@ void SystemClock_Config(void)
   RCC_OscInitTypeDef RCC_OscInitStruct = {0};
   RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
 
+  /** Configure the System Power Supply
+  */
+  if (HAL_PWREx_ConfigSupply(PWR_SMPS_SUPPLY) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
   /** Enable Epod Booster
   */
   if (HAL_RCCEx_EpodBoosterClkConfig(RCC_EPODBOOSTER_SOURCE_MSIS, RCC_EPODBOOSTER_DIV1) != HAL_OK)
   {
     Error_Handler();
   }
-
   if (HAL_PWREx_EnableEpodBooster() != HAL_OK)
   {
     Error_Handler();
@@ -234,23 +234,6 @@ static void MX_ICACHE_Init(void)
 
 }
 
-/**
-  * @brief GPIO Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_GPIO_Init(void)
-{
-/* USER CODE BEGIN MX_GPIO_Init_1 */
-/* USER CODE END MX_GPIO_Init_1 */
-
-  /* GPIO Ports Clock Enable */
-  __HAL_RCC_GPIOC_CLK_ENABLE();
-
-/* USER CODE BEGIN MX_GPIO_Init_2 */
-/* USER CODE END MX_GPIO_Init_2 */
-}
-
 /* USER CODE BEGIN 4 */
 
 /**
@@ -281,8 +264,6 @@ void HAL_GPIO_EXTI_Falling_Callback(uint16_t GPIO_Pin)
 {
   if (GPIO_Pin == BUTTON_USER_PIN)
   {
-    /* Reconfigure LD2 */
-    BSP_LED_Init(LD2);
    /* Toggle LD2 */
     BSP_LED_Toggle(LD2);
     TimingDelay = LED_TOGGLE_DELAY;
@@ -306,7 +287,7 @@ void Error_Handler(void)
   /* USER CODE END Error_Handler_Debug */
 }
 
-#ifdef  USE_FULL_ASSERT
+#ifdef USE_FULL_ASSERT
 /**
   * @brief  Reports the name of the source file and the source line number
   *         where the assert_param error has occurred.

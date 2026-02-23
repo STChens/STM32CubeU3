@@ -1,7 +1,7 @@
 /* USER CODE BEGIN Header */
 /**
   ******************************************************************************
-  * @file    I3C/I3C_Sensor_Private_Command_IT/Src/stm32h5xx_hal_msp.c
+  * @file    I3C/I3C_Sensor_Private_Command_IT/Src/stm32u3xx_hal_msp.c
   * @author  MCD Application Team
   * @brief   HAL MSP module.
   ******************************************************************************

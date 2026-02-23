@@ -2,9 +2,9 @@
   ******************************************************************************
   * @file    stm32u3xx_nucleo_conf.h
   * @author  MCD Application Team
-  * @brief   STM32U0xx_Nuleo board configuration file.
+  * @brief   STM32U3xx_Nuleo board configuration file.
   *          This file should be copied to the application folder and renamed
-  *          to stm32u0xx_nucleo_conf.h
+  *          to stm32u3xx_nucleo_conf.h
   ******************************************************************************
   * @attention
   *

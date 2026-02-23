@@ -33,9 +33,6 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define USE_SMPS            1U
-#define RTC_ASYNCH_PREDIV   0x7F
-#define RTC_SYNCH_PREDIV    0xF9  /* 32.768Khz/128 - 1 */
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -106,12 +103,6 @@ int main(void)
   MX_USART1_UART_Init();
   /* USER CODE BEGIN 2 */
 
-  /* Enable SMPS if required */
-  if(USE_SMPS == 1U)
-  {
-    HAL_PWREx_ConfigSupply(PWR_SMPS_SUPPLY);
-  }
-
   /* Print header hyper-terminal msg */
   if (lowpower_header_scenario(&LowPower_Scenario) != SCENARIO_OK)
   {
@@ -161,6 +152,13 @@ void SystemClock_Config(void)
 {
   RCC_OscInitTypeDef RCC_OscInitStruct = {0};
   RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
+
+  /** Configure the System Power Supply
+  */
+  if (HAL_PWREx_ConfigSupply(PWR_SMPS_SUPPLY) != HAL_OK)
+  {
+    Error_Handler();
+  }
 
   /** Enable Epod Booster
   */
@@ -309,7 +307,6 @@ static void MX_GPIO_Init(void)
 /* USER CODE END MX_GPIO_Init_1 */
 
   /* GPIO Ports Clock Enable */
-  __HAL_RCC_GPIOC_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
 
 /* USER CODE BEGIN MX_GPIO_Init_2 */

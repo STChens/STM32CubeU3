@@ -142,7 +142,7 @@ int main(void)
   */
 void SystemClock_Config(void)
 {
-/** Enable Epod Booster
+  /** Enable Epod Booster
   */
   LL_AHB1_GRP2_EnableClock(LL_AHB1_GRP2_PERIPH_PWR);
   LL_RCC_SetEPODBoosterClkSource(LL_RCC_EPODBOOSTCLKSRCE_MSIS);
@@ -162,7 +162,7 @@ void SystemClock_Config(void)
   /** Set Flash latency before switching to MSIS
   */
   LL_FLASH_SetLatency(LL_FLASH_LATENCY_2);
-  while(LL_FLASH_GetLatency() != LL_FLASH_LATENCY_2)
+  while(LL_FLASH_GetLatency()!= LL_FLASH_LATENCY_2)
   {
   }
 
@@ -173,13 +173,15 @@ void SystemClock_Config(void)
   {
   }
 
-  /* Activate MSIS as source */
+  /** Activate MSIS as source
+*/
   LL_RCC_MSIS_SetClockSource(LL_RCC_MSIS_CLOCK_SOURCE_RC0);
   LL_RCC_MSIS_SetClockDivision(LL_RCC_MSIS_CLOCK_SOURCE_RC_DIV_1);
   LL_RCC_MSI_SetMSIxClockRange();
   LL_RCC_SetSysClkSource(LL_RCC_SYS_CLKSOURCE_MSIS);
 
-   /* Wait till System clock is ready */
+   /** Wait till System clock is ready
+*/
   while(LL_RCC_GetSysClkSource() != LL_RCC_SYS_CLKSOURCE_MSIS)
   {
   }
@@ -257,8 +259,8 @@ static void MX_GPIO_Init(void)
 {
   LL_EXTI_InitTypeDef EXTI_InitStruct = {0};
   LL_GPIO_InitTypeDef GPIO_InitStruct = {0};
-/* USER CODE BEGIN MX_GPIO_Init_1 */
-/* USER CODE END MX_GPIO_Init_1 */
+  /* USER CODE BEGIN MX_GPIO_Init_1 */
+  /* USER CODE END MX_GPIO_Init_1 */
 
   /* GPIO Ports Clock Enable */
   LL_AHB2_GRP1_EnableClock(LL_AHB2_GRP1_PERIPH_GPIOC);
@@ -295,8 +297,8 @@ static void MX_GPIO_Init(void)
   NVIC_SetPriority(EXTI13_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(),0, 0));
   NVIC_EnableIRQ(EXTI13_IRQn);
 
-/* USER CODE BEGIN MX_GPIO_Init_2 */
-/* USER CODE END MX_GPIO_Init_2 */
+  /* USER CODE BEGIN MX_GPIO_Init_2 */
+  /* USER CODE END MX_GPIO_Init_2 */
 }
 
 /* USER CODE BEGIN 4 */
@@ -434,8 +436,7 @@ void Error_Handler(void)
   /* User can add his own implementation to report the HAL error return state */
   /* USER CODE END Error_Handler_Debug */
 }
-
-#ifdef  USE_FULL_ASSERT
+#ifdef USE_FULL_ASSERT
 /**
   * @brief  Reports the name of the source file and the source line number
   *         where the assert_param error has occurred.

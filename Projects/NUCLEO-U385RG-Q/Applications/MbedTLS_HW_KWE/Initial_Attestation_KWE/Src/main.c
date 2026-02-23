@@ -95,12 +95,12 @@ const uint8_t Firmware_Data[] =
 __asm(
     ".section .wrapped_keys,\"a\"\n"
     "__wrapped_keys_start__:\n"
-    ".incbin \"../Wrapped_Keys/DUA_USLU_DHUK_Sign_RDP0_NS_Priv.bin\"\n"
+    ".incbin \"../Wrapped_Keys/DUA_USFU_DHUK_Sign_NS_Priv.bin\"\n"
     "__wrapped_keys_end__:\n"
 );
 #elif defined(__GNUC__)
 asm(".section .wrapped_keys,\"a\";"
-".incbin \"../../Wrapped_Keys/DUA_USLU_DHUK_Sign_RDP0_NS_Priv.bin\";"
+".incbin \"../../Wrapped_Keys/DUA_USFU_DHUK_Sign_NS_Priv.bin\";"
 );
 #elif defined(__ICCARM__)
 
@@ -140,13 +140,31 @@ int main(void)
   /* STM32U3xx HAL library initialization:
        - Configure the Flash prefetch
        - Configure the Systick to generate an interrupt each 1 msec
-       - Set NVIC Group Priority to 3
+       - Set NVIC Group Priority to 4
        - Low Level Initialization
      */
   HAL_Init();
 
   /* Configure the System clock */
   SystemClock_Config();
+
+  /* Disable instruction cache */
+  if (HAL_ICACHE_Disable() != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  /* Enable instruction cache in 1-way (direct mapped cache) */
+  if (HAL_ICACHE_ConfigAssociativityMode(ICACHE_1WAY) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  /* Enable instruction cache */
+  if (HAL_ICACHE_Enable() != HAL_OK)
+  {
+    Error_Handler();
+  }
 
   /* Configure LD2 */
   BSP_LED_Init(LD2);
@@ -259,7 +277,7 @@ int main(void)
   /* Set up the key location using PSA_CRYPTO_KWE_DRIVER_LOCATION to import the DUA User key using STM32 Key Wrap Engine (KWE) */
   psa_set_key_lifetime(&key_attributes, PSA_KEY_LIFETIME_FROM_PERSISTENCE_AND_LOCATION(PSA_KEY_PERSISTENCE_DEFAULT, PSA_CRYPTO_KWE_DRIVER_LOCATION));
   /* Set up DUA user certificate key ID  */
-  psa_set_key_id(&key_attributes, PSA_KWE_ECC_KEY_ID_DUA_USER_LU);
+  psa_set_key_id(&key_attributes, PSA_KWE_ECC_KEY_ID_DUA_USER_FU);
   /* Import the DUA user */
   retval = psa_import_key(&key_attributes, Private_Key_Blob, (PSA_KWE_ECC_KEY_DUA_USER_BITS/8U), &key_handle_private);
   if (retval != PSA_SUCCESS)
@@ -387,7 +405,7 @@ int main(void)
    *          Get the certificate size using DUA_USER
    * --------------------------------------------------------------------------
    */
-  cert_status = UTIL_CERT_GetCertificateSize(DUA_USER_LU, &certificate_size);
+  cert_status = UTIL_CERT_GetCertificateSize(DUA_USER_FU, &certificate_size);
   /* Verify API returned value */
   if (cert_status != CERT_OK)
   {
@@ -398,7 +416,7 @@ int main(void)
    *          Get the certificate using DUA_USER
    * --------------------------------------------------------------------------
    */
-  cert_status = UTIL_CERT_GetCertificate(DUA_USER_LU, chip_certificate);
+  cert_status = UTIL_CERT_GetCertificate(DUA_USER_FU, chip_certificate);
   /* Verify API returned value */
   if (cert_status != CERT_OK)
   {
@@ -473,9 +491,16 @@ int main(void)
   */
 void SystemClock_Config(void)
 {
-  RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
   RCC_OscInitTypeDef RCC_OscInitStruct = {0};
+  RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
   uint32_t latency;
+
+  /** Configure the System Power Supply
+  */
+  if (HAL_PWREx_ConfigSupply(PWR_SMPS_SUPPLY) != HAL_OK)
+  {
+    Error_Handler();
+  }
 
   /* Enable Epod Booster */
   __HAL_RCC_PWR_CLK_ENABLE();

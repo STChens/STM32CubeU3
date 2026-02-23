@@ -70,7 +70,7 @@ void Error_Handler(void);
     Prescaler = (SystemCoreClock /10 KHz) - 1
 
     Note:
-     SystemCoreClock variable holds HCLK frequency and is defined in system_stm32g0xx.c file.
+     SystemCoreClock variable holds HCLK frequency and is defined in system_stm32u3xx.c file.
      Each time the core clock (HCLK) changes, user had to update SystemCoreClock
      variable value. Otherwise, any configuration based on this variable will be incorrect.
      This variable is updated in three ways:

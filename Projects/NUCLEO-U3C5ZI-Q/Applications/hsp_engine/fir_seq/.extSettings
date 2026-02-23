@@ -1,0 +1,13 @@
+[ProjectFiles]
+HeaderPath=..\..\..\..\..\..\Drivers\BSP\STM32U3xx_Nucleo; ..\..\..\..\..\..\Drivers\CMSIS\DSP\Include\dsp; ..\..\..\..\..\..\Middlewares\ST\hsp_engine\common\modules\proclist_lib
+[Others]
+Define=USE_HSP_ARM_MATH_TYPES
+HALModule=EXTI;ICACHE
+[Groups]
+Doc=../README.md;
+Application/User/HSP_Engine/App=../HSP_Engine/App/app_hsp_engine_seq.c;
+Drivers/BSP/STM32U3xx_Nucleo=../../../../../../Drivers/BSP/STM32U3xx_Nucleo/stm32u3xx_nucleo.c;
+Drivers/STM32U3xx_HAL_Driver=../../../../../../Drivers/STM32U3xx_HAL_Driver/Src/stm32u3xx_hal_exti.c;
+Drivers/CMSIS/Math=../../../../../../Drivers/CMSIS/DSP/Source/StatisticsFunctions/arm_rms_f32.c;
+Middlewares/HSP_Engine/interfaces=../../../../../../Middlewares/ST/hsp_engine/interfaces/hsp_utilities.c;
+Middlewares/HSP_Engine/modules=../../../../../../Middlewares/ST/hsp_engine/common/modules/proclist_lib/hsp_proclist_filter.c;

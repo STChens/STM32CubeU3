@@ -112,7 +112,7 @@
                 </option>
                 <option>
                     <name>FlashLoadersV3</name>
-                    <state>$TOOLKIT_DIR$\config\flashloader\ST\FlashSTM32U3xxxG.board</state>
+                    <state>$TOOLKIT_DIR$/config/flashloader/ST/FlashSTM32U3xxxG.board</state>
                 </option>
                 <option>
                     <name>OCImagesSuppressCheck1</name>
@@ -1090,7 +1090,7 @@
                 <option>
                     <name>CCSTLinkResetList</name>
                     <version>3</version>
-                    <state>0</state>
+                    <state>4</state>
                 </option>
                 <option>
                     <name>CCCpuClockEdit</name>

@@ -77,6 +77,13 @@ static void SystemClock_Config(void)
   RCC_ClkInitTypeDef rcc_clk_init_struct = {0U};
   RCC_OscInitTypeDef rcc_osc_init_struct = {0U};
 
+  /** Configure the System Power Supply
+  */
+  if (HAL_PWREx_ConfigSupply(PWR_SMPS_SUPPLY) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
   /* Enable Epod Booster */
   __HAL_RCC_PWR_CLK_ENABLE();
 

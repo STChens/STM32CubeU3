@@ -42,7 +42,7 @@ extern "C" {
   * @{
   */
 
-/** @defgroup STM32C0XX_NUCLEO_CONFIG_Exported_Constants Exported Constants
+/** @defgroup STM32U3XX_NUCLEO_CONFIG_Exported_Constants Exported Constants
   * @{
   */
 /* Nucleo pin and part number defines */

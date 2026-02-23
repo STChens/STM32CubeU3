@@ -53,7 +53,7 @@ System, RTC, Alarm, wakeup timer, Backup domain, Counter, LSE, LSI
   - RTC/RTC_Alarm_Init/Inc/stm32_assert.h     Template file to include assert_failed function
   - RTC/RTC_Alarm_Init/Src/stm32u3xx_it.c     Interrupt handlers
   - RTC/RTC_Alarm_Init/Src/main.c             Main program
-  - RTC/RTC_Alarm_Init/Src/system_stm32u3xx.c STM32U0xx system source file
+  - RTC/RTC_Alarm_Init/Src/system_stm32u3xx.c STM32U3xx system source file
 
 ### <b>Hardware and Software environment</b>
 

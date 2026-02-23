@@ -186,7 +186,7 @@ int main(void)
   /* STM32U3xx HAL library initialization:
        - Configure the Flash prefetch
        - Configure the Systick to generate an interrupt each 1 msec
-       - Set NVIC Group Priority to 3
+       - Set NVIC Group Priority to 4
        - Low Level Initialization
      */
   HAL_Init();
@@ -194,12 +194,24 @@ int main(void)
   /* Configure the System clock */
   SystemClock_Config();
 
+  /* Disable instruction cache */
+  if (HAL_ICACHE_Disable() != HAL_OK)
+  {
+    Error_Handler();
+  }
 
-  /* Enable instruction cache (default 2-ways set associative cache) */
+  /* Enable instruction cache in 1-way (direct mapped cache) */
+  if (HAL_ICACHE_ConfigAssociativityMode(ICACHE_1WAY) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+  /* Enable instruction cache */
   if (HAL_ICACHE_Enable() != HAL_OK)
   {
     Error_Handler();
   }
+
 
   /* Configure LD2 */
   BSP_LED_Init(LD2);
@@ -309,9 +321,16 @@ int main(void)
   */
 void SystemClock_Config(void)
 {
-  RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
   RCC_OscInitTypeDef RCC_OscInitStruct = {0};
+  RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
   uint32_t latency;
+
+  /** Configure the System Power Supply
+  */
+  if (HAL_PWREx_ConfigSupply(PWR_SMPS_SUPPLY) != HAL_OK)
+  {
+    Error_Handler();
+  }
 
   /* Enable Epod Booster */
   __HAL_RCC_PWR_CLK_ENABLE();

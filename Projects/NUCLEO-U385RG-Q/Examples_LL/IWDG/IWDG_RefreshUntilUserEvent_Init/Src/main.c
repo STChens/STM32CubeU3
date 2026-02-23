@@ -168,13 +168,15 @@ void SystemClock_Config(void)
   {
   }
 
-  /* Activate MSIS as source */
+  /** Activate MSIS as source 
+  */
   LL_RCC_MSIS_SetClockSource(LL_RCC_MSIS_CLOCK_SOURCE_RC0);
   LL_RCC_MSIS_SetClockDivision(LL_RCC_MSIS_CLOCK_SOURCE_RC_DIV_1);
   LL_RCC_MSI_SetMSIxClockRange();
   LL_RCC_SetSysClkSource(LL_RCC_SYS_CLKSOURCE_MSIS);
 
-   /* Wait till System clock is ready */
+   /** Wait till System clock is ready 
+  */
   while(LL_RCC_GetSysClkSource() != LL_RCC_SYS_CLKSOURCE_MSIS)
   {
   }

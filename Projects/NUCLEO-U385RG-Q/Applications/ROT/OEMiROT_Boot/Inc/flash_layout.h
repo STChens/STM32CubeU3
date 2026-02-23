@@ -222,7 +222,7 @@
 /* HDP area end at this address */
 #define FLASH_BL2_HDP_END_OFFSET        (FLASH_AREA_SCRATCH_OFFSET+FLASH_AREA_SCRATCH_SIZE)
 
-#if defined(TFM_COMPATIBILTY)
+#if defined(TFM_COMPATIBILITY)
 /* OTP / Non-Volatile Counters definitions */
 #define FLASH_OTP_NV_COUNTERS_SECTOR_SIZE (FLASH_AREA_IMAGE_SECTOR_SIZE)
 #define FLASH_OTP_NV_COUNTERS_AREA_OFFSET (FLASH_BL2_HDP_END_OFFSET)
@@ -245,11 +245,7 @@
 #if (FLASH_ITS_AREA_OFFSET % FLASH_AREA_IMAGE_SECTOR_SIZE) != 0
 #error "FLASH_ITS_AREA_OFFSET not aligned on FLASH_AREA_IMAGE_SECTOR_SIZE"
 #endif /* (FLASH_ITS_AREA_OFFSET % FLASH_AREA_IMAGE_SECTOR_SIZE) != 0 */
-
-#define FLASH_AREAS_TFM_SIZE (FLASH_OTP_NV_COUNTERS_AREA_SIZE + FLASH_PS_AREA_SIZE + FLASH_ITS_AREA_SIZE)
-#else
-#define FLASH_AREAS_TFM_SIZE (0x0)
-#endif /*(TFM_COMPATIBILTY)*/
+#endif /*(TFM_COMPATIBILITY)*/
 
 /* BL2 partitions size */
 #if  defined(OEMIROT_FIRST_BOOT_STAGE)
@@ -273,11 +269,11 @@
 #define FLASH_S_PARTITION_SIZE          (OEMIROT_AREA_0_SIZE)
 
 #elif (MCUBOOT_APP_IMAGE_NUMBER == 1) && (FLASH_NS_PARTITION_SIZE == 0)
-/* For FULL SECURE case, we need at least 32 KB for S partition */
+/* For FULL SECURE case, we need at least 36 KB for S partition */
 #define FLASH_S_PARTITION_SIZE          (0x09000)
 
 #else
-/* For Others case, we keep 32 KB for S partition (like FULL SECURE) */
+/* For Others case, we keep 36 KB for S partition (like FULL SECURE) */
 #define FLASH_S_PARTITION_SIZE          (0x09000)
 
 #endif /* OEMIROT_FIRST_BOOT_STAGE */
@@ -292,25 +288,6 @@
 #else
 #define FLASH_MAX_APP_PARTITION_SIZE    FLASH_PARTITION_SIZE
 #endif /* (MCUBOOT_APP_IMAGE_NUMBER == 2) */
-#if (MCUBOOT_S_DATA_IMAGE_NUMBER == 1)
-#define FLASH_S_DATA_PARTITION_SIZE     (FLASH_AREA_IMAGE_SECTOR_SIZE + FLASH_AREA_IMAGE_SECTOR_SIZE)
-#else
-#define FLASH_S_DATA_PARTITION_SIZE     (0x0)
-#endif /* (MCUBOOT_S_DATA_IMAGE_NUMBER == 1) */
-#if (MCUBOOT_NS_DATA_IMAGE_NUMBER == 1)
-#define FLASH_NS_DATA_PARTITION_SIZE    (FLASH_AREA_IMAGE_SECTOR_SIZE + FLASH_AREA_IMAGE_SECTOR_SIZE)
-#else
-#define FLASH_NS_DATA_PARTITION_SIZE    (0x0)
-#endif /* (MCUBOOT_NS_DATA_IMAGE_NUMBER == 1) */
-
-#define FLASH_MAX_DATA_PARTITION_SIZE   ((FLASH_S_DATA_PARTITION_SIZE >   \
-                                          FLASH_NS_DATA_PARTITION_SIZE) ? \
-                                         FLASH_S_DATA_PARTITION_SIZE : \
-                                         FLASH_NS_DATA_PARTITION_SIZE)
-#define FLASH_MAX_PARTITION_SIZE        ((FLASH_MAX_APP_PARTITION_SIZE >   \
-                                          FLASH_MAX_DATA_PARTITION_SIZE) ? \
-                                         FLASH_MAX_APP_PARTITION_SIZE : \
-                                         FLASH_MAX_DATA_PARTITION_SIZE)
 
 /* BL2 flash areas */
 #if defined (OEMIROT_FIRST_BOOT_STAGE)
@@ -328,15 +305,41 @@
                                          OEMUROT_HASH_REF_SIZE + OEMUROT_BL2_NVCNT_SIZE + \
                                          OEMUROT_SCRATCH_SIZE + OEMUROT_PERSO_SIZE)
 #else /* OEMIROT_FIRST_BOOT_STAGE */
-#if defined(TFM_COMPATIBILTY)
+#if defined(TFM_COMPATIBILITY)
 #define OEMIROT_AREA_0_OFFSET            (FLASH_AREA_BL2_OFFSET)
 #define FLASH_AREA_BEGIN_OFFSET          (FLASH_ITS_AREA_OFFSET + FLASH_ITS_AREA_SIZE)
 #else
 #define OEMIROT_AREA_0_OFFSET           (FLASH_AREA_BL2_OFFSET)
 #define FLASH_AREA_BEGIN_OFFSET         (FLASH_BL2_HDP_END_OFFSET)
-#endif /*(TFM_COMPATIBILTY)*/
+#endif /*(TFM_COMPATIBILITY)*/
 #endif /* OEMIROT_FIRST_BOOT_STAGE */
 
+#if (MCUBOOT_S_DATA_IMAGE_NUMBER == 1)
+#define FLASH_S_DATA_PARTITION_SIZE     (FLASH_AREA_IMAGE_SECTOR_SIZE + FLASH_AREA_IMAGE_SECTOR_SIZE)
+#else
+#define FLASH_S_DATA_PARTITION_SIZE     (0x0)
+#endif /* (MCUBOOT_S_DATA_IMAGE_NUMBER == 1) */
+
+#if (MCUBOOT_NS_DATA_IMAGE_NUMBER == 1)
+#define FLASH_NS_DATA_PARTITION_SIZE    (FLASH_AREA_IMAGE_SECTOR_SIZE + FLASH_AREA_IMAGE_SECTOR_SIZE)
+#else
+#define FLASH_NS_DATA_PARTITION_SIZE    (0x0)
+#endif /* (MCUBOOT_NS_DATA_IMAGE_NUMBER == 1) */
+
+#define FLASH_MAX_DATA_PARTITION_SIZE   ((FLASH_S_DATA_PARTITION_SIZE >   \
+                                          FLASH_NS_DATA_PARTITION_SIZE) ? \
+                                         FLASH_S_DATA_PARTITION_SIZE : \
+                                         FLASH_NS_DATA_PARTITION_SIZE)
+#define FLASH_MAX_PARTITION_SIZE        ((FLASH_MAX_APP_PARTITION_SIZE >   \
+                                         FLASH_MAX_DATA_PARTITION_SIZE) ?  \
+                                         ((FLASH_MAX_APP_PARTITION_SIZE >  \
+                                           FLASH_AREA_SCRATCH_SIZE) ?      \
+                                           FLASH_MAX_APP_PARTITION_SIZE :  \
+                                           FLASH_AREA_SCRATCH_SIZE) :      \
+                                         ((FLASH_MAX_DATA_PARTITION_SIZE > \
+                                           FLASH_AREA_SCRATCH_SIZE) ?      \
+                                           FLASH_MAX_DATA_PARTITION_SIZE : \
+                                           FLASH_AREA_SCRATCH_SIZE))
 #define FLASH_AREAS_DEVICE_ID           (FLASH_DEVICE_ID - FLASH_DEVICE_ID)
 
 /* Secure data image primary slot */

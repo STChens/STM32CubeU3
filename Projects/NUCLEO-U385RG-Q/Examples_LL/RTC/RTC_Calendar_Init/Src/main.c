@@ -247,7 +247,7 @@ void SystemClock_Config(void)
   /** Set Flash latency before switching to MSIS
   */
   LL_FLASH_SetLatency(LL_FLASH_LATENCY_2);
-  while(LL_FLASH_GetLatency() != LL_FLASH_LATENCY_2)
+  while(LL_FLASH_GetLatency()!= LL_FLASH_LATENCY_2)
   {
   }
 
@@ -263,13 +263,15 @@ void SystemClock_Config(void)
   {
   }
 
-  /* Activate MSIS as source */
+  /** Activate MSIS as source
+*/
   LL_RCC_MSIS_SetClockSource(LL_RCC_MSIS_CLOCK_SOURCE_RC0);
   LL_RCC_MSIS_SetClockDivision(LL_RCC_MSIS_CLOCK_SOURCE_RC_DIV_1);
   LL_RCC_MSI_SetMSIxClockRange();
   LL_RCC_SetSysClkSource(LL_RCC_SYS_CLKSOURCE_MSIS);
 
-   /* Wait till System clock is ready */
+   /** Wait till System clock is ready
+*/
   while(LL_RCC_GetSysClkSource() != LL_RCC_SYS_CLKSOURCE_MSIS)
   {
   }
@@ -325,6 +327,10 @@ static void MX_RTC_Init(void)
   LL_RTC_InitTypeDef RTC_InitStruct = {0};
   LL_RTC_TimeTypeDef RTC_TimeStruct = {0};
   LL_RTC_DateTypeDef RTC_DateStruct = {0};
+  
+  /** Enable access to the backup domain
+  */
+    LL_PWR_EnableBkUpAccess();
 
   if(LL_RCC_GetRTCClockSource(LL_RCC_RTC_CLKSOURCE) != LL_RCC_RTC_CLKSOURCE_LSI)
   {
@@ -407,8 +413,8 @@ static void MX_RTC_Init(void)
 static void MX_GPIO_Init(void)
 {
   LL_GPIO_InitTypeDef GPIO_InitStruct = {0};
-/* USER CODE BEGIN MX_GPIO_Init_1 */
-/* USER CODE END MX_GPIO_Init_1 */
+  /* USER CODE BEGIN MX_GPIO_Init_1 */
+  /* USER CODE END MX_GPIO_Init_1 */
 
   /* GPIO Ports Clock Enable */
   LL_AHB2_GRP1_EnableClock(LL_AHB2_GRP1_PERIPH_GPIOA);
@@ -424,8 +430,8 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
   LL_GPIO_Init(LED2_GPIO_Port, &GPIO_InitStruct);
 
-/* USER CODE BEGIN MX_GPIO_Init_2 */
-/* USER CODE END MX_GPIO_Init_2 */
+  /* USER CODE BEGIN MX_GPIO_Init_2 */
+  /* USER CODE END MX_GPIO_Init_2 */
 }
 
 /* USER CODE BEGIN 4 */
@@ -574,8 +580,7 @@ void Error_Handler(void)
   }
   /* USER CODE END Error_Handler_Debug */
 }
-
-#ifdef  USE_FULL_ASSERT
+#ifdef USE_FULL_ASSERT
 /**
   * @brief  Reports the name of the source file and the source line number
   *         where the assert_param error has occurred.

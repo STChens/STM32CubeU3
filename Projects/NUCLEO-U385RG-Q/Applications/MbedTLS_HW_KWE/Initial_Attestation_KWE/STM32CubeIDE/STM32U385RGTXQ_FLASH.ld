@@ -52,7 +52,7 @@ MEMORY
 }
 
 TARGET(binary) /* specify the file format of binary file */
-INPUT (../../Wrapped_Keys/DUA_USLU_DHUK_Sign_RDP0_NS_Priv.bin) /* first bin file path (relative to the output folder)*/
+INPUT (../../Wrapped_Keys/DUA_USFU_DHUK_Sign_NS_Priv.bin) /* first bin file path (relative to the output folder)*/
 OUTPUT_FORMAT(default) /* restore the out file format */
 
 /* Sections */

@@ -135,6 +135,13 @@ void SystemClock_Config(void)
   RCC_MSIRCxPLLTypeDef RCC_MSIRCxPLLStruct = {0};
   RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
 
+  /** Configure the System Power Supply
+  */
+  if (HAL_PWREx_ConfigSupply(PWR_SMPS_SUPPLY) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
   /** Enable Epod Booster
   */
   if (HAL_RCCEx_EpodBoosterClkConfig(RCC_EPODBOOSTER_SOURCE_MSIS, RCC_EPODBOOSTER_DIV1) != HAL_OK)
@@ -183,6 +190,7 @@ void SystemClock_Config(void)
   */
   RCC_MSIRCxPLLStruct.State = RCC_MSIRCx_PLL_ON;
   RCC_MSIRCxPLLStruct.InputSrce = RCC_MSIRCx_PLL_INPUT_LSE;
+
   if (HAL_RCCEx_MSIRCxPLLModeConfig(RCC_MSI_RC0, &RCC_MSIRCxPLLStruct) != HAL_OK)
   {
     Error_Handler();
@@ -331,8 +339,6 @@ static void MX_GPIO_Init(void)
 /* USER CODE END MX_GPIO_Init_1 */
 
   /* GPIO Ports Clock Enable */
-  __HAL_RCC_GPIOC_CLK_ENABLE();
-  __HAL_RCC_GPIOH_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
 
 /* USER CODE BEGIN MX_GPIO_Init_2 */

@@ -47,7 +47,7 @@ This application is scheduled as follow:
 
 #### <b>Error behaviors</b>
 
-- The green led will be toggled each 250 milliseconds in an infinity loop.
+- If the green led is off or green led will be toggled each 250 milliseconds in an infinity loop.
 - The global variable glob_status will be set to FAILED
 
 ### <b>Keywords</b>
@@ -58,20 +58,20 @@ Cryptography, authentication, ECDSA, wrap, Cryptographic
 
   - MbedTLS_HW_KWE/Initial_Attestation_KWE/Inc/stm32u3xx_nucleo_conf.h     BSP configuration file
 
-  - MbedTLS_HW_KWE/Initial_Attestation_KWE/Inc/stm32u3xx_hal_conf.h    HAL configuration file
-  - MbedTLS_HW_KWE/Initial_Attestation_KWE/Inc/stm32u3xx_it.h          Interrupt handlers header file
-  - MbedTLS_HW_KWE/Initial_Attestation_KWE/Inc/main.h                        Header for main.c module
-  - MbedTLS_HW_KWE/Initial_Attestation_KWE/Inc/storage_interface.h           Storage header file
-  - MbedTLS_HW_KWE/Initial_Attestation_KWE/Inc/stm32_cert.h                  STM32 certificate header file
-  - MbedTLS_HW_KWE/Initial_Attestation_KWE/Inc/mbedtls_config.h              Mbed TLS configuration file
-  - MbedTLS_HW_KWE/Initial_Attestation_KWE/Inc/mbedtls_alt_config.h          Mbed TLS Alt configuration file
-  - MbedTLS_HW_KWE/Initial_Attestation_KWE/Inc/kwe_config.h                  Key Wrap Engine configuration file
-  - MbedTLS_HW_KWE/Initial_Attestation_KWE/Src/stm32u3xx_it.c          Interrupt handlers
-  - MbedTLS_HW_KWE/Initial_Attestation_KWE/Src/stm32u3xx_hal_msp.c     HAL MSP module
-  - MbedTLS_HW_KWE/Initial_Attestation_KWE/Src/main.c                        Main program
-  - MbedTLS_HW_KWE/Initial_Attestation_KWE/Src/stm32_cert.c                  STM32 certificate source file
-  - MbedTLS_HW_KWE/Initial_Attestation_KWE/Src/storage_interface.c           Storage source file
-  - MbedTLS_HW_KWE/Initial_Attestation_KWE/Src/system_stm32u3xx.c      STM32U3xx system source file
+  - MbedTLS_HW_KWE/Initial_Attestation_KWE/Inc/stm32u3xx_hal_conf.h        HAL configuration file
+  - MbedTLS_HW_KWE/Initial_Attestation_KWE/Inc/stm32u3xx_it.h              Interrupt handlers header file
+  - MbedTLS_HW_KWE/Initial_Attestation_KWE/Inc/main.h                      Header for main.c module
+  - MbedTLS_HW_KWE/Initial_Attestation_KWE/Inc/storage_interface.h         Storage header file
+  - MbedTLS_HW_KWE/Initial_Attestation_KWE/Inc/stm32_cert.h                STM32 certificate header file
+  - MbedTLS_HW_KWE/Initial_Attestation_KWE/Inc/mbedtls_config.h            Mbed TLS configuration file
+  - MbedTLS_HW_KWE/Initial_Attestation_KWE/Inc/mbedtls_alt_config.h        Mbed TLS Alt configuration file
+  - MbedTLS_HW_KWE/Initial_Attestation_KWE/Inc/kwe_config.h                Key Wrap Engine configuration file
+  - MbedTLS_HW_KWE/Initial_Attestation_KWE/Src/stm32u3xx_it.c              Interrupt handlers
+  - MbedTLS_HW_KWE/Initial_Attestation_KWE/Src/stm32u3xx_hal_msp.c         HAL MSP module
+  - MbedTLS_HW_KWE/Initial_Attestation_KWE/Src/main.c                      Main program
+  - MbedTLS_HW_KWE/Initial_Attestation_KWE/Src/stm32_cert.c                STM32 certificate source file
+  - MbedTLS_HW_KWE/Initial_Attestation_KWE/Src/storage_interface.c         Storage source file
+  - MbedTLS_HW_KWE/Initial_Attestation_KWE/Src/system_stm32u3xx.c          STM32U3xx system source file
 
 ### <b>Hardware and Software environment</b>
 
@@ -84,7 +84,19 @@ Cryptography, authentication, ECDSA, wrap, Cryptographic
 
 In order to make the program work, you must do the following :
 
+ - Download the Rsse package from st.com : X-CUBE-RSSe (STM32CubeExpansion_RSSe_V1.1.0 or greater and update the path accordingly in export_DUA_key.bat).
+ - Download the tool STM32CubeProgrammer software for all STM32 from st.com (V2.19.0 or greater and update the path accordingly in export_DUA_key.bat).
+
+ - Run the script export_DUA_key.bat (to export the DUA wrapped private key and save it under Wrapped_Keys directory)
+
+ - Reset the board.
+
  - Open your preferred toolchain
  - Rebuild all files and load your image into target memory
- - Run the application
+
+ - Set the board in RDP level 1 using the STM32CubeProgrammer.
+ - Unplug and plug the board
+ - Reset the board and verify the status of the Green LED.
+
+ - To reopen the debug RDP must be set to level 0 using the STM32CubeProgrammer.
 

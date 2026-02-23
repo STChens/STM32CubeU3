@@ -8,7 +8,7 @@
     /* Define application-specific start/stop entry points for the module.  */
     .global default_module_start
 
-    /* Define common external refrences.  */
+    /* Define common external references.  */
     .global _txm_module_thread_shell_entry
     .global _txm_module_callback_request_thread_entry
 

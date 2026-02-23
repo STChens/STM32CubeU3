@@ -163,7 +163,7 @@ void SystemClock_Config(void)
   /** Set Flash latency before switching to MSIS
   */
   LL_FLASH_SetLatency(LL_FLASH_LATENCY_2);
-  while(LL_FLASH_GetLatency() != LL_FLASH_LATENCY_2)
+  while(LL_FLASH_GetLatency()!= LL_FLASH_LATENCY_2)
   {
   }
 
@@ -179,13 +179,15 @@ void SystemClock_Config(void)
   {
   }
 
-  /* Activate MSIS as source */
+  /** Activate MSIS as source
+*/
   LL_RCC_MSIS_SetClockSource(LL_RCC_MSIS_CLOCK_SOURCE_RC0);
   LL_RCC_MSIS_SetClockDivision(LL_RCC_MSIS_CLOCK_SOURCE_RC_DIV_1);
   LL_RCC_MSI_SetMSIxClockRange();
   LL_RCC_SetSysClkSource(LL_RCC_SYS_CLKSOURCE_MSIS);
 
-   /* Wait till System clock is ready */
+   /** Wait till System clock is ready
+*/
   while(LL_RCC_GetSysClkSource() != LL_RCC_SYS_CLKSOURCE_MSIS)
   {
   }
@@ -217,6 +219,7 @@ static void MX_DAC1_Init(void)
   LL_GPIO_InitTypeDef GPIO_InitStruct = {0};
 
   LL_RCC_SetADCDACClockSource(LL_RCC_ADCDAC_CLKSOURCE_HCLK);
+  LL_RCC_SetADCDACClockPrescaler(LL_RCC_ADCDAC_CLKPRESCALER_ICLK);
   LL_RCC_SetDACSHClockSource(LL_RCC_DAC1SH_CLKSOURCE_LSI);
 
   /* Peripheral clock enable */
@@ -267,6 +270,8 @@ static void MX_ICACHE_Init(void)
   /* USER CODE BEGIN ICACHE_Init 0 */
 
   /* USER CODE END ICACHE_Init 0 */
+  
+  LL_RCC_SetADCDACClockPrescaler(LL_RCC_ADCDAC_CLKPRESCALER_ICLK);
 
   /* USER CODE BEGIN ICACHE_Init 1 */
 
@@ -297,6 +302,8 @@ static void MX_OPAMP2_Init(void)
   LL_OPAMP_InitTypeDef OPAMP_InitStruct = {0};
 
   LL_GPIO_InitTypeDef GPIO_InitStruct = {0};
+  
+  LL_RCC_SetADCDACClockPrescaler(LL_RCC_ADCDAC_CLKPRESCALER_ICLK);
 
   /* Peripheral clock enable */
   LL_APB1_GRP1_EnableClock(LL_APB1_GRP1_PERIPH_OPAMP);
@@ -331,15 +338,15 @@ static void MX_OPAMP2_Init(void)
   */
 static void MX_GPIO_Init(void)
 {
-/* USER CODE BEGIN MX_GPIO_Init_1 */
-/* USER CODE END MX_GPIO_Init_1 */
+  /* USER CODE BEGIN MX_GPIO_Init_1 */
+  /* USER CODE END MX_GPIO_Init_1 */
 
   /* GPIO Ports Clock Enable */
   LL_AHB2_GRP1_EnableClock(LL_AHB2_GRP1_PERIPH_GPIOA);
   LL_AHB2_GRP1_EnableClock(LL_AHB2_GRP1_PERIPH_GPIOB);
 
-/* USER CODE BEGIN MX_GPIO_Init_2 */
-/* USER CODE END MX_GPIO_Init_2 */
+  /* USER CODE BEGIN MX_GPIO_Init_2 */
+  /* USER CODE END MX_GPIO_Init_2 */
 }
 
 /* USER CODE BEGIN 4 */
@@ -454,8 +461,7 @@ void Error_Handler(void)
 
   /* USER CODE END Error_Handler_Debug */
 }
-
-#ifdef  USE_FULL_ASSERT
+#ifdef USE_FULL_ASSERT
 /**
   * @brief  Reports the name of the source file and the source line number
   *         where the assert_param error has occurred.

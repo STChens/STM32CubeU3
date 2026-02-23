@@ -20,7 +20,7 @@
 <div class="row">
 <div class="col-sm-12 col-lg-8">
 <h2 id="spi_fullduplex_comdma_lowpower_slave-example-description"><b>SPI_FullDuplex_ComDMA_LowPower_Slave Example Description</b></h2>
-<p>A data buffer transmission/reception via SPI using DMA wakes up slave board from low power mode.</p>
+<p>A data buffer transmission/reception via SPI using DMA wakes up master and slave board from low power mode.</p>
 <pre><code>Board: NUCLEO-U385RG-Q (embeds a STM32U385RGTxQ device)
 CLK Pin: PA.01 (Pin 30 on CN7 connector)
 MISO Pin: PA.06 (Pin 13 on CN10 connector)
@@ -35,11 +35,10 @@ MOSI Pin: PA.07 (Pin 15 on CN10 connector)</code></pre>
 <p>The SPI communication is then initiated. The HAL_SPI_TransmitReceive_DMA() function allows the reception and the transmission of a predefined data buffer at the same time (Full Duplex Mode).</p>
 <p>If the Master board is used, the project SPI_FullDuplex_ComDMA_LowPower_Master must be used. If the Slave board is used, the project SPI_FullDuplex_ComDMA_LowPower_Slave must be used.</p>
 <p>For this example the aTxBuffer is predefined and the aRxBuffer size is same as aTxBuffer.</p>
-<p>In a first step, both slave and master board enter in low power mode. RTC is configured to wake up master board after 5 seconds. Then SPI Master starts the communication by sending aTxBuffer and receiving aRxBuffer through HAL_SPI_TransmitReceive_DMA(), at the same time, initiating the transfer triggers the awakening of SPI Slave from low power and the Slave will transmit aTxBuffer and receives aRxBuffer through HAL_SPI_TransmitReceive_DMA(). The callback functions (HAL_SPI_TxRxCpltCallback and HAL_SPI_ErrorCallbackand) update the variable wTransferState used in the main function to check the transfer status. Finally, aRxBuffer and aTxBuffer are compared through Buffercmp() in order to check buffers correctness.</p>
+<p>In a first step, both the slave and master boards initialize, but do not start, a bi-directional SPI transfer using DMA. Then the two MCU enter low power mode (STOP1). On master board, RTC is configured to trigger the transfer from master board after 5 seconds. Once the time has elapsed, the DMA transfer is triggered by sending aTxBuffer and receiving aRxBuffer while both MCU remain in low power mode. When the transfer is complete, both systems wake up. The callback functions (HAL_SPI_TxRxCpltCallback and HAL_SPI_ErrorCallback) update the variable wTransferState used in the main function to check the transfer status. Finally, aRxBuffer and aTxBuffer are compared through Buffercmp() in order to check buffers correctness.</p>
 <p>STM32 board’s LEDs can be used to monitor the transfer status:</p>
 <ul>
-<li>LED2 is OFF on master board waiting RTC interrupt wakes up the system and trigger the transfer after 5 seconds.</li>
-<li>LED2 turns ON when the transmission/reception process is complete.</li>
+<li>LED2 is OFF until the DMA transfer is complete. It is turned ON afterwards.</li>
 <li>LED2 toggle when there is an error in transmission/reception process.</li>
 </ul>
 <h4 id="notes"><b>Notes</b></h4>

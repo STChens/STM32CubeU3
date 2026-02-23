@@ -27,6 +27,7 @@ extern "C" {
 /* Includes ------------------------------------------------------------------*/
 #include "stm32u3xx_hal.h"
 
+
 /** @addtogroup KWE_MODULES
   * @{
   */

@@ -34,7 +34,7 @@
 #define FLASH_IF_MIN_WRITE_LEN (8U)     /* Flash programming by 64 bits */
 #define NB_PAGE_SECTOR_PER_ERASE  (2U)  /* Nb page erased per erase */
 
-#define ITS_LOCATION         0X080FC000 /* ITS start address */
+#define ITS_LOCATION         ((uint32_t)0X080FC000) /* ITS start address */
 #define ITS_MAX_SIZE         (8*1024U)  /* 8 KBytes */
 #define ITS_SLOT_MAX_NUMBER  (16U)
 #define ITS_SLOT_OFFSET      0x00000080 /* 128 words (32 bits)) */
@@ -60,7 +60,7 @@ static HAL_StatusTypeDef FLASH_If_Erase_Size(void *pStart, uint32_t uLength);
 /* Functions Definition ------------------------------------------------------*/
 
 /**
-  * @brief  Gets the page of a given address
+  * @brief  Gets the page or sector of a given address
   * @param  uAddr: Address of the FLASH Memory
   * @retval The page of a given address
   */
@@ -206,11 +206,23 @@ static HAL_StatusTypeDef FLASH_If_Write(void *pDestination, const void *pSource,
       /* DataLength must be a multiple of 64 bit */
       for (i = 0U; i < uLength; i += 8U)
       {
+        /* Disable instruction cache prior to internal cacheable memory update */
+        if (HAL_ICACHE_Disable() != HAL_OK)
+        {
+            e_ret_status = HAL_ERROR;
+            break;
+        }
         /* Device voltage range supposed to be [2.7V to 3.6V], the operation will
         be done by word */
         if (HAL_FLASH_Program(FLASH_TYPEPROGRAM_DOUBLEWORD, (uint32_t)pDestination,  (uint32_t)(pdata+i))
             == HAL_OK)
         {
+          /* Re-enable instruction cache */
+          if (HAL_ICACHE_Enable() != HAL_OK)
+          {
+            e_ret_status = HAL_ERROR;
+            break;
+          }
           /* Check the written value */
           if (*(uint64_t *)pDestination != *(uint64_t *)(pdata + i))
           {
@@ -223,6 +235,12 @@ static HAL_StatusTypeDef FLASH_If_Write(void *pDestination, const void *pSource,
         }
         else
         {
+          /* Re-enable instruction cache */
+          if (HAL_ICACHE_Enable() != HAL_OK)
+          {
+            e_ret_status = HAL_ERROR;
+            break;
+          }
           /* Error occurred while writing data in Flash memory */
           e_ret_status = HAL_ERROR;
           break;
@@ -366,10 +384,20 @@ psa_status_t storage_get_info(uint64_t obj_uid, void *p_obj_info, uint32_t obj_i
     p_storage = (uint32_t *)ITS_LOCATION;
   }
 
+  /* Disable instruction cache prior to internal cacheable memory update */
+  if (HAL_ICACHE_Disable() != HAL_OK)
+  {
+      return HAL_ERROR;
+  }
   /* Fetch the object in ITS storage */
   do{
     if (memcmp(&obj_uid, p_storage, sizeof(uint32_t)) == 0 )
     {
+    /* Re-enable instruction cache */
+    if (HAL_ICACHE_Enable() != HAL_OK)
+    {
+      return HAL_ERROR;
+    }
       /* Copy object info from storage */
       memcpy(p_obj_info, p_storage, obj_info_size);
       return PSA_SUCCESS;
@@ -380,7 +408,11 @@ psa_status_t storage_get_info(uint64_t obj_uid, void *p_obj_info, uint32_t obj_i
 
     }while(i < ITS_MAX_SIZE);
   /* User code end */
-
+    /* Re-enable instruction cache */
+    if (HAL_ICACHE_Enable() != HAL_OK)
+    {
+      return HAL_ERROR;
+    }
    return status;
 }
 

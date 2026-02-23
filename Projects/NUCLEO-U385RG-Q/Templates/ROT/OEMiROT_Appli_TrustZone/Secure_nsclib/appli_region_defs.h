@@ -2,7 +2,7 @@
   ******************************************************************************
   * @file    appli_region_defs.h
   * @author  MCD Application Team
-  * @brief   This file contains definitions of memory regions for stm32wbaxx.
+  * @brief   This file contains definitions of memory regions.
   ******************************************************************************
   * @attention
   *

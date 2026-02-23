@@ -143,6 +143,20 @@ TX_BYTE_POOL HeapBytePool;
 TX_BYTE_POOL StackBytePool;
 TX_BLOCK_POOL BlockPool;
 
+/* Semaphore wrapper to support max_count with ThreadX */
+typedef struct osSemaphore
+{
+  TX_SEMAPHORE txSemaphore;
+  ULONG        ceiling;
+} osSemaphore_t;
+
+/* Timer wrapper to support static/dynamic allocation tracking with ThreadX */
+typedef struct osTimer
+{
+  TX_TIMER txTimer;
+  UINT     is_static;
+} osTimer_t;
+
 /*---------------------------------------------------------------------------*/
 /*-------------------CMSIS RTOS2 Internal Functions--------------------------*/
 /*---------------------------------------------------------------------------*/
@@ -910,14 +924,14 @@ osThreadId_t osThreadNew(osThreadFunc_t func, void *argument, const osThreadAttr
     {
       /* Check if the memory for thread control block has been internally
          allocated */
-      if ((attr->cb_mem == NULL) || (attr == NULL))
+      if ((attr == NULL) || (attr->cb_mem == NULL))
       {
         /* Free the already allocated memory for thread control block */
         MemFree(thread_ptr);
       }
 
       /* Check if the memory for thread stack has been internally allocated */
-      if ((attr->stack_mem == NULL) || (attr == NULL))
+      if ((attr == NULL) || (attr->stack_mem == NULL))
       {
         /* Free the already allocated memory for thread stack */
         MemFree(stack_start);
@@ -1501,6 +1515,16 @@ osStatus_t osThreadTerminate(osThreadId_t thread_id)
       /* Return osErrorResource in case of error */
       status = osErrorResource;
     }
+
+    if (status == osOK)
+    {
+      /* Call the tx_thread_delete to delete the specified thread */
+      if (tx_thread_delete(thread_ptr) != TX_SUCCESS)
+      {
+        /* Return osErrorResource in case of error */
+        status = osErrorResource;
+      }
+    }
   }
 
   return (status);
@@ -1776,8 +1800,8 @@ uint32_t osThreadEnumerate(osThreadId_t *thread_array, uint32_t array_items)
   */
 osTimerId_t osTimerNew(osTimerFunc_t func, osTimerType_t type, void *argument, const osTimerAttr_t *attr)
 {
-  /* For TX_TIMER the control block pointer is the timer identifier */
-  TX_TIMER *timer_ptr = NULL;
+  /* For osTimer_t the control block pointer is the timer identifier */
+  osTimer_t *timer_ptr = NULL;
   /* The name_ptr as null-terminated string */
   CHAR *name_ptr = NULL;
   /* The timer expiration input */
@@ -1785,7 +1809,7 @@ osTimerId_t osTimerNew(osTimerFunc_t func, osTimerType_t type, void *argument, c
   /* The timer reschedule ticks */
   ULONG reschedule_ticks = 0U;
   /* The size of control block */
-  ULONG cb_size = sizeof(TX_TIMER);
+  ULONG cb_size = sizeof(osTimer_t);
 
   /* Check if this API is called from Interrupt Service Routines,
      the timer callback function handler is NULL or the type is not valid */
@@ -1807,10 +1831,10 @@ osTimerId_t osTimerNew(osTimerFunc_t func, osTimerType_t type, void *argument, c
       /* Check if the control block size is equal to 0 */
       if (attr->cb_size == 0U)
       {
-        /* Set control block size to sizeof(TX_TIMER) */
-        cb_size = sizeof(TX_TIMER);
+        /* Set control block size to sizeof(osTimer_t) */
+        cb_size = sizeof(osTimer_t);
       }
-      else if (attr->cb_size < sizeof(TX_TIMER))
+      else if (attr->cb_size < sizeof(osTimer_t))
       {
         /* Return NULL pointer in case of error */
         return (NULL);
@@ -1825,23 +1849,31 @@ osTimerId_t osTimerNew(osTimerFunc_t func, osTimerType_t type, void *argument, c
       if (attr->cb_mem == NULL)
       {
         /* Allocate the timer_ptr structure for the timer to be created */
-        timer_ptr = (TX_TIMER *)MemAlloc(cb_size, RTOS2_BYTE_POOL_HEAP_TYPE);
+        timer_ptr = (osTimer_t *)MemAlloc(cb_size, RTOS2_BYTE_POOL_HEAP_TYPE);
         if (timer_ptr == NULL)
         {
           /* Return NULL pointer in case of error */
           return (NULL);
         }
+        timer_ptr->is_static = 0;
       }
       else
       {
         /* The control block shall point to the input cb_mem memory address */
-        timer_ptr = attr->cb_mem;
+        timer_ptr = (osTimer_t *)attr->cb_mem;
+        timer_ptr->is_static = 1;
       }
     }
     else
     {
       /* Allocate the timer_ptr structure for the timer to be created */
-      timer_ptr = (TX_TIMER *)MemAlloc(cb_size, RTOS2_BYTE_POOL_HEAP_TYPE);
+      timer_ptr = (osTimer_t *)MemAlloc(cb_size, RTOS2_BYTE_POOL_HEAP_TYPE);
+      if (timer_ptr == NULL)
+      {
+        /* Return NULL pointer in case of error */
+        return (NULL);
+      }
+      timer_ptr->is_static = 0;
     }
 
     /* Check the timer type to set timer periodicity */
@@ -1864,12 +1896,12 @@ osTimerId_t osTimerNew(osTimerFunc_t func, osTimerType_t type, void *argument, c
     }
 
     /* Call the tx_timer_create function to create the new timer */
-    if (tx_timer_create(timer_ptr, name_ptr, (void(*)(ULONG))func, expiration_input, 1, reschedule_ticks,
+    if (tx_timer_create(&timer_ptr->txTimer, name_ptr, (void(*)(ULONG))func, expiration_input, 1, reschedule_ticks,
                         TX_NO_ACTIVATE) != TX_SUCCESS)
     {
       /* Check if the memory for timer control block has been internally
          allocated */
-      if ((attr->cb_mem == NULL) || (attr == NULL))
+      if (timer_ptr->is_static == 0)
       {
         /* Free the already allocated memory for timer control block */
         MemFree(timer_ptr);
@@ -1894,8 +1926,8 @@ osTimerId_t osTimerNew(osTimerFunc_t func, osTimerType_t type, void *argument, c
   */
 const char *osTimerGetName(osTimerId_t timer_id)
 {
-  /* For TX_TIMER the control block pointer is the timer identifier */
-  TX_TIMER *timer_ptr = (TX_TIMER *)timer_id;
+  /* For osTimer_t the control block pointer is the timer identifier */
+  osTimer_t *timer_ptr = (osTimer_t *)timer_id;
   /* The output name_ptr as null-terminated string */
   CHAR *name_ptr;
 
@@ -1909,7 +1941,7 @@ const char *osTimerGetName(osTimerId_t timer_id)
   else
   {
     /* Call the tx_timer_info_get to get the timer name_ptr */
-    if (tx_timer_info_get(timer_ptr, &name_ptr, NULL, NULL, NULL, NULL) != TX_SUCCESS)
+    if (tx_timer_info_get(&timer_ptr->txTimer, &name_ptr, NULL, NULL, NULL, NULL) != TX_SUCCESS)
     {
       /* Return NULL in case of an error */
       name_ptr = NULL;
@@ -1930,8 +1962,8 @@ const char *osTimerGetName(osTimerId_t timer_id)
   */
 uint32_t osTimerIsRunning(osTimerId_t timer_id)
 {
-  /* For TX_TIMER the control block pointer is the timer identifier */
-  TX_TIMER *timer_ptr = (TX_TIMER *)timer_id;
+  /* For osTimer_t the control block pointer is the timer identifier */
+  osTimer_t *timer_ptr = (osTimer_t *)timer_id;
   /* The active state of the timer */
   UINT active;
 
@@ -1946,7 +1978,7 @@ uint32_t osTimerIsRunning(osTimerId_t timer_id)
   {
     /* Check if the timer is valid by calling the tx_timer_info_get to get
        the timer active state */
-    if (tx_timer_info_get(timer_ptr, NULL, &active, NULL, NULL, NULL) != TX_SUCCESS)
+    if (tx_timer_info_get(&timer_ptr->txTimer, NULL, &active, NULL, NULL, NULL) != TX_SUCCESS)
     {
       /* Return 0 in case of error */
       active = 0U;
@@ -1966,8 +1998,8 @@ uint32_t osTimerIsRunning(osTimerId_t timer_id)
   */
 osStatus_t osTimerStop(osTimerId_t timer_id)
 {
-  /* For TX_TIMER the control block pointer is the timer identifier */
-  TX_TIMER *timer_ptr = (TX_TIMER *)timer_id;
+  /* For osTimer_t the control block pointer is the timer identifier */
+  osTimer_t *timer_ptr = (osTimer_t *)timer_id;
   /* The returned status or error */
   osStatus_t status;
   /* The active state of the timer */
@@ -1980,7 +2012,7 @@ osStatus_t osTimerStop(osTimerId_t timer_id)
     status = osErrorISR;
   }
   /* Check if the timer control block is valid */
-  else if ((timer_id == NULL) || (timer_ptr->tx_timer_id != TX_TIMER_ID))
+  else if ((timer_id == NULL) || (timer_ptr->txTimer.tx_timer_id != TX_TIMER_ID))
   {
     /* Return osErrorParameter error */
     status = osErrorParameter;
@@ -1988,7 +2020,7 @@ osStatus_t osTimerStop(osTimerId_t timer_id)
   else
   {
     /* Get the timer running state */
-    if (tx_timer_info_get(timer_ptr, NULL, &active, NULL, NULL, NULL) == TX_SUCCESS)
+    if (tx_timer_info_get(&timer_ptr->txTimer, NULL, &active, NULL, NULL, NULL) == TX_SUCCESS)
     {
       /* Check if the timer is running (active) */
       if (active == TX_TRUE)
@@ -1996,7 +2028,7 @@ osStatus_t osTimerStop(osTimerId_t timer_id)
         /* Call the tx_timer_deactivate to deactivates the specified application
            timer. If the timer is already deactivated, this service has no
            effect. */
-        if (tx_timer_deactivate(timer_ptr) == TX_SUCCESS)
+        if (tx_timer_deactivate(&timer_ptr->txTimer) == TX_SUCCESS)
         {
           /* Return osOK for success */
           status = osOK;
@@ -2035,8 +2067,8 @@ osStatus_t osTimerStop(osTimerId_t timer_id)
   */
 osStatus_t osTimerStart(osTimerId_t timer_id, uint32_t ticks)
 {
-  /* For TX_TIMER the control block pointer is the timer identifier */
-  TX_TIMER *timer_ptr = (TX_TIMER *)timer_id;
+  /* For osTimer_t the control block pointer is the timer identifier */
+  osTimer_t *timer_ptr = (osTimer_t *)timer_id;
   /* The returned status or error */
   osStatus_t status = osOK;
   /* The active state of the timer */
@@ -2051,7 +2083,7 @@ osStatus_t osTimerStart(osTimerId_t timer_id, uint32_t ticks)
     status = osErrorISR;
   }
   /* Check if the timer control block is valid */
-  else if ((timer_id == NULL) || (timer_ptr->tx_timer_id != TX_TIMER_ID))
+  else if ((timer_id == NULL) || (timer_ptr->txTimer.tx_timer_id != TX_TIMER_ID))
   {
     /* Return osErrorParameter error */
     status = osErrorParameter;
@@ -2059,7 +2091,7 @@ osStatus_t osTimerStart(osTimerId_t timer_id, uint32_t ticks)
   else
   {
     /* Get the timer running state and reschedule ticks parameters */
-    if (tx_timer_info_get(timer_ptr, NULL, &active, NULL, &reschedule_ticks, NULL) == TX_SUCCESS)
+    if (tx_timer_info_get(&timer_ptr->txTimer, NULL, &active, NULL, &reschedule_ticks, NULL) == TX_SUCCESS)
     {
       /* Check if the timer is active. If so, it shall be stopped before being
          activated again */
@@ -2068,7 +2100,7 @@ osStatus_t osTimerStart(osTimerId_t timer_id, uint32_t ticks)
         /* Call the tx_timer_deactivate to deactivates the specified application
            timer. If the timer is already deactivated, this service has no
            effect. */
-        if (tx_timer_deactivate(timer_ptr) == TX_SUCCESS)
+        if (tx_timer_deactivate(&timer_ptr->txTimer) == TX_SUCCESS)
         {
           /* Set status osOK for success */
           status = osOK;
@@ -2091,12 +2123,12 @@ osStatus_t osTimerStart(osTimerId_t timer_id, uint32_t ticks)
 
         /* An expired one-shot timer must be reset via tx_timer_change before
            it can be activated again. */
-        if (tx_timer_change(timer_ptr, ticks, reschedule_ticks) == TX_SUCCESS)
+        if (tx_timer_change(&timer_ptr->txTimer, ticks, reschedule_ticks) == TX_SUCCESS)
         {
           /* Call the tx_timer_activate to activates the specified application
              timer. The expiration routines of timers that expire at the same
              time are executed in the order they were activated. */
-          if (tx_timer_activate(timer_ptr) == TX_SUCCESS)
+          if (tx_timer_activate(&timer_ptr->txTimer) == TX_SUCCESS)
           {
             /* Return osOK for success */
             status = osOK;
@@ -2134,8 +2166,8 @@ osStatus_t osTimerStart(osTimerId_t timer_id, uint32_t ticks)
   */
 osStatus_t osTimerDelete(osTimerId_t timer_id)
 {
-  /* For TX_TIMER the control block pointer is the timer identifier */
-  TX_TIMER *timer_ptr = (TX_TIMER *)timer_id;
+  /* For osTimer_t the control block pointer is the timer identifier */
+  osTimer_t *timer_ptr = (osTimer_t *)timer_id;
   /* The returned status or error */
   osStatus_t status;
 
@@ -2146,7 +2178,7 @@ osStatus_t osTimerDelete(osTimerId_t timer_id)
     status = osErrorISR;
   }
   /* Check if the timer control block is valid */
-  else if ((timer_id == NULL) || (timer_ptr->tx_timer_id != TX_TIMER_ID))
+  else if ((timer_id == NULL) || (timer_ptr->txTimer.tx_timer_id != TX_TIMER_ID))
   {
     /* Return osErrorParameter error */
     status = osErrorParameter;
@@ -2154,11 +2186,13 @@ osStatus_t osTimerDelete(osTimerId_t timer_id)
   else
   {
     /* Call the tx_timer_delete to delete the specified application timer. */
-    if (tx_timer_delete(timer_ptr) == TX_SUCCESS)
+    if (tx_timer_delete(&timer_ptr->txTimer) == TX_SUCCESS)
     {
-      /* Free the already allocated memory for timer control block */
-      MemFree(timer_ptr);
-
+      if (timer_ptr->is_static == 0)
+      {
+        /* Free the already allocated memory for timer control block */
+        MemFree(timer_ptr);
+      }
       /* Return osOK for success */
       status = osOK;
     }
@@ -2253,7 +2287,7 @@ osEventFlagsId_t osEventFlagsNew(const osEventFlagsAttr_t *attr)
     /* Call the tx_event_flags_create function to create the new event flags */
     if (tx_event_flags_create(eventflags_ptr, name_ptr) != TX_SUCCESS)
     {
-      if ((attr->cb_mem == NULL) || (attr == NULL))
+      if ((attr == NULL) || (attr->cb_mem == NULL))
       {
         /* Free the already allocated memory for event flags control block */
         MemFree(eventflags_ptr);
@@ -2673,7 +2707,7 @@ osMutexId_t osMutexNew(const osMutexAttr_t *attr)
     /* Call the tx_mutex_create function to create the new mutex */
     if (tx_mutex_create(mutex_ptr, name_ptr, inherit) != TX_SUCCESS)
     {
-      if ((attr->cb_mem == NULL) || (attr == NULL))
+      if ((attr == NULL) || (attr->cb_mem == NULL))
       {
         /* Free the already allocated memory for mutex control block */
         MemFree(mutex_ptr);
@@ -2949,14 +2983,14 @@ osStatus_t osMutexDelete(osMutexId_t mutex_id)
   */
 osSemaphoreId_t osSemaphoreNew(uint32_t max_count, uint32_t initial_count, const osSemaphoreAttr_t *attr)
 {
-  /* For ThreadX the control block pointer is the semaphore identifier */
-  TX_SEMAPHORE *semaphore_ptr = NULL;
+  /* For ThreadX the control block is part of the wrapper struct returned as the semaphore identifier */
+  osSemaphore_t *semaphore_ptr = NULL;
   /* Pointer to the semaphore name */
   CHAR *name_ptr = NULL;
   /* The semaphore initial count */
   ULONG init_count = (ULONG) initial_count;
   /* The size of control block */
-  ULONG cb_size = sizeof(TX_SEMAPHORE);
+  ULONG cb_size = sizeof(osSemaphore_t);
 
   /* Check if this API is called from Interrupt Service Routines */
   if (!IS_IRQ_MODE())
@@ -2974,10 +3008,10 @@ osSemaphoreId_t osSemaphoreNew(uint32_t max_count, uint32_t initial_count, const
       /* Check if the control block size is equal to 0 */
       if (attr->cb_size == 0U)
       {
-        /* Set control block size to sizeof(TX_SEMAPHORE) */
-        cb_size = sizeof(TX_SEMAPHORE);
+        /* Set control block size to sizeof(osSemaphore_t) */
+        cb_size = sizeof(osSemaphore_t);
       }
-      else if (attr->cb_size < sizeof(TX_SEMAPHORE))
+      else if (attr->cb_size < sizeof(osSemaphore_t))
       {
         /* Return NULL pointer in case of error */
         return (NULL);
@@ -2992,7 +3026,7 @@ osSemaphoreId_t osSemaphoreNew(uint32_t max_count, uint32_t initial_count, const
       if (attr->cb_mem == NULL)
       {
         /* Allocate the semaphore_ptr structure for the semaphore to be created */
-        semaphore_ptr = (TX_SEMAPHORE *)MemAlloc(cb_size, RTOS2_BYTE_POOL_HEAP_TYPE);
+        semaphore_ptr = (osSemaphore_t *)MemAlloc(cb_size, RTOS2_BYTE_POOL_HEAP_TYPE);
         if (semaphore_ptr == NULL)
         {
           /* Return NULL pointer in case of error */
@@ -3008,14 +3042,15 @@ osSemaphoreId_t osSemaphoreNew(uint32_t max_count, uint32_t initial_count, const
     else
     {
       /* Allocate the semaphore_ptr structure for the semaphore to be created */
-      semaphore_ptr = (TX_SEMAPHORE *)MemAlloc(cb_size, RTOS2_BYTE_POOL_HEAP_TYPE);
+      semaphore_ptr = (osSemaphore_t *)MemAlloc(cb_size, RTOS2_BYTE_POOL_HEAP_TYPE);
     }
 
-
+    /* store max_count needed during osSemaphoreRelease */
+    semaphore_ptr->ceiling = max_count;
     /* Call the tx_semaphore_create function to create the new semaphore */
-    if (tx_semaphore_create(semaphore_ptr, name_ptr, init_count) != TX_SUCCESS)
+    if (tx_semaphore_create(&(semaphore_ptr->txSemaphore), name_ptr, init_count) != TX_SUCCESS)
     {
-      if ((attr->cb_mem == NULL) || (attr == NULL))
+      if ((attr == NULL) || (attr->cb_mem == NULL))
       {
         /* Free the already allocated memory for semaphore control block */
         MemFree(semaphore_ptr);
@@ -3038,13 +3073,13 @@ osSemaphoreId_t osSemaphoreNew(uint32_t max_count, uint32_t initial_count, const
 const char *osSemaphoreGetName(osSemaphoreId_t semaphore_id)
 {
   /* For ThreadX the control block pointer is the semaphore identifier */
-  TX_SEMAPHORE *semaphore_ptr = (TX_SEMAPHORE *)semaphore_id;
+  osSemaphore_t *semaphore_ptr = (osSemaphore_t *)semaphore_id;
   /* The output name_ptr as null-terminated string */
   CHAR *name_ptr;
 
   /* Check if this API is called from Interrupt Service Routines or the semaphore_id is NULL
      and the semaphore is invalid  */
-  if (IS_IRQ_MODE() || (semaphore_ptr == NULL) || (semaphore_ptr -> tx_semaphore_id != TX_SEMAPHORE_ID))
+  if (IS_IRQ_MODE() || (semaphore_ptr == NULL) || (semaphore_ptr -> txSemaphore.tx_semaphore_id != TX_SEMAPHORE_ID))
   {
     /* Return NULL in case of an error */
     name_ptr = NULL;
@@ -3052,7 +3087,7 @@ const char *osSemaphoreGetName(osSemaphoreId_t semaphore_id)
   else
   {
     /* Call the tx_semaphore_info_get to get the semaphore name_ptr */
-    if (tx_semaphore_info_get(semaphore_ptr, &name_ptr, NULL, NULL, NULL, NULL) != TX_SUCCESS)
+    if (tx_semaphore_info_get(&(semaphore_ptr->txSemaphore), &name_ptr, NULL, NULL, NULL, NULL) != TX_SUCCESS)
     {
       /* Return NULL in case of an error */
       name_ptr = NULL;
@@ -3076,7 +3111,7 @@ const char *osSemaphoreGetName(osSemaphoreId_t semaphore_id)
 osStatus_t osSemaphoreAcquire(osSemaphoreId_t semaphore_id, uint32_t timeout)
 {
   /* For ThreadX the control block pointer is the semaphore identifier */
-  TX_SEMAPHORE *semaphore_ptr = (TX_SEMAPHORE *)semaphore_id;
+  osSemaphore_t *semaphore_ptr = (osSemaphore_t *)semaphore_id;
   /* The returned status or error */
   osStatus_t status;
   /* The ThreadX wait option */
@@ -3086,7 +3121,7 @@ osStatus_t osSemaphoreAcquire(osSemaphoreId_t semaphore_id, uint32_t timeout)
 
   /* Check if the semaphore ID is NULL or the semaphore is invalid or non-zero timeout specified in an ISR  */
   if ((IS_IRQ_MODE() && (timeout != 0)) || (semaphore_id == NULL) ||
-      (semaphore_ptr -> tx_semaphore_id != TX_SEMAPHORE_ID))
+      (semaphore_ptr -> txSemaphore.tx_semaphore_id != TX_SEMAPHORE_ID))
   {
     /* Return osErrorParameter error */
     status = osErrorParameter;
@@ -3094,7 +3129,7 @@ osStatus_t osSemaphoreAcquire(osSemaphoreId_t semaphore_id, uint32_t timeout)
   else
   {
     /* Call the tx_semaphore_get to get the semaphore object */
-    tx_status = tx_semaphore_get(semaphore_ptr, wait_option);
+    tx_status = tx_semaphore_get(&(semaphore_ptr->txSemaphore), wait_option);
     if (tx_status == TX_SUCCESS)
     {
       /* Return osOK for success */
@@ -3130,20 +3165,20 @@ osStatus_t osSemaphoreAcquire(osSemaphoreId_t semaphore_id, uint32_t timeout)
 osStatus_t osSemaphoreRelease(osSemaphoreId_t semaphore_id)
 {
   /* For ThreadX the control block pointer is the semaphore identifier */
-  TX_SEMAPHORE *semaphore_ptr = (TX_SEMAPHORE *)semaphore_id;
+  osSemaphore_t *semaphore_ptr = (osSemaphore_t *)semaphore_id;
   /* The returned status or error */
   osStatus_t status;
 
   /* Check if the semaphore ID is NULL or the semaphore is invalid */
-  if ((semaphore_id == NULL) || (semaphore_ptr -> tx_semaphore_id != TX_SEMAPHORE_ID))
+  if ((semaphore_id == NULL) || (semaphore_ptr -> txSemaphore.tx_semaphore_id != TX_SEMAPHORE_ID))
   {
     /* Return osErrorParameter error */
     status = osErrorParameter;
   }
   else
   {
-    /* Call the tx_semaphore_put to put the semaphore object */
-    if (tx_semaphore_put(semaphore_ptr) == TX_SUCCESS)
+    /* Call the tx_semaphore_ceiling_put to put the semaphore object */
+    if (tx_semaphore_ceiling_put(&(semaphore_ptr->txSemaphore), semaphore_ptr->ceiling) == TX_SUCCESS)
     {
       /* Return osOK for success */
       status = osOK;
@@ -3172,7 +3207,7 @@ osStatus_t osSemaphoreRelease(osSemaphoreId_t semaphore_id)
 osStatus_t osSemaphoreDelete(osSemaphoreId_t semaphore_id)
 {
   /* For ThreadX the control block pointer is the semaphore identifier */
-  TX_SEMAPHORE *semaphore_ptr = (TX_SEMAPHORE *)semaphore_id;
+  osSemaphore_t *semaphore_ptr = (osSemaphore_t *)semaphore_id;
   /* The returned status or error */
   osStatus_t status;
 
@@ -3183,7 +3218,7 @@ osStatus_t osSemaphoreDelete(osSemaphoreId_t semaphore_id)
     status = osErrorISR;
   }
   /* Check if the semaphore ID is NULL or the semaphore is invalid */
-  else if ((semaphore_id == NULL) || (semaphore_ptr -> tx_semaphore_id != TX_SEMAPHORE_ID))
+  else if ((semaphore_id == NULL) || (semaphore_ptr -> txSemaphore.tx_semaphore_id != TX_SEMAPHORE_ID))
   {
     /* Return osErrorParameter error */
     status = osErrorParameter;
@@ -3191,7 +3226,7 @@ osStatus_t osSemaphoreDelete(osSemaphoreId_t semaphore_id)
   else
   {
     /* Call the tx_semaphore_delete to delete the semaphore object */
-    if (tx_semaphore_delete(semaphore_ptr) == TX_SUCCESS)
+    if (tx_semaphore_delete(&(semaphore_ptr->txSemaphore)) == TX_SUCCESS)
     {
       /* Free the already allocated memory for semaphore control block */
       if (MemFree(semaphore_ptr) == osOK)
@@ -3258,7 +3293,7 @@ osMessageQueueId_t osMessageQueueNew(uint32_t msg_count, uint32_t msg_size, cons
     name_ptr = NULL;
 
     /* The msg_size is rounded up to a double even number to ensure 32-bit alignment of the memory blocks. */
-    msg_size = msg_size + (msg_size % sizeof(ULONG));
+    msg_size = (msg_size + sizeof(ULONG) - 1) & ~(sizeof(ULONG) - 1);
 
     /* Check if the attr is not NULL */
     if (attr != NULL)
@@ -3398,14 +3433,14 @@ osMessageQueueId_t osMessageQueueNew(uint32_t msg_count, uint32_t msg_size, cons
     {
       /* Check if the memory for message queue control block has been internally
          allocated */
-      if ((attr->cb_mem == NULL) || (attr == NULL))
+      if ((attr == NULL) || (attr->cb_mem == NULL))
       {
         /* Free the already allocated memory for message queue control block */
         MemFree(queue_ptr);
       }
 
       /* Check if the memory for message queue data has been internally allocated */
-      if ((attr->mq_mem == NULL) || (attr == NULL))
+      if ((attr == NULL) || (attr->mq_mem == NULL))
       {
         /* Free the already allocated memory for message queue data */
         MemFree(queue_start);
@@ -3986,14 +4021,14 @@ osMemoryPoolId_t osMemoryPoolNew (uint32_t block_count, uint32_t block_size, con
     {
       /* Check if the memory for  memory pool control block has been internally
          allocated */
-      if ((attr->cb_mem == NULL) || (attr == NULL))
+      if ((attr == NULL) || (attr->cb_mem == NULL))
       {
         /* Free the already allocated memory for  memory pool control block */
         MemFree(block_pool_ptr);
       }
 
       /* Check if the memory for  memory pool data has been internally allocated */
-      if ((attr->mp_mem == NULL) || (attr == NULL))
+      if ((attr == NULL) || (attr->mp_mem == NULL))
       {
         /* Free the already allocated memory for memory pool data */
         MemFree(pool_start);

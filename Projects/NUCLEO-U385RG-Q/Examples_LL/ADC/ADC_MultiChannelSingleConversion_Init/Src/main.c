@@ -364,6 +364,7 @@ static void MX_ADC1_Init(void)
   LL_GPIO_InitTypeDef GPIO_InitStruct = {0};
 
   LL_RCC_SetADCDACClockSource(LL_RCC_ADCDAC_CLKSOURCE_HCLK);
+  LL_RCC_SetADCDACClockPrescaler(LL_RCC_ADCDAC_CLKPRESCALER_ICLK_DIV_2);
 
   /* Peripheral clock enable */
   LL_AHB2_GRP1_EnableClock(LL_AHB2_GRP1_PERIPH_ADC12);
@@ -543,6 +544,8 @@ static void MX_ICACHE_Init(void)
   /* USER CODE BEGIN ICACHE_Init 0 */
 
   /* USER CODE END ICACHE_Init 0 */
+
+  LL_RCC_SetADCDACClockPrescaler(LL_RCC_ADCDAC_CLKPRESCALER_ICLK_DIV_2);
 
   /* USER CODE BEGIN ICACHE_Init 1 */
 

@@ -50,12 +50,12 @@ Memory, FLASH, Swap, Bank, Dual bank, Program, Sector, LED
 ### <b> Directory contents </b>
 
         - FLASH/FLASH_SwapBanks/Inc/stm32u3xx_hal_conf.h        HAL Configuration file
-        - FLASH/FLASH_SwapBanks/Inc/stm32u3xx_nucleo_conf.h     STM32U5xx_Nuleo board configuration file
+        - FLASH/FLASH_SwapBanks/Inc/stm32u3xx_nucleo_conf.h     STM32U3xx_Nuleo board configuration file
         - FLASH/FLASH_SwapBanks/Inc/stm32u3xx_it.h              Header for stm32u3xx_it.c
         - FLASH/FLASH_SwapBanks/Inc/main.h                      Header for main.c module
         - FLASH/FLASH_SwapBanks/Src/stm32u3xx_it.c              Interrupt handlers
         - FLASH/FLASH_SwapBanks/Src/main.c                      Main program
-        - FLASH/FLASH_SwapBanks/Src/system_stm32u3xx.c          STM32U5xx system clock configuration file
+        - FLASH/FLASH_SwapBanks/Src/system_stm32u3xx.c          STM32U3xx system clock configuration file
 
 ### <b> Hardware and Software environment </b>
 

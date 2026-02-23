@@ -35,7 +35,7 @@ extern "C" {
   */
 
 #define HAL_MODULE_ENABLED
-/*#define HAL_ADC_MODULE_ENABLED */
+#define HAL_ADC_MODULE_ENABLED
 /*#define HAL_CCB_MODULE_ENABLED */
 /*#define HAL_COMP_MODULE_ENABLED */
 /*#define HAL_CRC_MODULE_ENABLED */

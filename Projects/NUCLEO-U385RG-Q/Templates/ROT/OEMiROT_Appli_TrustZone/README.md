@@ -52,7 +52,7 @@ TrustZone, OEMiROT, Boot path, Root Of Trust, MPU
   - OEMiROT_Appli_TrustZone/Secure/Inc/main.h                      Header file for main.c
   - OEMiROT_Appli_TrustZone/Secure/Inc/partition_stm32u385xx.h     STM32U3xx Device System Configuration file
   - OEMiROT_Appli_TrustZone/Secure/Inc/stm32u3xx_hal_conf.h        HAL configuration file
-  - OEMiROT_Appli_TrustZone/Secure/Inc/stm32u3xx_it.h              Header file for stm32h5xx_it.h
+  - OEMiROT_Appli_TrustZone/Secure/Inc/stm32u3xx_it.h              Header file for stm32u3xx_it.h
   - OEMiROT_Appli_TrustZone/Secure/Inc/stm32_board.h               Header file for stm32_board.h
   - OEMiROT_Appli_TrustZone/Secure/Inc/stm32hal.h                  HAL header file ( Secure )
   - OEMiROT_Appli_TrustZone/Secure/Src/main.c                      Secure Main program
@@ -102,14 +102,6 @@ For more details, refer to Wiki article available here : https://wiki.st.com/stm
   1. The most efficient way to develop and debug an application is to boot directly on user flash in the Open product state by setting with
      STM32CubeProgrammer the UBE to 0xB4 and the SECBOOTADD to (0x0C000400 + offset of the firmware execution slot)
 
-  2. Two versions of ROT_AppliConfig are available: windows executable and python version. By default, the windows executable is selected. It
-     is possible to switch to python version by:
-        - installing python (Python 3.10 or newer) with the required modules listed in requirements.txt.
-        ```
-        pip install -r requirements.txt
-        ```
-        - having python in execution path variable
-        - deleting main.exe in Utilities\PC_Software\ROT_AppliConfig\dist
-
-
-
+  2. **AppliCfg.py** (located in Utilities/PC_Software/ROT_AppliConfig) is used during provisioning
+     process. It is needed to have python and some python packages installed in your
+     environment. Refer to Utilities/PC_Software/ROT_AppliConfig/README.md for more details.

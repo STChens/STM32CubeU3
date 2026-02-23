@@ -105,6 +105,7 @@ int main(void)
   /* USER CODE BEGIN SysInit */
   /* Configure LED2 */
   BSP_LED_Init(LD2);
+
   /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */
@@ -126,16 +127,18 @@ int main(void)
   /* Disable debug to avoid some buses to stay awake */
   HAL_DBGMCU_DisableDBGStopMode();
 
-  /* Enter in low power mode(STOP1) and wait SPI interrupt to wakeup from stop mode */
+  /* Suspend Tick increment */
+  HAL_SuspendTick();
+
+  /* Enter in low power mode(STOP1) and wait SPI end of transfer interrupt to wakeup from stop mode */
   HAL_PWR_EnterSTOPMode(PWR_LOWPOWERMODE_STOP1, PWR_STOPENTRY_WFI);
 
+  /* Resume Tick increment */
+  HAL_ResumeTick();
 
   /*##-3- Wait for the end of the transfer ###################################*/
   /*  Before starting a new communication transfer, you must wait the callback call
-      to get the transfer complete confirmation or an error detection.
-      For simplicity reasons, this example is just waiting till the end of the
-      transfer, but application may perform other tasks while transfer operation
-      is ongoing. */
+      to get the transfer complete confirmation or an error detection. */
   while (wTransferState == TRANSFER_WAIT)
   {
   }
@@ -176,6 +179,13 @@ void SystemClock_Config(void)
   RCC_OscInitTypeDef RCC_OscInitStruct = {0};
   RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
 
+  /** Configure the System Power Supply
+  */
+  if (HAL_PWREx_ConfigSupply(PWR_SMPS_SUPPLY) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
   /** Configure the main internal regulator output voltage
   */
   if (HAL_PWREx_ControlVoltageScaling(PWR_REGULATOR_VOLTAGE_SCALE2) != HAL_OK)
@@ -185,10 +195,14 @@ void SystemClock_Config(void)
 
   /** Initializes the CPU, AHB and APB buses clocks
   */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_MSIS;
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_MSIS|RCC_OSCILLATORTYPE_MSIK;
   RCC_OscInitStruct.MSISState = RCC_MSI_ON;
   RCC_OscInitStruct.MSISSource = RCC_MSI_RC1;
   RCC_OscInitStruct.MSISDiv = RCC_MSI_DIV1;
+  RCC_OscInitStruct.MSIKState = RCC_MSI_ON;
+  RCC_OscInitStruct.MSIKSource = RCC_MSI_RC1;
+  RCC_OscInitStruct.MSIKDiv = RCC_MSI_DIV1;
+
   if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
   {
     Error_Handler();
@@ -336,14 +350,14 @@ static void MX_SPI1_Init(void)
   */
 static void MX_GPIO_Init(void)
 {
-/* USER CODE BEGIN MX_GPIO_Init_1 */
-/* USER CODE END MX_GPIO_Init_1 */
+  /* USER CODE BEGIN MX_GPIO_Init_1 */
+  /* USER CODE END MX_GPIO_Init_1 */
 
   /* GPIO Ports Clock Enable */
   __HAL_RCC_GPIOA_CLK_ENABLE();
 
-/* USER CODE BEGIN MX_GPIO_Init_2 */
-/* USER CODE END MX_GPIO_Init_2 */
+  /* USER CODE BEGIN MX_GPIO_Init_2 */
+  /* USER CODE END MX_GPIO_Init_2 */
 }
 
 /* USER CODE BEGIN 4 */
@@ -415,8 +429,7 @@ void Error_Handler(void)
   }
   /* USER CODE END Error_Handler_Debug */
 }
-
-#ifdef  USE_FULL_ASSERT
+#ifdef USE_FULL_ASSERT
 /**
   * @brief  Reports the name of the source file and the source line number
   *         where the assert_param error has occurred.

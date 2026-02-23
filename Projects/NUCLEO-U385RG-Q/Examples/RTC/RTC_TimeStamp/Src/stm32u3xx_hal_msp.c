@@ -152,6 +152,10 @@ void HAL_RTC_MspInit(RTC_HandleTypeDef* hrtc)
     /* Enable RTC APB clock  */
     __HAL_RCC_RTCAPB_CLK_ENABLE();
   /* USER CODE END RTC_MspInit 0 */
+    
+  /** Enable access to the backup domain
+  */
+    HAL_PWR_EnableBkUpAccess();
 
   /** Initializes the peripherals clock
   */

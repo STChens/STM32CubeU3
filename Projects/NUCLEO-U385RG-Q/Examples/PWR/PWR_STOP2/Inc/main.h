@@ -64,8 +64,6 @@ void Error_Handler(void);
 #define LED2_GPIO_Port GPIOA
 
 /* USER CODE BEGIN Private defines */
-#define RTC_ASYNCH_PREDIV    0x7F
-#define RTC_SYNCH_PREDIV     0xF9  /* 32Khz/128 - 1 */
 
 /* USER CODE END Private defines */
 

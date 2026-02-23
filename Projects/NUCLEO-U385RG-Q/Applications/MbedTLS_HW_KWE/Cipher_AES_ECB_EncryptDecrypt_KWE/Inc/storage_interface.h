@@ -45,4 +45,3 @@ psa_status_t storage_get_info(uint64_t obj_uid,
 psa_status_t storage_remove(uint64_t obj_uid, uint32_t obj_size);
 
 #endif  /* STORAGE_INTERFACE_H */
-

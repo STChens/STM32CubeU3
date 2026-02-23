@@ -122,6 +122,5 @@ crt0_memory_set:
 memory_set_done:
     bx      lr
 
-    /* Setup attibutes of heap section so it doesn't take up room in the elf file */
+    /* Setup attributes of heap section so it doesn't take up room in the elf file */
     .section .heap, "wa", %nobits
-  

@@ -2,7 +2,7 @@
   ******************************************************************************
   * @file    appli_flash_layout.h
   * @author  MCD Application Team
-  * @brief   This file contains definitions of memory regions for stm32wbaxx.
+  * @brief   This file contains definitions of memory regions.
   ******************************************************************************
   * @attention
   *
@@ -20,17 +20,6 @@
 #define __APPLI_FLASH_LAYOUT_H__
 
 /********** Application Flash layout configuration : begin **********/
-
-#define S_HEAP_SIZE                    0x0000200  /* EWARM / MDK-ARM / STM32CubeIDE */
-#define S_C_STACK_SIZE                 0x0000400  /* EWARM / STM32CubeIDE */
-
-#define S_MSP_STACK_SIZE               0x0000200  /* MDK-ARM */
-#define S_PSP_STACK_SIZE               0x0000700  /* MDK-ARM */
-
-#define NS_HEAP_SIZE                   0x0001000  /* EWARM / MDK-ARM / STM32CubeIDE */
-#define NS_C_STACK_SIZE                0x0000400  /* EWARM / STM32CubeIDE */
-#define NS_MSP_STACK_SIZE              0x0000C00  /* MDK-ARM */
-#define NS_PSP_STACK_SIZE              0x0000C00  /* MDK-ARM */
 
 #define NSC_CODE_SIZE                  0x400
 

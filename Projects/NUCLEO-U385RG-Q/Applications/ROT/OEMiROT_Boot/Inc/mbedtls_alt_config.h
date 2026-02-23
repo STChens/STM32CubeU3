@@ -27,7 +27,7 @@ extern "C" {
 #endif
 
 /* Includes ------------------------------------------------------------------*/
-/* This file needs hal header. Example : stm32u3xx_hal.h, stm32u5xx_hal.h     */
+/* This file needs hal header. Example : stm32u3xx_hal.h,                     */
 #include "stm32u3xx_hal.h"
 
 /* Exported types ------------------------------------------------------------*/

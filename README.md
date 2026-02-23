@@ -1,6 +1,6 @@
 # STM32CubeU3 MCU Firmware Package
 
-![latest tag](https://img.shields.io/github/v/tag/STMicroelectronics/STM32CubeU3.svg?color=brightgreen)
+![tag](https://img.shields.io/badge/tag-v1.3.0-brightgreen.svg)
 
 > [!IMPORTANT]
 > This repository has been created using the `git submodule` command. Please refer to the ["How to use"](README.md#how-to-use) section for more details.
@@ -30,7 +30,7 @@ The **STM32CubeU3 MCU Package** projects are directly running on the STM32U3 ser
 
 ## Release note
 
-Details about the content of this release are available in the release note [here](https://htmlpreview.github.io/?https://github.com/STMicroelectronics/STM32CubeU3/blob/master/Release_Notes.html).
+Details about the content of this release are available in the release note [here](https://htmlpreview.github.io/?https://github.com/STMicroelectronics/STM32CubeU3/blob/main/Release_Notes.html).
 
 ## How to use
 

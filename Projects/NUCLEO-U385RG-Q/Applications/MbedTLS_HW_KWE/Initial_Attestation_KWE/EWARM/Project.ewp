@@ -803,7 +803,7 @@
         </option>
         <option>
           <name>IlinkExtraOptions</name>
-          <state>--image_input $PROJ_DIR$\..\Wrapped_Keys\DUA_USLU_DHUK_Sign_RDP0_NS_Priv.bin,__wrapped_keys_start__,wrapped_keys,4</state>
+          <state>--image_input $PROJ_DIR$\..\Wrapped_Keys\DUA_USFU_DHUK_Sign_NS_Priv.bin,__wrapped_keys_start__,wrapped_keys,4</state>
           <state>--keep __wrapped_keys_start__</state>
         </option>
         <option>

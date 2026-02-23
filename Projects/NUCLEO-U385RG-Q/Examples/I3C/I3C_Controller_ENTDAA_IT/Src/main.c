@@ -3,7 +3,7 @@
   ******************************************************************************
   * @file    I3C/I3C_Controller_ENTDAA_IT/Src/main.c
   * @author  MCD Application Team
-  * @brief   This sample code shows how to use STM32H5xx I3C HAL API to
+  * @brief   This sample code shows how to use STM32U3xx I3C HAL API to
   *          manage a Dynamic Address Assignment procedure between a Controller
   *          and one or two Targets with a communication process based
   *          on Interrupt transfer.
@@ -170,6 +170,13 @@ void SystemClock_Config(void)
 {
   RCC_OscInitTypeDef RCC_OscInitStruct = {0};
   RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
+
+  /** Configure the System Power Supply
+  */
+  if (HAL_PWREx_ConfigSupply(PWR_SMPS_SUPPLY) != HAL_OK)
+  {
+    Error_Handler();
+  }
 
   /** Enable Epod Booster
   */

@@ -1,7 +1,7 @@
 /* USER CODE BEGIN Header */
 /**
   ******************************************************************************
-  * @file    stm32h5xx_hal_msp.c
+  * @file    stm32u3xx_hal_msp.c
   * @author  MCD Application Team
   * @brief   This file provides code for the MSP Initialization
   *          and de-Initialization codes.

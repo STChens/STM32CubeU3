@@ -7,8 +7,7 @@
 **
 ** @brief       : Linker script for STM32U385RGTxQ Device from STM32U3 series
 **                      1024KBytes FLASH
-**                      192KBytes RAM
-**                      64KBytes RAM2
+**                      256KBytes RAM
 **
 **                Set heap size, stack size and stack location according
 **                to application requirements.
@@ -39,9 +38,6 @@
 ROM_S_START       = S_CODE_START;
 ROM_S_SIZE        = S_CODE_SIZE;
 
-ROM_NSC_START     = NSC_CODE_START;
-ROM_NSC_SIZE      = NSC_CODE_SIZE;
-
 RAM_S_START       = S_RAM_START;
 RAM_S_SIZE        = S_RAM_SIZE;
 
@@ -52,15 +48,14 @@ ENTRY(Reset_Handler)
 /* Highest address of the user mode stack */
 _estack = ORIGIN(RAM) + LENGTH(RAM); /* end of "RAM" Ram type memory */
 
-_Min_Heap_Size  = S_HEAP_SIZE;    /* required amount of heap */
-_Min_Stack_Size = S_C_STACK_SIZE; /* required amount of stack */
+_Min_Heap_Size  = 0x200; /* required amount of heap */
+_Min_Stack_Size = 0x400; /* required amount of stack */
 
 /* Memories definition */
 MEMORY
 {
   RAM    (xrw)   : ORIGIN = RAM_S_START,   LENGTH = RAM_S_SIZE
   FLASH  (rx)    : ORIGIN = ROM_S_START,   LENGTH = ROM_S_SIZE
-  FLASH_NSC (rx) : ORIGIN = ROM_NSC_START, LENGTH = ROM_NSC_SIZE
 }
 
 /* Sections */
@@ -162,13 +157,6 @@ SECTIONS
     _edata = .;        /* define a global symbol at data end */
 
   } >RAM AT> FLASH
-
-  .gnu.sgstubs :
-  {
-    . = ALIGN(4);
-    *(.gnu.sgstubs*)   /* Secure Gateway stubs */
-    . = ALIGN(4);
-  } >FLASH_NSC
 
   /* Uninitialized data section into "RAM" Ram type memory */
   . = ALIGN(4);

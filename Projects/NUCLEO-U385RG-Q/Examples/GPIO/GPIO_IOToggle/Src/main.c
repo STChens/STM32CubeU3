@@ -4,7 +4,7 @@
   * @file    GPIO/GPIO_IOToggle/Src/main.c
   * @author  MCD Application Team
   * @brief   This example describes how to configure and use GPIOs through
-  *          the STM32WBAxx HAL API.
+  *          the STM32U3xx HAL API.
   ******************************************************************************
   * @attention
   *
@@ -68,7 +68,7 @@ int main(void)
 {
 
   /* USER CODE BEGIN 1 */
-  /* STM32WBAxx HAL library initialization:
+  /* STM32U3xx HAL library initialization:
        - Systick timer is configured by default as source of time base, but user
              can eventually implement his proper time base source (a general purpose
              timer for example or other time source), keeping in mind that Time base
@@ -135,6 +135,13 @@ void SystemClock_Config(void)
 {
   RCC_OscInitTypeDef RCC_OscInitStruct = {0};
   RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
+
+  /** Configure the System Power Supply
+  */
+  if (HAL_PWREx_ConfigSupply(PWR_SMPS_SUPPLY) != HAL_OK)
+  {
+    Error_Handler();
+  }
 
 
   /** Enable Epod Booster

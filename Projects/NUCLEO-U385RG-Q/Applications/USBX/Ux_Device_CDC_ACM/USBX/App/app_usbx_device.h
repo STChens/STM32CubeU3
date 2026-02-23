@@ -42,7 +42,7 @@ extern UART_HandleTypeDef huart1;
 /* USER CODE END ET */
 
 /* Exported constants --------------------------------------------------------*/
-#define USBX_DEVICE_MEMORY_STACK_SIZE     4*1024
+#define USBX_DEVICE_MEMORY_STACK_SIZE       4*1024
 
 #define UX_DEVICE_APP_THREAD_STACK_SIZE   1024
 #define UX_DEVICE_APP_THREAD_PRIO         10
@@ -86,7 +86,11 @@ VOID USBX_APP_UART_Init(UART_HandleTypeDef **huart);
 #endif
 
 /* USER CODE BEGIN 1 */
-
+typedef enum {
+  Device_VBUS_SENSING=0,
+  Device_Connection,
+  Device_Disconnection,
+}Device_State;
 /* USER CODE END 1 */
 
 #ifdef __cplusplus

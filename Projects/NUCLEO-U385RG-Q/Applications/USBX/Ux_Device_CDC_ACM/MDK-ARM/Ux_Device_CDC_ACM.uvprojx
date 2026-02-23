@@ -574,6 +574,16 @@
               <FileType>1</FileType>
               <FilePath>../../../../../../Drivers/STM32U3xx_HAL_Driver/Src/stm32u3xx_ll_usb.c</FilePath>
             </File>
+            <File>
+              <FileName>stm32u3xx_hal_adc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\..\..\Drivers\STM32U3xx_HAL_Driver\Src\stm32u3xx_hal_adc.c</FilePath>
+            </File>
+            <File>
+              <FileName>stm32u3xx_hal_adc_ex.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\..\..\Drivers\STM32U3xx_HAL_Driver\Src\stm32u3xx_hal_adc_ex.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

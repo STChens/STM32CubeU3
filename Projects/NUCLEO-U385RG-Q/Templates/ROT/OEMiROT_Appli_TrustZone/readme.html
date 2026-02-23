@@ -64,7 +64,7 @@ to have correct HAL operation.</p>
 <li>OEMiROT_Appli_TrustZone/Secure/Inc/main.h                     Header file for main.c</li>
 <li>OEMiROT_Appli_TrustZone/Secure/Inc/partition_stm32u385xx.h    STM32U3xx Device System Configuration file</li>
 <li>OEMiROT_Appli_TrustZone/Secure/Inc/stm32u3xx_hal_conf.h       HAL configuration file</li>
-<li>OEMiROT_Appli_TrustZone/Secure/Inc/stm32u3xx_it.h             Header file for stm32h5xx_it.h</li>
+<li>OEMiROT_Appli_TrustZone/Secure/Inc/stm32u3xx_it.h             Header file for stm32u3xx_it.h</li>
 <li>OEMiROT_Appli_TrustZone/Secure/Inc/stm32_board.h              Header file for stm32_board.h</li>
 <li>OEMiROT_Appli_TrustZone/Secure/Inc/stm32hal.h                 HAL header file ( Secure )</li>
 <li>OEMiROT_Appli_TrustZone/Secure/Src/main.c                     Secure Main program</li>
@@ -104,21 +104,13 @@ Then start provisioning process by running ROT_Provisioning/OEMiROT/provisioning
 <p>If the product state set to PROVISIONED, TZ-CLOSED or CLOSED, it is still possible to open the debug or to execute a full/partial regression
 with the Debug Authentication feature. To do it, scripts (regression.bat &amp; dbg_auth.bat) are available in the ROT_provisioning/DA folder.</p>
 <p>For more details, refer to Wiki article available here : <a href="https://wiki.st.com/stm32mcu/wiki/Category:Security">Link to Security Wiki</a></p>
-<h4 id="notes"><b>Notes:</b></h4>
-<ol>
-</li>
-<li><p>Two versions of ROT_AppliConfig are available: windows executable and python version. By default, the windows executable is selected. It
-is possible to switch to python version by:  </p>
-<ul>
-<li>installing python (Python 3.10 or newer) with the required modules listed in requirements.txt.  <pre><code>pip install -r requirements.txt
-</code></pre>
-</li>
-<li>having python in execution path variable  </li>
-<li>deleting main.exe in Utilities\PC_Software\ROT_AppliConfig\dist</li>
-</ul>
-</li>
+<h4 id="note"><b>Notes</b></h4>
+<ol type="1">
+<li><p><strong>AppliCfg.py</strong> (located in Utilities/PC_Software/ROT_AppliConfig) is used during provisioning
+process. It is needed to have python and some python packages installed in your
+environment. Refer to Utilities/PC_Software/ROT_AppliConfig/README.md for more details.</p></li>
 </ol>
-</div>
+</section>
 </div>
 </body>
 </html>

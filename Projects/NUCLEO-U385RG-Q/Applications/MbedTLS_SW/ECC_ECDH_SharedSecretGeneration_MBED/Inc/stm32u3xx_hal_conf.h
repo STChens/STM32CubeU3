@@ -42,7 +42,7 @@ extern "C" {
 /* #define HAL_CRC_MODULE_ENABLED */
 /* #define HAL_CRYP_MODULE_ENABLED */
 /* #define HAL_DAC_MODULE_ENABLED */
-/* #define HAL_DMA_MODULE_ENABLED */
+#define HAL_DMA_MODULE_ENABLED
 #define HAL_EXTI_MODULE_ENABLED
 /* #define HAL_FDCAN_MODULE_ENABLED */
 #define HAL_FLASH_MODULE_ENABLED
@@ -50,6 +50,7 @@ extern "C" {
 /* #define HAL_GTZC_MODULE_ENABLED */
 /* #define HAL_HASH_MODULE_ENABLED */
 /* #define HAL_HCD_MODULE_ENABLED */
+/* #define HAL_HSP_MODULE_ENABLED */
 /* #define HAL_I2C_MODULE_ENABLED */
 /* #define HAL_I3C_MODULE_ENABLED */
 #define HAL_ICACHE_MODULE_ENABLED
@@ -215,6 +216,7 @@ extern "C" {
 #define USE_HAL_GTZC_REGISTER_CALLBACKS          1U
 #define USE_HAL_HASH_REGISTER_CALLBACKS          1U
 #define USE_HAL_HCD_REGISTER_CALLBACKS           1U
+#define USE_HAL_HSP_REGISTER_CALLBACKS           1U
 #define USE_HAL_I2C_REGISTER_CALLBACKS           1U
 #define USE_HAL_I3C_REGISTER_CALLBACKS           1U
 #define USE_HAL_ICACHE_REGISTER_CALLBACKS        1U
@@ -260,6 +262,7 @@ extern "C" {
 #define USE_HAL_GTZC_REGISTER_CALLBACKS          0U
 #define USE_HAL_HASH_REGISTER_CALLBACKS          0U
 #define USE_HAL_HCD_REGISTER_CALLBACKS           0U
+#define USE_HAL_HSP_REGISTER_CALLBACKS           0U
 #define USE_HAL_I2C_REGISTER_CALLBACKS           0U
 #define USE_HAL_I3C_REGISTER_CALLBACKS           0U
 #define USE_HAL_ICACHE_REGISTER_CALLBACKS        0U
@@ -373,6 +376,10 @@ extern "C" {
 #ifdef HAL_HCD_MODULE_ENABLED
 #include "stm32u3xx_hal_hcd.h"
 #endif /* HAL_HCD_MODULE_ENABLED */
+
+#ifdef HAL_HSP_MODULE_ENABLED
+#include "stm32u3xx_hal_hsp.h"
+#endif /* HAL_HSP_MODULE_ENABLED */
 
 #ifdef HAL_I2C_MODULE_ENABLED
 #include "stm32u3xx_hal_i2c.h"

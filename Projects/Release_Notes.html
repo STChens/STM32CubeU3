@@ -4,54 +4,32 @@
   <meta charset="utf-8" />
   <meta name="generator" content="pandoc" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>Release Notes for Projects of STM32CubeU3 Firmware
-Package</title>
-  <style>
-    code{white-space: pre-wrap;}
-    span.smallcaps{font-variant: small-caps;}
-    div.columns{display: flex; gap: min(4vw, 1.5em);}
-    div.column{flex: auto; overflow-x: auto;}
-    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
-    /* The extra [class] is a hack that increases specificity enough to
-       override a similar rule in reveal.js */
-    ul.task-list[class]{list-style: none;}
-    ul.task-list li input[type="checkbox"] {
-      font-size: inherit;
-      width: 0.8em;
-      margin: 0 0.8em 0.2em -1.6em;
-      vertical-align: middle;
-    }
-    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  <title>Release Notes for Projects of STM32CubeU3 Firmware Package</title>
+  <style type="text/css">
+      code{white-space: pre-wrap;}
+      span.smallcaps{font-variant: small-caps;}
+      span.underline{text-decoration: underline;}
+      div.column{display: inline-block; vertical-align: top; width: 50%;}
   </style>
   <link rel="stylesheet" href="../_htmresc/mini-st_2020.css" />
-  <link rel="icon" type="image/x-icon" href="../_htmresc/favicon.png" />
   <!--[if lt IE 9]>
     <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
   <![endif]-->
+  <link rel="icon" type="image/x-icon" href="../_htmresc/favicon.png" />
 </head>
 <body>
 <div class="row">
 <div class="col-sm-12 col-lg-4">
 <center>
 <h1 id="release-notes-for">Release Notes for</h1>
-<h1 id="projects-of-stm32cubeu3-firmware-package"><mark>Projects of
-STM32CubeU3 Firmware Package</mark></h1>
-<p>Copyright © 2024 STMicroelectronics<br />
+<h1 id="projects-of-stm32cubeu3-firmware-package"><mark>Projects of STM32CubeU3 Firmware Package</mark></h1>
+<p>Copyright © 2024 - 2026 STMicroelectronics<br />
 </p>
-<a href="https://www.st.com" class="logo"><img
-src="../_htmresc/st_logo_2020.png" alt="ST logo" /></a>
+<a href="https://www.st.com" class="logo"><img src="../_htmresc/st_logo_2020.png" alt="ST logo" /></a>
 </center>
 <h1 id="purpose">Purpose</h1>
-<p>The projects are a set of applicative tasks that aim to explain and
-provide use cases of the different products features based on the
-products hardware (Boards, STM32 Core(s) features, interconnections and
-peripherals) and built around the different firmware components. They
-can be directly used or adapted by the STM32CubeU3 Firmware Package
-users. They provide basic functionalities, show main features or
-demonstrate performance. They are provided with preconfigured projects
-for the main supported toolchains.</p>
-<p>In the STM32CubeU3 Firmware Package, the projects are organized in a
-sequential scheme based on the following levels:</p>
+<p>The projects are a set of applicative tasks that aim to explain and provide use cases of the different products features based on the products hardware (Boards, STM32 Core(s) features, interconnections and peripherals) and built around the different firmware components. They can be directly used or adapted by the STM32CubeU3 Firmware Package users. They provide basic functionalities, show main features or demonstrate performance. They are provided with preconfigured projects for the main supported toolchains.</p>
+<p>In the STM32CubeU3 Firmware Package, the projects are organized in a sequential scheme based on the following levels:</p>
 <ul>
 <li>Boards: Hardware platform (nucleo boards)</li>
 <li>Project Category:
@@ -66,17 +44,224 @@ sequential scheme based on the following levels:</p>
 <li>Templates_Boards</li>
 </ul></li>
 </ul>
-<p>The exhaustive list of projects is provided in this table: <a
-href="STM32CubeProjectsList.html">STM32CubeProjectsList</a>.</p>
+<p>The exhaustive list of projects is provided in this table: <a href="STM32CubeProjectsList.html">STM32CubeProjectsList</a>.</p>
 </div>
-<section id="update-history" class="col-sm-12 col-lg-8">
-<h1>Update History</h1>
+<div class="col-sm-12 col-lg-8">
+<h1 id="update-history">Update History</h1>
 <div class="collapse">
-<input type="checkbox" id="collapse-section3" checked aria-hidden="true">
-<label for="collapse-section3" aria-hidden="true"><strong>V1.2.0 /
-04-June-2025</strong></label>
+<input type="checkbox" id="collapse-section4" checked aria-hidden="true"> <label for="collapse-section4" aria-hidden="true"><strong>V1.3.0 / 04-February-2026</strong></label>
 <div>
 <h2 id="contents">Contents</h2>
+<p>Official release of STM32CubeU3 Projects :</p>
+<ul>
+<li><strong>Applications</strong> updates
+<ul>
+<li>Applications for OEMiROT_Appli, OEMiROT_Appli_TrustZone, and OEMiROT_Boot ported to STM32U3 2M</li>
+<li>Applications for ThreadX, FileX, USBX applications ported to STM32U3 2M</li>
+<li>New Applications for HSP - biquad_acc, cfft_acc, fir_acc, fir_rfft_seq, fir_seq and rfft_acc</li>
+</ul></li>
+<li>Improve power conumption
+<ul>
+<li>Enabled SMPS for all Applications for the improvement in low power consumption</li>
+<li>Enabled ICACHE-1WAY for HSP, Filex, ThreadX and USBX applications for the improvement in low power consumption</li>
+</ul></li>
+<li><strong>ROT_Provisionning</strong> updates
+<ul>
+<li>Update OEMiROT and OEMiRoT_OEMuRoT for STM32U3 2M</li>
+</ul></li>
+<li><strong>Examples</strong> update
+<ul>
+<li>IP HAL Examples for STM32U3 2M</li>
+<li>Enabled SMPS for the improvement in low power consumption of all the examples</li>
+<li>Enabled ICACHE-1WAY for the improvement in low power consumption of all the examples</li>
+<li>STM32U3 2M: XSPI Example demonstrating usage of
+<ul>
+<li>XSPI_MemoryToolbox_M2_MX25UW25645G</li>
+<li>XSPI_MemoryToolbox_M2_MX25LM51245G</li>
+<li>XSPI_MemoryToolbox_M2_M95P32</li>
+<li>XSPI_MemoryToolbox_M2_W25Q16JV</li>
+<li>XSPI_MemoryToolbox_M2_IS25LP032D</li>
+</ul></li>
+</ul></li>
+<li><strong>Templates</strong> updates
+<ul>
+<li>OEMiROT_Appli for STM32U3 2M</li>
+<li>OEMiROT_Appli_TrustZone and TrustZoneEnabled_NoIsolation for STM32U3 2M</li>
+<li>Enabled SMPS for the improvement in low power consumption of all the templates</li>
+<li>Enabled ICACHE-1WAY for the improvement in low power consumption of all the templates</li>
+</ul></li>
+<li><strong>Templates_Board</strong> updates
+<ul>
+<li>Templates_Board for STM32U3 2M</li>
+<li>Enabled SMPS for the improvement in low power consumption</li>
+<li>Enabled ICACHE-1WAY for the improvement in low power consumption</li>
+</ul></li>
+<li><strong>Templates_LL</strong> updates
+<ul>
+<li>Templates_LL for STM32U3 2M</li>
+<li>Enabled ICACHE-1WAY for the improvement in low power consumption</li>
+</ul></li>
+</ul>
+<h2 id="projects">Projects</h2>
+<p><small>The Project categories flagged by “<span class="icon-st-update"></span>” have changed since the previous release. “<span class="icon-st-add"></span>” are new.</small></p>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Board</th>
+<th style="text-align: left;">Project category</th>
+<th style="text-align: left;">Path</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">NUCLEO-U385RG-Q</td>
+<td style="text-align: left;">Applications <span class="icon-st-update"></span></td>
+<td style="text-align: left;">Projects\NUCLEO-U385RG-Q\Applications</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">NUCLEO-U385RG-Q</td>
+<td style="text-align: left;">HAL Examples <span class="icon-st-update"></span></td>
+<td style="text-align: left;">Projects\NUCLEO-U385RG-Q\Examples</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">NUCLEO-U385RG-Q</td>
+<td style="text-align: left;">LL Examples <span class="icon-st-update"></span></td>
+<td style="text-align: left;">Projects\NUCLEO-U385RG-Q\Examples_LL</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">NUCLEO-U385RG-Q</td>
+<td style="text-align: left;">MIX Examples <span class="icon-st-update"></span></td>
+<td style="text-align: left;">Projects\NUCLEO-U385RG-Q\Examples_MIX</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">NUCLEO-U385RG-Q</td>
+<td style="text-align: left;">HAL Template <span class="icon-st-update"></span></td>
+<td style="text-align: left;">Projects\NUCLEO-U385RG-Q\Templates</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">NUCLEO-U385RG-Q</td>
+<td style="text-align: left;">LL Template <span class="icon-st-update"></span></td>
+<td style="text-align: left;">Projects\NUCLEO-U385RG-Q\Templates_LL</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">NUCLEO-U385RG-Q</td>
+<td style="text-align: left;">Start from board Template <span class="icon-st-update"></span></td>
+<td style="text-align: left;">Projects\NUCLEO-U385RG-Q\Templates_Board</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">NUCLEO-U385RG-Q</td>
+<td style="text-align: left;">ROT Provisionning <span class="icon-st-update"></span></td>
+<td style="text-align: left;">Projects\NUCLEO-U385RG-Q\ROT_Provisioning</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">NUCLEO-U3C5ZI-Q</td>
+<td style="text-align: left;">Applications <span class="icon-st-add"></span></td>
+<td style="text-align: left;">Projects\NUCLEO-U3C5ZI-Q\Applications</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">NUCLEO-U3C5ZI-Q</td>
+<td style="text-align: left;">HAL Examples <span class="icon-st-add"></span></td>
+<td style="text-align: left;">Projects\NUCLEO-U3C5ZI-Q\Examples</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">NUCLEO-U3C5ZI-Q</td>
+<td style="text-align: left;">LL Examples <span class="icon-st-add"></span></td>
+<td style="text-align: left;">Projects\NUCLEO-U3C5ZI-Q\Examples_LL</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">NUCLEO-U3C5ZI-Q</td>
+<td style="text-align: left;">HAL Template <span class="icon-st-add"></span></td>
+<td style="text-align: left;">Projects\NUCLEO-U3C5ZI-Q\Templates</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">NUCLEO-U3C5ZI-Q</td>
+<td style="text-align: left;">LL Template <span class="icon-st-add"></span></td>
+<td style="text-align: left;">Projects\NUCLEO-U3C5ZI-Q\Templates_LL</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">NUCLEO-U3C5ZI-Q</td>
+<td style="text-align: left;">Start from board Template <span class="icon-st-add"></span></td>
+<td style="text-align: left;">Projects\NUCLEO-U3C5ZI-Q\Templates_Board</td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">NUCLEO-U3C5ZI-Q</td>
+<td style="text-align: left;">ROT Provisionning <span class="icon-st-add"></span></td>
+<td style="text-align: left;">Projects\NUCLEO-U3C5ZI-Q\ROT_Provisioning</td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">NUCLEO_CUSTOM_HW</td>
+<td style="text-align: left;">HAL Examples <span class="icon-st-update"></span></td>
+<td style="text-align: left;">Projects\NUCLEO_CUSTOM_HW\Examples</td>
+</tr>
+</tbody>
+</table>
+<h2 id="development-toolchains-and-compilers">Development Toolchains and Compilers</h2>
+<table>
+<thead>
+<tr class="header">
+<th style="text-align: left;">Toolchain + ST-Link</th>
+<th>Version</th>
+<th style="text-align: left;">Patch (if available)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: left;">IAR Embedded Workbench for ARM (EWARM)</td>
+<td>V9.20.1</td>
+<td style="text-align: left;"><a href="../Utilities/PC_Software/EWARMv9_STM32U37x-38x_V1.0.0.zip">STM32U3 1M Patch EWARM</a></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;"></td>
+<td>V9.20.1</td>
+<td style="text-align: left;"><a href="../Utilities/PC_Software/EWARMv9_STM32U3Bx-3Cx_V1.0.0.zip">STM32U3 2M Patch EWARM</a></td>
+</tr>
+<tr class="odd">
+<td style="text-align: left;">RealView Microcontroller Development Kit (MDK-ARM)</td>
+<td>V5.39 (U375xx/U385xx/U3B5xx/U3C5xx)</td>
+<td style="text-align: left;"><a href="../Utilities/PC_Software/Keil.STM32U3xx_DFP.1.2.0.zip">Patch MDK-ARM</a></td>
+</tr>
+<tr class="even">
+<td style="text-align: left;">STM32CubeIDE</td>
+<td>V2.1.0</td>
+<td style="text-align: left;"></td>
+</tr>
+</tbody>
+</table>
+<h2 id="supported-devices-and-boards">Supported Devices and boards</h2>
+<ul>
+<li>STM32U375xx/STM32U385xx/STM32U3B5xx/STM32U3C5xx devices</li>
+<li>NUCLEO-U385RG-Q (Rev.E) board</li>
+<li>NUCLEO-U3C5ZI-Q board</li>
+<li>STM32U3_CUSTOM_HW board</li>
+</ul>
+<h2 id="known-limitations">Known Limitations</h2>
+<ul>
+<li>The USBX applications Ux_Host_HID and Ux_Host_HID_Standalone may not operate correctly on MDK-ARM v5.39 (AC6 compiler) when compiled with the -O3 optimization level.</li>
+<li>Some non-critical Clang warnings remain in the HSP_HW_IF_SEQ_EVENT_SetConfig_Trigger() function. These warnings have been reviewed and do not affect the functional behavior of the application.</li>
+</ul>
+<h2 id="dependencies">Dependencies</h2>
+<ul>
+<li>STM32CubeMX V6.17.0
+<ul>
+<li>Projects (Examples and Applications) are generated using STM32CubeMX version V6.17.0</li>
+</ul></li>
+</ul>
+<h2 id="backward-compatibility">Backward compatibility</h2>
+<ul>
+<li>Not applicable</li>
+</ul>
+<h2 id="notes">Notes</h2>
+<ul>
+<li>None</li>
+</ul>
+<p><br />
+</p>
+</div>
+</div>
+<div class="collapse">
+<input type="checkbox" id="collapse-section3" aria-hidden="true"> <label for="collapse-section3" aria-hidden="true"><strong>V1.2.0 / 04-June-2025</strong></label>
+<div>
+<h2 id="contents-1">Contents</h2>
 <p>Maintenance release of STM32CubeU3 Projects :</p>
 <ul>
 <li><strong>Applications</strong> updates
@@ -94,8 +279,7 @@ href="STM32CubeProjectsList.html">STM32CubeProjectsList</a>.</p>
 <li><strong>Examples LL</strong> update
 <ul>
 <li>Update PWR_ModesSelection</li>
-<li>fix SystemClock_Config(void) : Clock power must be enabled before
-call to any LL PWR interface</li>
+<li>fix SystemClock_Config(void) : Clock power must be enabled before call to any LL PWR interface</li>
 </ul></li>
 <li><strong>Templates</strong> updates
 <ul>
@@ -104,13 +288,10 @@ call to any LL PWR interface</li>
 </ul></li>
 <li><strong>Templates LL</strong> updates
 <ul>
-<li>fix SystemClock_Config(void) : Clock power must be enabled before
-call to any LL PWR interface</li>
+<li>fix SystemClock_Config(void) : Clock power must be enabled before call to any LL PWR interface</li>
 </ul></li>
 </ul>
-<p><small>The Project categories flagged by “<span
-class="icon-st-update"></span>” have changed since the previous release.
-“<span class="icon-st-add"></span>” are new.</small></p>
+<p><small>The Project categories flagged by “<span class="icon-st-update"></span>” have changed since the previous release. “<span class="icon-st-add"></span>” are new.</small></p>
 <p>Projects</p>
 <table>
 <thead>
@@ -123,20 +304,17 @@ class="icon-st-update"></span>” have changed since the previous release.
 <tbody>
 <tr class="odd">
 <td style="text-align: left;">NUCLEO-U385RG-Q</td>
-<td style="text-align: left;">Applications <span
-class="icon-st-update"></span></td>
+<td style="text-align: left;">Applications <span class="icon-st-update"></span></td>
 <td style="text-align: left;">Projects\NUCLEO-U385RG-Q\Applications</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">NUCLEO-U385RG-Q</td>
-<td style="text-align: left;">HAL Examples <span
-class="icon-st-update"></span></td>
+<td style="text-align: left;">HAL Examples <span class="icon-st-update"></span></td>
 <td style="text-align: left;">Projects\NUCLEO-U385RG-Q\Examples</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">NUCLEO-U385RG-Q</td>
-<td style="text-align: left;">LL Examples <span
-class="icon-st-update"></span></td>
+<td style="text-align: left;">LL Examples <span class="icon-st-update"></span></td>
 <td style="text-align: left;">Projects\NUCLEO-U385RG-Q\Examples_LL</td>
 </tr>
 <tr class="even">
@@ -146,28 +324,23 @@ class="icon-st-update"></span></td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">NUCLEO-U385RG-Q</td>
-<td style="text-align: left;">HAL Template <span
-class="icon-st-update"></span></td>
+<td style="text-align: left;">HAL Template <span class="icon-st-update"></span></td>
 <td style="text-align: left;">Projects\NUCLEO-U385RG-Q\Templates</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">NUCLEO-U385RG-Q</td>
-<td style="text-align: left;">LL Template <span
-class="icon-st-update"></span></td>
+<td style="text-align: left;">LL Template <span class="icon-st-update"></span></td>
 <td style="text-align: left;">Projects\NUCLEO-U385RG-Q\Templates_LL</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">NUCLEO-U385RG-Q</td>
 <td style="text-align: left;">Start from board Template</td>
-<td
-style="text-align: left;">Projects\NUCLEO-U385RG-Q\Templates_Board</td>
+<td style="text-align: left;">Projects\NUCLEO-U385RG-Q\Templates_Board</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">NUCLEO-U385RG-Q</td>
-<td style="text-align: left;">ROT Provisionning <span
-class="icon-st-update"></span></td>
-<td
-style="text-align: left;">Projects\NUCLEO-U385RG-Q\ROT_Provisioning</td>
+<td style="text-align: left;">ROT Provisionning <span class="icon-st-update"></span></td>
+<td style="text-align: left;">Projects\NUCLEO-U385RG-Q\ROT_Provisioning</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">NUCLEO_CUSTOM_HW</td>
@@ -176,8 +349,7 @@ style="text-align: left;">Projects\NUCLEO-U385RG-Q\ROT_Provisioning</td>
 </tr>
 </tbody>
 </table>
-<h2 id="development-toolchains-and-compilers">Development Toolchains and
-Compilers</h2>
+<h2 id="development-toolchains-and-compilers-1">Development Toolchains and Compilers</h2>
 <table>
 <thead>
 <tr class="header">
@@ -188,20 +360,14 @@ Compilers</h2>
 </thead>
 <tbody>
 <tr class="odd">
-<td style="text-align: left;">IAR Embedded Workbench for ARM
-(EWARM)</td>
+<td style="text-align: left;">IAR Embedded Workbench for ARM (EWARM)</td>
 <td>V9.20.1</td>
-<td style="text-align: left;"><a
-href="../Utilities/PC_Software/EWARMv9_STM32U37x-38x_V1.0.0.zip">Patch
-EWARM</a></td>
+<td style="text-align: left;"><a href="../Utilities/PC_Software/EWARMv9_STM32U37x-38x_V1.0.0.zip">Patch EWARM</a></td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">RealView Microcontroller Development Kit
-(MDK-ARM)</td>
+<td style="text-align: left;">RealView Microcontroller Development Kit (MDK-ARM)</td>
 <td>V5.39</td>
-<td style="text-align: left;"><a
-href="../Utilities/PC_Software/Keil.STM32U3xx_DFP.1.0.0.zip">Patch
-MDK-ARM</a></td>
+<td style="text-align: left;"><a href="../Utilities/PC_Software/Keil.STM32U3xx_DFP.1.0.0.zip">Patch MDK-ARM</a></td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">STM32CubeIDE</td>
@@ -210,29 +376,28 @@ MDK-ARM</a></td>
 </tr>
 </tbody>
 </table>
-<h2 id="supported-devices-and-boards">Supported Devices and boards</h2>
+<h2 id="supported-devices-and-boards-1">Supported Devices and boards</h2>
 <ul>
 <li>STM32U375xx/STM32U385xx devices</li>
 <li>NUCLEO-U385RG-Q (Rev.E) board</li>
 <li>STM32U3_CUSTOM_HW board</li>
 </ul>
-<h2 id="known-limitations">Known Limitations</h2>
+<h2 id="known-limitations-1">Known Limitations</h2>
 <ul>
 <li>None</li>
 </ul>
-<h2 id="dependencies">Dependencies</h2>
+<h2 id="dependencies-1">Dependencies</h2>
 <ul>
 <li>STM32CubeMX V6.15.0
 <ul>
-<li>Projects (Examples and Applications) are generated using STM32CubeMX
-version V6.15.0</li>
+<li>Projects (Examples and Applications) are generated using STM32CubeMX version V6.15.0</li>
 </ul></li>
 </ul>
-<h2 id="backward-compatibility">Backward compatibility</h2>
+<h2 id="backward-compatibility-1">Backward compatibility</h2>
 <ul>
 <li>Not applicable</li>
 </ul>
-<h2 id="notes">Notes</h2>
+<h2 id="notes-1">Notes</h2>
 <ul>
 <li>None</li>
 </ul>
@@ -241,11 +406,9 @@ version V6.15.0</li>
 </div>
 </div>
 <div class="collapse">
-<input type="checkbox" id="collapse-section2"  aria-hidden="true">
-<label for="collapse-section2" aria-hidden="true"><strong>V1.1.0 /
-05-February-2025</strong></label>
+<input type="checkbox" id="collapse-section2"  aria-hidden="true"> <label for="collapse-section2" aria-hidden="true"><strong>V1.1.0 / 05-February-2025</strong></label>
 <div>
-<h2 id="contents-1">Contents</h2>
+<h2 id="contents-2">Contents</h2>
 <p>Maintenance release of STM32CubeU3 Projects :</p>
 <ul>
 <li><strong>Applications</strong> updates
@@ -280,9 +443,7 @@ version V6.15.0</li>
 <li>Enhance some comments</li>
 </ul></li>
 </ul>
-<p><small>The Project categories flagged by “<span
-class="icon-st-update"></span>” have changed since the previous release.
-“<span class="icon-st-add"></span>” are new.</small></p>
+<p><small>The Project categories flagged by “<span class="icon-st-update"></span>” have changed since the previous release. “<span class="icon-st-add"></span>” are new.</small></p>
 <p>Projects</p>
 <table>
 <thead>
@@ -295,20 +456,17 @@ class="icon-st-update"></span>” have changed since the previous release.
 <tbody>
 <tr class="odd">
 <td style="text-align: left;">NUCLEO-U385RG-Q</td>
-<td style="text-align: left;">Applications <span
-class="icon-st-update"></span></td>
+<td style="text-align: left;">Applications <span class="icon-st-update"></span></td>
 <td style="text-align: left;">Projects\NUCLEO-U385RG-Q\Applications</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">NUCLEO-U385RG-Q</td>
-<td style="text-align: left;">HAL Examples <span
-class="icon-st-update"></span></td>
+<td style="text-align: left;">HAL Examples <span class="icon-st-update"></span></td>
 <td style="text-align: left;">Projects\NUCLEO-U385RG-Q\Examples</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">NUCLEO-U385RG-Q</td>
-<td style="text-align: left;">LL Examples <span
-class="icon-st-update"></span></td>
+<td style="text-align: left;">LL Examples <span class="icon-st-update"></span></td>
 <td style="text-align: left;">Projects\NUCLEO-U385RG-Q\Examples_LL</td>
 </tr>
 <tr class="even">
@@ -318,8 +476,7 @@ class="icon-st-update"></span></td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">NUCLEO-U385RG-Q</td>
-<td style="text-align: left;">HAL Template <span
-class="icon-st-update"></span></td>
+<td style="text-align: left;">HAL Template <span class="icon-st-update"></span></td>
 <td style="text-align: left;">Projects\NUCLEO-U385RG-Q\Templates</td>
 </tr>
 <tr class="even">
@@ -330,15 +487,12 @@ class="icon-st-update"></span></td>
 <tr class="odd">
 <td style="text-align: left;">NUCLEO-U385RG-Q</td>
 <td style="text-align: left;">Start from board Template</td>
-<td
-style="text-align: left;">Projects\NUCLEO-U385RG-Q\Templates_Board</td>
+<td style="text-align: left;">Projects\NUCLEO-U385RG-Q\Templates_Board</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">NUCLEO-U385RG-Q</td>
-<td style="text-align: left;">ROT Provisionning <span
-class="icon-st-update"></span></td>
-<td
-style="text-align: left;">Projects\NUCLEO-U385RG-Q\ROT_Provisioning</td>
+<td style="text-align: left;">ROT Provisionning <span class="icon-st-update"></span></td>
+<td style="text-align: left;">Projects\NUCLEO-U385RG-Q\ROT_Provisioning</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">NUCLEO_CUSTOM_HW</td>
@@ -347,8 +501,7 @@ style="text-align: left;">Projects\NUCLEO-U385RG-Q\ROT_Provisioning</td>
 </tr>
 </tbody>
 </table>
-<h2 id="development-toolchains-and-compilers-1">Development Toolchains
-and Compilers</h2>
+<h2 id="development-toolchains-and-compilers-2">Development Toolchains and Compilers</h2>
 <table>
 <thead>
 <tr class="header">
@@ -359,20 +512,14 @@ and Compilers</h2>
 </thead>
 <tbody>
 <tr class="odd">
-<td style="text-align: left;">IAR Embedded Workbench for ARM
-(EWARM)</td>
+<td style="text-align: left;">IAR Embedded Workbench for ARM (EWARM)</td>
 <td>V9.20.1</td>
-<td style="text-align: left;"><a
-href="../Utilities/PC_Software/EWARMv9_STM32U37x-38x_V1.0.0.zip">Patch
-EWARM</a></td>
+<td style="text-align: left;"><a href="../Utilities/PC_Software/EWARMv9_STM32U37x-38x_V1.0.0.zip">Patch EWARM</a></td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">RealView Microcontroller Development Kit
-(MDK-ARM)</td>
+<td style="text-align: left;">RealView Microcontroller Development Kit (MDK-ARM)</td>
 <td>V5.39</td>
-<td style="text-align: left;"><a
-href="../Utilities/PC_Software/Keil.STM32U3xx_DFP.1.0.0.zip">Patch
-MDK-ARM</a></td>
+<td style="text-align: left;"><a href="../Utilities/PC_Software/Keil.STM32U3xx_DFP.1.0.0.zip">Patch MDK-ARM</a></td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">STM32CubeIDE</td>
@@ -381,30 +528,28 @@ MDK-ARM</a></td>
 </tr>
 </tbody>
 </table>
-<h2 id="supported-devices-and-boards-1">Supported Devices and
-boards</h2>
+<h2 id="supported-devices-and-boards-2">Supported Devices and boards</h2>
 <ul>
 <li>STM32U375xx/STM32U385xx devices</li>
 <li>NUCLEO-U385RG-Q (Rev.E) board</li>
 <li>STM32U3_CUSTOM_HW board</li>
 </ul>
-<h2 id="known-limitations-1">Known Limitations</h2>
+<h2 id="known-limitations-2">Known Limitations</h2>
 <ul>
 <li>None</li>
 </ul>
-<h2 id="dependencies-1">Dependencies</h2>
+<h2 id="dependencies-2">Dependencies</h2>
 <ul>
 <li>STM32CubeMX V6.14.0
 <ul>
-<li>Projects (Examples and Applications) are generated using STM32CubeMX
-version V6.14.0</li>
+<li>Projects (Examples and Applications) are generated using STM32CubeMX version V6.14.0</li>
 </ul></li>
 </ul>
-<h2 id="backward-compatibility-1">Backward compatibility</h2>
+<h2 id="backward-compatibility-2">Backward compatibility</h2>
 <ul>
 <li>Not applicable</li>
 </ul>
-<h2 id="notes-1">Notes</h2>
+<h2 id="notes-2">Notes</h2>
 <ul>
 <li>None</li>
 </ul>
@@ -413,15 +558,11 @@ version V6.14.0</li>
 </div>
 </div>
 <div class="collapse">
-<input type="checkbox" id="collapse-section1"  aria-hidden="true">
-<label for="collapse-section1" aria-hidden="true"><strong>V1.0.0 /
-30-October-2024</strong></label>
+<input type="checkbox" id="collapse-section1"  aria-hidden="true"> <label for="collapse-section1" aria-hidden="true"><strong>V1.0.0 / 30-October-2024</strong></label>
 <div>
-<h2 id="contents-2">Contents</h2>
+<h2 id="contents-3">Contents</h2>
 <p>First official release of STM32CubeU3 Projects</p>
-<p><small>The Project categories flagged by “<span
-class="icon-st-update"></span>” have changed since the previous release.
-“<span class="icon-st-add"></span>” are new.</small></p>
+<p><small>The Project categories flagged by “<span class="icon-st-update"></span>” have changed since the previous release. “<span class="icon-st-add"></span>” are new.</small></p>
 <p>Projects</p>
 <table>
 <thead>
@@ -465,14 +606,12 @@ class="icon-st-update"></span>” have changed since the previous release.
 <tr class="odd">
 <td style="text-align: left;">NUCLEO-U385RG-Q</td>
 <td style="text-align: left;">Start from board Template</td>
-<td
-style="text-align: left;">Projects\NUCLEO-U385RG-Q\Templates_Board</td>
+<td style="text-align: left;">Projects\NUCLEO-U385RG-Q\Templates_Board</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">NUCLEO-U385RG-Q</td>
 <td style="text-align: left;">ROT Provisionning</td>
-<td
-style="text-align: left;">Projects\NUCLEO-U385RG-Q\ROT_Provisioning</td>
+<td style="text-align: left;">Projects\NUCLEO-U385RG-Q\ROT_Provisioning</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">NUCLEO_CUSTOM_HW</td>
@@ -481,8 +620,7 @@ style="text-align: left;">Projects\NUCLEO-U385RG-Q\ROT_Provisioning</td>
 </tr>
 </tbody>
 </table>
-<h2 id="development-toolchains-and-compilers-2">Development Toolchains
-and Compilers</h2>
+<h2 id="development-toolchains-and-compilers-3">Development Toolchains and Compilers</h2>
 <table>
 <thead>
 <tr class="header">
@@ -493,20 +631,14 @@ and Compilers</h2>
 </thead>
 <tbody>
 <tr class="odd">
-<td style="text-align: left;">IAR Embedded Workbench for ARM
-(EWARM)</td>
+<td style="text-align: left;">IAR Embedded Workbench for ARM (EWARM)</td>
 <td>V9.20.1</td>
-<td style="text-align: left;"><a
-href="../Utilities/PC_Software/EWARMv9_STM32U37x-38x_V1.0.0.zip">Patch
-EWARM</a></td>
+<td style="text-align: left;"><a href="../Utilities/PC_Software/EWARMv9_STM32U37x-38x_V1.0.0.zip">Patch EWARM</a></td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">RealView Microcontroller Development Kit
-(MDK-ARM)</td>
+<td style="text-align: left;">RealView Microcontroller Development Kit (MDK-ARM)</td>
 <td>V5.39</td>
-<td style="text-align: left;"><a
-href="../Utilities/PC_Software/Keil.STM32U3xx_DFP.1.0.0.zip">Patch
-MDK-ARM</a></td>
+<td style="text-align: left;"><a href="../Utilities/PC_Software/Keil.STM32U3xx_DFP.1.0.0.zip">Patch MDK-ARM</a></td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">STM32CubeIDE</td>
@@ -515,30 +647,28 @@ MDK-ARM</a></td>
 </tr>
 </tbody>
 </table>
-<h2 id="supported-devices-and-boards-2">Supported Devices and
-boards</h2>
+<h2 id="supported-devices-and-boards-3">Supported Devices and boards</h2>
 <ul>
 <li>STM32U375xx/STM32U385xx devices</li>
 <li>NUCLEO-U385RG-Q (Rev.E) board</li>
 <li>STM32U3_CUSTOM_HW board</li>
 </ul>
-<h2 id="known-limitations-2">Known Limitations</h2>
+<h2 id="known-limitations-3">Known Limitations</h2>
 <ul>
 <li>None</li>
 </ul>
-<h2 id="dependencies-2">Dependencies</h2>
+<h2 id="dependencies-3">Dependencies</h2>
 <ul>
 <li>STM32CubeMX V6.13.0
 <ul>
-<li>Projects (Examples and Applications) are generated using STM32CubeMX
-version V6.13.0.</li>
+<li>Projects (Examples and Applications) are generated using STM32CubeMX version V6.13.0.</li>
 </ul></li>
 </ul>
-<h2 id="backward-compatibility-2">Backward compatibility</h2>
+<h2 id="backward-compatibility-3">Backward compatibility</h2>
 <ul>
 <li>Not applicable</li>
 </ul>
-<h2 id="notes-2">Notes</h2>
+<h2 id="notes-3">Notes</h2>
 <ul>
 <li>None</li>
 </ul>
@@ -546,17 +676,13 @@ version V6.13.0.</li>
 </p>
 </div>
 </div>
-</section>
+</div>
 </div>
 <footer class="sticky">
 <div class="columns">
 <div class="column" style="width:95%;">
-<p>For complete documentation on STM32U375xx/STM32U385xx, visit: <a
-href="http://www.st.com/stm32u3">www.st.com/stm32u3</a></p>
-<p><em>This release note uses up to date web standards and, for this
-reason, should not be opened with Internet Explorer but preferably with
-popular browsers such as Google Chrome, Mozilla Firefox, Opera or
-Microsoft Edge.</em></p>
+<p>For complete documentation on STM32U375xx/STM32U385xx, visit: <a href="http://www.st.com/stm32u3">www.st.com/stm32u3</a></p>
+<p><em>This release note uses up to date web standards and, for this reason, should not be opened with Internet Explorer but preferably with popular browsers such as Google Chrome, Mozilla Firefox, Opera or Microsoft Edge.</em></p>
 </div><div class="column" style="width:5%;">
 <p><abbr title="Based on template cx626901 version 2.0">Info</abbr></p>
 </div>
