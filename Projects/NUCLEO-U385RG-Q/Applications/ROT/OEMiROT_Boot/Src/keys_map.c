@@ -34,11 +34,21 @@
 
 /* Private Define -------------------------------------------------------- */
 #if defined(MCUBOOT_SIGN_EC256)
-#define EC256_PRIV_KEY_LENGTH     (70U)
 #define EC256_PUB_KEY_LENGTH      (91U)
+#elif defined(MCUBOOT_SIGN_EC384)
+#define EC384_PUB_KEY_LENGTH      (120U)
+#endif
+
+#if defined(MCUBOOT_ENCRYPT_EC256)
+#define EC256_PRIV_KEY_LENGTH     (70U)
+#elif defined(MCUBOOT_ENCRYPT_EC384)
+#define EC384_PRIV_KEY_LENGTH     (96U)
 #endif
 
 #define SECURE_AUTHENTICATION_PUBKEY_ADDRESS      (const uint8_t *)((uint32_t)(PERSO_START))
+
+#if defined(MCUBOOT_SIGN_EC256)
+
 #if defined (OEMIROT_FIRST_BOOT_STAGE)
 #define ENCRYPTION_PRIVKEY_ADDRESS                (const uint8_t *)((uint32_t)(PERSO_START | 0x5C))
 #else
@@ -46,10 +56,51 @@
 #define ENCRYPTION_PRIVKEY_ADDRESS                (const uint8_t *)((uint32_t)(PERSO_START | 0xB8))
 #endif /* OEMIROT_FIRST_BOOT_STAGE */
 
+#elif defined(MCUBOOT_SIGN_EC384)
+
+#if defined (OEMIROT_FIRST_BOOT_STAGE)
+#define ENCRYPTION_PRIVKEY_ADDRESS                (const uint8_t *)((uint32_t)(PERSO_START | 0x78))
+#else
+#define NONSECURE_AUTHENTICATION_PUBKEY_ADDRESS   (const uint8_t *)((uint32_t)(PERSO_START | 0x78))
+#define ENCRYPTION_PRIVKEY_ADDRESS                (const uint8_t *)((uint32_t)(PERSO_START | 0xF0))
+#endif /* OEMIROT_FIRST_BOOT_STAGE */
+
+#endif
+
 #if defined(MCUBOOT_SIGN_EC256)
 const unsigned int ecdsa_pub_key_len = EC256_PUB_KEY_LENGTH;
 #if (MCUBOOT_APP_IMAGE_NUMBER == 2) || (MCUBOOT_NS_DATA_IMAGE_NUMBER == 1)
 const unsigned int ecdsa_pub_key_len_1 = EC256_PUB_KEY_LENGTH;
+#endif
+const struct bootutil_key bootutil_keys[] =
+{
+  {
+    .key = SECURE_AUTHENTICATION_PUBKEY_ADDRESS,
+    .len = &ecdsa_pub_key_len,
+  },
+#if (MCUBOOT_APP_IMAGE_NUMBER == 2)
+  {
+    .key = NONSECURE_AUTHENTICATION_PUBKEY_ADDRESS,
+    .len = &ecdsa_pub_key_len_1,
+  },
+#endif
+#if (MCUBOOT_S_DATA_IMAGE_NUMBER == 1)
+  {
+    .key = SECURE_AUTHENTICATION_PUBKEY_ADDRESS,
+    .len = &ecdsa_pub_key_len,
+  },
+#endif
+#if (MCUBOOT_NS_DATA_IMAGE_NUMBER == 1)
+  {
+    .key = NONSECURE_AUTHENTICATION_PUBKEY_ADDRESS,
+    .len = &ecdsa_pub_key_len_1,
+  },
+#endif
+};
+#elif defined(MCUBOOT_SIGN_EC384)
+const unsigned int ecdsa_pub_key_len = EC384_PUB_KEY_LENGTH;
+#if (MCUBOOT_APP_IMAGE_NUMBER == 2) || (MCUBOOT_NS_DATA_IMAGE_NUMBER == 1)
+const unsigned int ecdsa_pub_key_len_1 = EC384_PUB_KEY_LENGTH;
 #endif
 const struct bootutil_key bootutil_keys[] =
 {

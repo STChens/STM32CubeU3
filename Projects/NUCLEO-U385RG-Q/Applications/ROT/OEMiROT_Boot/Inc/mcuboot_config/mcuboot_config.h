@@ -40,22 +40,39 @@ extern "C" {
 /* Available crypto schemes (do not change values, as used in appli postbuild script) */
 #define CRYPTO_SCHEME_EC256      0x2 /* ECDSA-256 signature,
                                         AES-CTR-128 encryption with key ECIES-P256 encrypted */
+#define CRYPTO_SCHEME_EC384      0x3 /* ECDSA-256 signature,
+                                        AES-CTR-128 encryption with key ECIES-P256 encrypted */
 
 /* Crypto scheme selection : begin */
-#define CRYPTO_SCHEME            CRYPTO_SCHEME_EC256  /* Select one of available crypto schemes */
+//#define CRYPTO_SCHEME            CRYPTO_SCHEME_EC256  /* Select one of available crypto schemes */
+#define CRYPTO_SCHEME 	           CRYPTO_SCHEME_EC384
 /* Crypto scheme selection : end */
 
 
 /* ECC config */
-#define NUM_ECC_BYTES 32
-#define MCUBOOT_SIGN_EC256
-#define MCUBOOT_ENCRYPT_EC256
+#if ( CRYPTO_SCHEME == CRYPTO_SCHEME_EC384 )
+  #define NUM_ECC_BYTES 48
+  #define NUM_ENC_ECC_BYTES 32
+  #define MCUBOOT_SIGN_EC384
+  #define MCUBOOT_ENCRYPT_EC256
+#elif ( CRYPTO_SCHEME == CRYPTO_SCHEME_EC256 )
+  #define NUM_ECC_BYTES 32
+  #define NUM_ENC_ECC_BYTES 32
+  #define MCUBOOT_SIGN_EC256
+  #define MCUBOOT_ENCRYPT_EC256
+                                          
+  #define MCUBOOT_KEY_REVOCATION                                        
+#else
+#error "CRYPTO_SCHEME must be CRYPTO_SCHEME_EC256 or CRYPTO_SCHEME_EC384!"
+#endif
+#define PSA_KEY_ID_NULL                         ((psa_key_id_t)0)   // not overly happy with this being here
+#define MCUBOOT_USE_PSA_CRYPTO
 
 #define MCUBOOT_VALIDATE_PRIMARY_SLOT
 #define MCUBOOT_USE_FLASH_AREA_GET_SECTORS
 
 #define MCUBOOT_HW_ROLLBACK_PROT
-#define MCUBOOT_ENC_IMAGES           /* Defined: Image encryption enabled. */
+// #define MCUBOOT_ENC_IMAGES           /* Defined: Image encryption enabled. */
                                      /* Undefined: Image encryption disabled. */
 
 #define MCUBOOT_MEASURED_BOOT
@@ -67,13 +84,13 @@ extern "C" {
  * Cryptographic settings
  */
 /* HW accelerators activation in BL2 */
-#define BL2_HW_ACCEL_ENABLE
+//#define BL2_HW_ACCEL_ENABLE
 #if defined(BL2_HW_ACCEL_ENABLE)
 #define MCUBOOT_USE_HAL
 #else /* not BL2_HW_ACCEL_ENABLE */
-#define MCUBOOT_USE_MBED_TLS
+#define MCUBOOT_USE_MBED_TLS /* Need to use this macro to have correct function for memory allocation */
 #endif /* BL2_HW_ACCEL_ENABLE */
-#define PKA_ECDSA_SIGNATURE_ADDRESS 0x0578UL
+// #define PKA_ECDSA_SIGNATURE_ADDRESS 0x0578UL
 
 #include "stm32_hal.h"
 #include "flash_layout.h"

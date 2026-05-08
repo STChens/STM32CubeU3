@@ -64,9 +64,19 @@ uint8_t ImageValidEnable = 0;
 #endif /* MCUBOOT_DOUBLE_SIGN_VERIF || MCUBOOT_USE_HASH_REF */
 
 #if defined(MCUBOOT_USE_HASH_REF)
+
+#define SHA384_LENGTH             (48U)
+#define SHA256_LENGTH             (32U)
+
 #define BL2_HASH_REF_ADDR     (FLASH_HASH_REF_AREA_OFFSET)
 uint8_t ImageValidHashUpdate = 0;
+#if ( CRYPTO_SCHEME == CRYPTO_SCHEME_EC256 )
+#define IMG_SHA_LENGTH            SHA256_LENGTH
 uint8_t ImageValidHashRef[MCUBOOT_IMAGE_NUMBER * SHA256_LEN] = {0};
+#elif ( CRYPTO_SCHEME == CRYPTO_SCHEME_EC384 )
+#define IMG_SHA_LENGTH            SHA384_LENGTH
+uint8_t ImageValidHashRef[MCUBOOT_IMAGE_NUMBER * SHA384_LEN] = {0};
+#endif
 #endif /* MCUBOOT_USE_HASH_REF */
 
 #if defined(FLOW_CONTROL)
@@ -429,7 +439,7 @@ int boot_hash_ref_store(void)
 
   /* Store new hash references in flash */
   if (FLASH_DEV_NAME.ProgramData(BL2_HASH_REF_ADDR, ImageValidHashRef,
-                                 (SHA256_LEN * MCUBOOT_IMAGE_NUMBER)) != ARM_DRIVER_OK)
+                                 (IMG_SHA_LENGTH * MCUBOOT_IMAGE_NUMBER)) != ARM_DRIVER_OK)
   {
     return BOOT_EFLASH;
   }
@@ -445,7 +455,7 @@ int boot_hash_ref_load(void)
 {
   /* Read hash references */
   if (FLASH_DEV_NAME.ReadData(BL2_HASH_REF_ADDR, ImageValidHashRef,
-                              (SHA256_LEN * MCUBOOT_IMAGE_NUMBER)) != ARM_DRIVER_OK)
+                              (IMG_SHA_LENGTH * MCUBOOT_IMAGE_NUMBER)) != ARM_DRIVER_OK)
   {
     return BOOT_EFLASH;
   }
@@ -463,7 +473,7 @@ int boot_hash_ref_load(void)
 int boot_hash_ref_set(uint8_t *hash_ref, uint8_t size, uint8_t image_index)
 {
   /* Check size */
-  if (size != SHA256_LEN)
+  if (size != IMG_SHA_LENGTH)
   {
     return BOOT_EFLASH;
   }
@@ -475,7 +485,7 @@ int boot_hash_ref_set(uint8_t *hash_ref, uint8_t size, uint8_t image_index)
   }
 
   /* Set hash reference */
-  memcpy(ImageValidHashRef + (image_index * SHA256_LEN), hash_ref, SHA256_LEN);
+  memcpy(ImageValidHashRef + (image_index * IMG_SHA_LENGTH), hash_ref, IMG_SHA_LENGTH);
 
   /* Memorize that hash references will have to be updated in flash (later) */
   ImageValidHashUpdate++;
@@ -493,7 +503,7 @@ int boot_hash_ref_set(uint8_t *hash_ref, uint8_t size, uint8_t image_index)
 int boot_hash_ref_get(uint8_t *hash_ref, uint8_t size, uint8_t image_index)
 {
   /* Check size */
-  if (size != SHA256_LEN)
+  if (size != IMG_SHA_LENGTH)
   {
     return BOOT_EFLASH;
   }
@@ -505,7 +515,7 @@ int boot_hash_ref_get(uint8_t *hash_ref, uint8_t size, uint8_t image_index)
   }
 
   /* Get hash reference */
-  memcpy(hash_ref, ImageValidHashRef + (image_index * SHA256_LEN), SHA256_LEN);
+  memcpy(hash_ref, ImageValidHashRef + (image_index * IMG_SHA_LENGTH), IMG_SHA_LENGTH);
 
   return 0;
 }

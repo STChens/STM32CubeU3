@@ -7,7 +7,7 @@ set provisioningdir=%cd%
 popd
 
 call %provisioningdir%/env.bat
-call %provisioningdir%/OEMiROT/img_config.bat
+call %provisioningdir%/OEMiROT_384/img_config.bat
 
 IF "%oemurot_enabled%" == "1" (
 set project=OEMuROT
@@ -16,7 +16,7 @@ set bootpath=OEMiRoT_OEMuRoT
 call %provisioningdir%/OEMiRoT_OEMuRoT/img_config.bat
 ) else (
 set project=OEMiROT
-set bootpath=OEMiROT
+set bootpath=OEMiROT_384
 )
 
 :: Environment variable for log file
@@ -260,6 +260,7 @@ IF !errorlevel! NEQ 0 goto :error
 :bypass_postbuild_appli_update
 
 :: ============================================================ Update %ns_code_xml% ============================================================
+
 IF "%app_full_secure%" == "1" (goto bypass_ns_code_xml_update)
 set "command=%python%%applicfg% xmlname --layout %preprocess_bl2_file% -m RE_APP_IMAGE_NUMBER -n %auth_ns_xml_field% -sn %auth_s_xml_field% -v 1 -c k %ns_code_xml% --vb >> %current_log_file% 2>>&1"
 %command%
