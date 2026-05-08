@@ -13,9 +13,9 @@ set imgtool="C:\Program Files\STMicroelectronics\STM32Cube\STM32CubeProgrammer\b
 :: ==============================================================================
 :: Select OEMiROT Application TrustZone project below
 ::set oemirot_appli_path_project=Templates\ROT\OEMiROT_Appli
-::set oemirot_appli_path_project=Applications\ROT\OEMiROT_Appli
+set oemirot_appli_path_project=Applications\ROT\OEMiROT_Appli
 ::set oemirot_appli_path_project=Templates\ROT\OEMiROT_Appli_TrustZone
-set oemirot_appli_path_project=Applications\ROT\OEMiROT_Appli_TrustZone
+::set oemirot_appli_path_project=Applications\ROT\OEMiROT_Appli_TrustZone
 
 :: ==============================================================================
 ::                            OEMiROT Boot path
