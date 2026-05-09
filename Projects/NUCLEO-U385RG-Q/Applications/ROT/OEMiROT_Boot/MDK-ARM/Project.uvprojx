@@ -17,7 +17,7 @@
         <TargetCommonOption>
           <Device>STM32U385RGTxQ</Device>
           <Vendor>STMicroelectronics</Vendor>
-          <PackID>Keil.STM32U3xx_DFP.1.2.0-A02</PackID>
+          <PackID>Keil.STM32U3xx_DFP.1.0.0</PackID>
           <PackURL>https://www.keil.com/pack/</PackURL>
           <Cpu>IRAM(0x20000000,0x00040000) IROM(0x08000000,0x00100000) CPUTYPE("Cortex-M33") FPU3(SFPU) DSP TZ CLOCK(12000000) ELITTLE</Cpu>
           <FlashUtilSpec></FlashUtilSpec>
@@ -341,7 +341,7 @@
               <MiscControls></MiscControls>
               <Define>STM32U385xx,USE_HAL_DRIVER,NDEBUG,MCUBOOT_TARGET_CONFIG=&lt;flash_layout.h&gt;,MBEDTLS_CONFIG_FILE=&lt;mbedtls_config.h&gt;,MCUBOOT_DOUBLE_SIGN_VERIF,FLOW_CONTROL,DEFAULT_UART_BAUDRATE=115200,OEMIROT_DEV_MODE,BOOT_MAX_ALIGN=16</Define>
               <Undefine></Undefine>
-              <IncludePath>../Inc;../../../../../../Drivers/CMSIS/Include;../../../../../../Drivers/CMSIS/Device/ST/STM32U3xx/Include;../../../../../../Drivers/STM32U3xx_HAL_Driver/Inc;../../../../../../Middlewares/Third_Party/mbedtls/include;../../../../../../Middlewares/Third_Party/mcuboot;../../../../../../Middlewares/Third_Party/mcuboot/platform/include;../../../../../../Middlewares/Third_Party/mcuboot/platform/ext/common;../../../../../../Middlewares/Third_Party/mcuboot/platform/ext/driver;../../../../../../Middlewares/Third_Party/mcuboot/bl2/include;../../../../../../Middlewares/Third_Party/mcuboot/bl2/ext/mcuboot;../../../../../../Middlewares/Third_Party/mcuboot/bl2/ext/mcuboot/include;../../../../../../Middlewares/Third_Party/mcuboot/boot/bootutil/include;../../../../../../Middlewares/Third_Party/mcuboot/boot/bootutil/src;../../../../../../Middlewares/Third_Party/mcuboot/ext/tinycrypt/lib/include;..\..\..\..\..\..\Middlewares\Third_Party\mcuboot\ext\hal\Inc;..\..\..\..\..\..\Middlewares\ST\mbedtls_alt\interfaces\patterns;..\..\..\..\..\..\Middlewares\Third_Party\mbedtls\library;..\..\..\..\..\..\Drivers\BSP\Components\Common;..\..\..\..\..\..\Drivers\BSP\STM32U3xx_Nucleo;..\..\..\..\..\..\Drivers\CMSIS\Core\Include;..\..\..\..\..\..\Middlewares\Third_Party\mbedtls\include\psa</IncludePath>
+              <IncludePath>../Inc;../../../../../../Drivers/CMSIS/Include;../../../../../../Drivers/CMSIS/Device/ST/STM32U3xx/Include;../../../../../../Drivers/STM32U3xx_HAL_Driver/Inc;../../../../../../Middlewares/Third_Party/mbedtls/include;../../../../../../Middlewares/Third_Party/mcuboot;../../../../../../Middlewares/Third_Party/mcuboot/platform/include;../../../../../../Middlewares/Third_Party/mcuboot/platform/ext/common;../../../../../../Middlewares/Third_Party/mcuboot/platform/ext/driver;../../../../../../Middlewares/Third_Party/mcuboot/bl2/include;../../../../../../Middlewares/Third_Party/mcuboot/bl2/ext/mcuboot;../../../../../../Middlewares/Third_Party/mcuboot/bl2/ext/mcuboot/include;../../../../../../Middlewares/Third_Party/mcuboot/boot/bootutil/include;../../../../../../Middlewares/Third_Party/mcuboot/boot/bootutil/src;../../../../../../Middlewares/Third_Party/mcuboot/ext/tinycrypt/lib/include;..\..\..\..\..\..\Middlewares\Third_Party\mcuboot\ext\hal\Inc;..\..\..\..\..\..\Drivers\BSP\Components\Common;..\..\..\..\..\..\Drivers\BSP\STM32U3xx_Nucleo;..\..\..\..\..\..\Drivers\CMSIS\Core\Include;..\..\..\..\..\..\Middlewares\Third_Party\mbed-crypto\include;..\..\..\..\..\..\Middlewares\Third_Party\mbed-crypto\include\psa;..\..\..\..\..\..\Middlewares\ST\mbedtls_alt\interfaces\patterns</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -379,7 +379,7 @@
 --predefine=-DSTM32U385xx
 --entry=Reset_Handler</Misc>
             <LinkerInputFile></LinkerInputFile>
-            <DisabledWarnings>6848</DisabledWarnings>
+            <DisabledWarnings></DisabledWarnings>
           </LDads>
         </TargetArmAds>
       </TargetOption>
@@ -558,11 +558,6 @@
               <FilePath>../../../../../../Middlewares/Third_Party/mcuboot/boot/bootutil/src/image_ec.c</FilePath>
             </File>
             <File>
-              <FileName>image_ec256.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../../../../../../Middlewares/Third_Party/mcuboot/boot/bootutil/src/image_ec256.c</FilePath>
-            </File>
-            <File>
               <FileName>image_validate.c</FileName>
               <FileType>1</FileType>
               <FilePath>../../../../../../Middlewares/Third_Party/mcuboot/boot/bootutil/src/image_validate.c</FilePath>
@@ -642,120 +637,10 @@
               <FileType>1</FileType>
               <FilePath>../../../../../../Middlewares/Third_Party/mcuboot/bl2/src/shared_data.c</FilePath>
             </File>
-          </Files>
-        </Group>
-        <Group>
-          <GroupName>Middlewares/mbedtls</GroupName>
-          <Files>
             <File>
-              <FileName>aes.c</FileName>
+              <FileName>image_ecdsa.c</FileName>
               <FileType>1</FileType>
-              <FilePath>../../../../../../Middlewares/Third_Party/mbedtls/library/aes.c</FilePath>
-            </File>
-            <File>
-              <FileName>asn1parse.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../../../../../../Middlewares/Third_Party/mbedtls/library/asn1parse.c</FilePath>
-            </File>
-            <File>
-              <FileName>asn1write.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../../../../../../Middlewares/Third_Party/mbedtls/library/asn1write.c</FilePath>
-            </File>
-            <File>
-              <FileName>bignum.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../../../../../../Middlewares/Third_Party/mbedtls/library/bignum.c</FilePath>
-            </File>
-            <File>
-              <FileName>cipher.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../../../../../../Middlewares/Third_Party/mbedtls/library/cipher.c</FilePath>
-            </File>
-            <File>
-              <FileName>cipher_wrap.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../../../../../../Middlewares/Third_Party/mbedtls/library/cipher_wrap.c</FilePath>
-            </File>
-            <File>
-              <FileName>hmac_drbg.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../../../../../../Middlewares/Third_Party/mbedtls/library/hmac_drbg.c</FilePath>
-            </File>
-            <File>
-              <FileName>ecdh.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../../../../../../Middlewares/Third_Party/mbedtls/library/ecdh.c</FilePath>
-            </File>
-            <File>
-              <FileName>ecdsa.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../../../../../../Middlewares/Third_Party/mbedtls/library/ecdsa.c</FilePath>
-            </File>
-            <File>
-              <FileName>ecp.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../../../../../../Middlewares/Third_Party/mbedtls/library/ecp.c</FilePath>
-            </File>
-            <File>
-              <FileName>ecp_curves.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../../../../../../Middlewares/Third_Party/mbedtls/library/ecp_curves.c</FilePath>
-            </File>
-            <File>
-              <FileName>hkdf.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../../../../../../Middlewares/Third_Party/mbedtls/library/hkdf.c</FilePath>
-            </File>
-            <File>
-              <FileName>md.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../../../../../../Middlewares/Third_Party/mbedtls/library/md.c</FilePath>
-            </File>
-            <File>
-              <FileName>memory_buffer_alloc.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../../../../../../Middlewares/Third_Party/mbedtls/library/memory_buffer_alloc.c</FilePath>
-            </File>
-            <File>
-              <FileName>platform.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../../../../../../Middlewares/Third_Party/mbedtls/library/platform.c</FilePath>
-            </File>
-            <File>
-              <FileName>platform_util.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../../../../../../Middlewares/Third_Party/mbedtls/library/platform_util.c</FilePath>
-            </File>
-            <File>
-              <FileName>sha256.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../../../../../../Middlewares/Third_Party/mbedtls/library/sha256.c</FilePath>
-            </File>
-            <File>
-              <FileName>entropy.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../../../../../../Middlewares/Third_Party/mbedtls/library/entropy.c</FilePath>
-            </File>
-            <File>
-              <FileName>constant_time.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../../../../../../Middlewares/Third_Party/mbedtls/library/constant_time.c</FilePath>
-            </File>
-            <File>
-              <FileName>bignum_core.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\..\..\..\..\..\Middlewares\Third_Party\mbedtls\library\bignum_core.c</FilePath>
-            </File>
-          </Files>
-        </Group>
-        <Group>
-          <GroupName>Middlewares/ST</GroupName>
-          <Files>
-            <File>
-              <FileName>sha256_alt.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>../../../../../../Middlewares/ST/mbedtls_alt/interfaces/patterns/sha256_alt.c</FilePath>
+              <FilePath>..\..\..\..\..\..\Middlewares\Third_Party\mcuboot\boot\bootutil\src\image_ecdsa.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -821,6 +706,191 @@
               <FileName>startup_stm32u3xx.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\Src\startup_stm32u3xx.c</FilePath>
+            </File>
+            <File>
+              <FileName>ecdsa_alt.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\ecdsa_alt.c</FilePath>
+            </File>
+            <File>
+              <FileName>ecp_alt.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\ecp_alt.c</FilePath>
+            </File>
+            <File>
+              <FileName>ecp_curves_alt.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\ecp_curves_alt.c</FilePath>
+            </File>
+            <File>
+              <FileName>sha256_alt.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\sha256_alt.c</FilePath>
+            </File>
+            <File>
+              <FileName>sha512_alt.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\Src\sha512_alt.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>Middlewares/mbed-crypto</GroupName>
+          <Files>
+            <File>
+              <FileName>aes.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\..\..\Middlewares\Third_Party\mbed-crypto\library\aes.c</FilePath>
+            </File>
+            <File>
+              <FileName>asn1parse.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\..\..\Middlewares\Third_Party\mbed-crypto\library\asn1parse.c</FilePath>
+            </File>
+            <File>
+              <FileName>bignum.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\..\..\Middlewares\Third_Party\mbed-crypto\library\bignum.c</FilePath>
+            </File>
+            <File>
+              <FileName>bignum_core.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\..\..\Middlewares\Third_Party\mbed-crypto\library\bignum_core.c</FilePath>
+            </File>
+            <File>
+              <FileName>cipher.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\..\..\Middlewares\Third_Party\mbed-crypto\library\cipher.c</FilePath>
+            </File>
+            <File>
+              <FileName>constant_time.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\..\..\Middlewares\Third_Party\mbed-crypto\library\constant_time.c</FilePath>
+            </File>
+            <File>
+              <FileName>hmac_drbg.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\..\..\Middlewares\Third_Party\mbed-crypto\library\hmac_drbg.c</FilePath>
+            </File>
+            <File>
+              <FileName>ecdh.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\..\..\Middlewares\Third_Party\mbed-crypto\library\ecdh.c</FilePath>
+            </File>
+            <File>
+              <FileName>ecdsa.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\..\..\Middlewares\Third_Party\mbed-crypto\library\ecdsa.c</FilePath>
+            </File>
+            <File>
+              <FileName>ecp.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\..\..\Middlewares\Third_Party\mbed-crypto\library\ecp.c</FilePath>
+            </File>
+            <File>
+              <FileName>ecp_curves.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\..\..\Middlewares\Third_Party\mbed-crypto\library\ecp_curves.c</FilePath>
+            </File>
+            <File>
+              <FileName>entropy.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\..\..\Middlewares\Third_Party\mbed-crypto\library\entropy.c</FilePath>
+            </File>
+            <File>
+              <FileName>hkdf.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\..\..\Middlewares\Third_Party\mbed-crypto\library\hkdf.c</FilePath>
+            </File>
+            <File>
+              <FileName>md.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\..\..\Middlewares\Third_Party\mbed-crypto\library\md.c</FilePath>
+            </File>
+            <File>
+              <FileName>memory_buffer_alloc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\..\..\Middlewares\Third_Party\mbed-crypto\library\memory_buffer_alloc.c</FilePath>
+            </File>
+            <File>
+              <FileName>platform.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\..\..\Middlewares\Third_Party\mbed-crypto\library\platform.c</FilePath>
+            </File>
+            <File>
+              <FileName>platform_util.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\..\..\Middlewares\Third_Party\mbed-crypto\library\platform_util.c</FilePath>
+            </File>
+            <File>
+              <FileName>psa_crypto.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\..\..\Middlewares\Third_Party\mbed-crypto\library\psa_crypto.c</FilePath>
+            </File>
+            <File>
+              <FileName>psa_crypto_client.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\..\..\Middlewares\Third_Party\mbed-crypto\library\psa_crypto_client.c</FilePath>
+            </File>
+            <File>
+              <FileName>psa_crypto_driver_wrappers.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\..\..\..\..\..\Middlewares\Third_Party\mbed-crypto\library\psa_crypto_driver_wrappers.h</FilePath>
+            </File>
+            <File>
+              <FileName>psa_crypto_ecp.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\..\..\Middlewares\Third_Party\mbed-crypto\library\psa_crypto_ecp.c</FilePath>
+            </File>
+            <File>
+              <FileName>psa_crypto_hash.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\..\..\Middlewares\Third_Party\mbed-crypto\library\psa_crypto_hash.c</FilePath>
+            </File>
+            <File>
+              <FileName>psa_crypto_slot_management.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\..\..\Middlewares\Third_Party\mbed-crypto\library\psa_crypto_slot_management.c</FilePath>
+            </File>
+            <File>
+              <FileName>psa_util.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\..\..\Middlewares\Third_Party\mbed-crypto\library\psa_util.c</FilePath>
+            </File>
+            <File>
+              <FileName>sha256.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\..\..\Middlewares\Third_Party\mbed-crypto\library\sha256.c</FilePath>
+            </File>
+            <File>
+              <FileName>sha512.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\..\..\Middlewares\Third_Party\mbed-crypto\library\sha512.c</FilePath>
+            </File>
+            <File>
+              <FileName>psa_crypto_cipher.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\..\..\Middlewares\Third_Party\mbed-crypto\library\psa_crypto_cipher.c</FilePath>
+            </File>
+            <File>
+              <FileName>psa_crypto_driver_wrappers_no_static.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\..\..\Middlewares\Third_Party\mbed-crypto\library\psa_crypto_driver_wrappers_no_static.c</FilePath>
+            </File>
+            <File>
+              <FileName>psa_crypto_mac.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\..\..\Middlewares\Third_Party\mbed-crypto\library\psa_crypto_mac.c</FilePath>
+            </File>
+            <File>
+              <FileName>asn1write.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\..\..\Middlewares\Third_Party\mbed-crypto\library\asn1write.c</FilePath>
+            </File>
+            <File>
+              <FileName>cipher_wrap.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\..\..\..\..\Middlewares\Third_Party\mbed-crypto\library\cipher_wrap.c</FilePath>
             </File>
           </Files>
         </Group>

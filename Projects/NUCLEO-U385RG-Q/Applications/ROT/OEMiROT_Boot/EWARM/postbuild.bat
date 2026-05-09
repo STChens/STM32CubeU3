@@ -33,7 +33,7 @@ echo. > %current_log_file%
 
 set "preprocess_bl2_file=%projectdir%\image_macros_preprocessed_bl2.c"
 
-set "appli_dir=..\..\..\..\%oemirot_appli_path_project%"
+set "appli_dir=%projectdir%\..\..\..\..\%oemirot_appli_path_project%"
 set "postbuild_appli=%appli_dir%\EWARM\postbuild.bat"
 set appli_flash_layout="%appli_dir%\Secure_nsclib\appli_flash_layout.h"
 
