@@ -41,7 +41,7 @@
 #define OEMIROT_ICACHE_ENABLE /*!< Instruction cache enable */
 
 /* Static protections */
-//#define OEMIROT_WRP_PROTECT_ENABLE  /*!< Write Protection  */
+#define OEMIROT_WRP_PROTECT_ENABLE  /*!< Write Protection  */
 #define OEMIROT_HDP_PROTECT_ENABLE /*!< HDP protection   */
 #define OEMIROT_SECURE_USER_SRAM2_ERASE_AT_RESET /*!< SRAM2 clear at Reset  */
 

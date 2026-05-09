@@ -19,7 +19,11 @@ set project=OEMuROT
 set bootpath=OEMiRoT_OEMuRoT
 ) else (
 set project=OEMiROT
+if %ecc384_support% == 1 ( 
 set bootpath=OEMiROT_384
+) else ( 
+set bootpath=OEMiROT
+)
 )
 
 :: Enable delayed expansion

@@ -38,7 +38,7 @@
 
 #endif /* OEMUROT_ENABLE */
 
-/* #define MCUBOOT_OVERWRITE_ONLY   */       /* Defined: the FW installation uses overwrite method.
+#define MCUBOOT_OVERWRITE_ONLY  /* */       /* Defined: the FW installation uses overwrite method.
                                            UnDefined: The FW installation uses swap mode. */
 
 #define MCUBOOT_APP_IMAGE_NUMBER 1      /* 1: S application only if FLASH_NS_PARTITION_SIZE = 0 ,

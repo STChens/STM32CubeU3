@@ -7,7 +7,11 @@ set provisioningdir=%cd%
 popd
 
 call %provisioningdir%/env.bat
+if %ecc384_support% == 1 ( 
 call %provisioningdir%/OEMiROT_384/img_config.bat
+) else ( 
+call %provisioningdir%/OEMiROT/img_config.bat
+)
 
 IF "%oemurot_enabled%" == "1" (
 set project=OEMuROT
@@ -16,7 +20,11 @@ set bootpath=OEMiRoT_OEMuRoT
 call %provisioningdir%/OEMiRoT_OEMuRoT/img_config.bat
 ) else (
 set project=OEMiROT
+if %ecc384_support% == 1 ( 
 set bootpath=OEMiROT_384
+) else ( 
+set bootpath=OEMiROT
+)
 )
 
 :: Environment variable for log file

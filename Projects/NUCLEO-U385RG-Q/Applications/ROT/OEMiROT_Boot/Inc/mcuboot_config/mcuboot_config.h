@@ -72,7 +72,7 @@ extern "C" {
 #define MCUBOOT_USE_FLASH_AREA_GET_SECTORS
 
 #define MCUBOOT_HW_ROLLBACK_PROT
-// #define MCUBOOT_ENC_IMAGES           /* Defined: Image encryption enabled. */
+#define MCUBOOT_ENC_IMAGES           /* Defined: Image encryption enabled. */
                                      /* Undefined: Image encryption disabled. */
 
 #define MCUBOOT_MEASURED_BOOT

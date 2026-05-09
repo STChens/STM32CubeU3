@@ -7,7 +7,11 @@ set provisioningdir=%cd%
 popd
 
 call %provisioningdir%/env.bat
+if %ecc384_support% == 1 ( 
+call %provisioningdir%/OEMiROT_384/img_config.bat
+) else ( 
 call %provisioningdir%/OEMiROT/img_config.bat
+)
 
 IF "%oemurot_enabled%" == "1" (
 set project=OEMuROT
@@ -16,7 +20,11 @@ set bootpath=OEMiRoT_OEMuRoT
 call %provisioningdir%/OEMiRoT_OEMuRoT/img_config.bat
 ) else (
 set project=OEMiROT
+if %ecc384_support% == 1 ( 
+set bootpath=OEMiROT_384
+) else ( 
 set bootpath=OEMiROT
+)
 )
 
 :: Environment variable for log file
@@ -25,7 +33,7 @@ echo. > %current_log_file%
 
 set "preprocess_bl2_file=%projectdir%\image_macros_preprocessed_bl2.c"
 
-set "appli_dir=..\..\..\..\%oemirot_appli_path_project%"
+set "appli_dir=%projectdir%\..\..\..\..\%oemirot_appli_path_project%"
 set "postbuild_appli=%appli_dir%\STM32CubeIDE\postbuild.bat"
 set appli_flash_layout="%appli_dir%\Secure_nsclib\appli_flash_layout.h"
 

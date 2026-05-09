@@ -194,7 +194,7 @@ int main(void)
 
   printf("\r\n======================================================================");
   printf("\r\n=              (C) COPYRIGHT 2024 STMicroelectronics                 =");
-  printf("\r\n=              Build on %s %s               =", __DATE__, __TIME__);
+  printf("\r\n=              Build on %s %s                         =", __DATE__, __TIME__);
   printf("\r\n=                          User App #%c                               =", *pUserAppId);
   printf("\r\n======================================================================");
   printf("\r\n\r\n");
