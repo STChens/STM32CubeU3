@@ -12,7 +12,7 @@ set bootpath=OEMiRoT
 
 :: Data updated with the postbuild of OEMiROT-Boot
 set sec1_start=0x0
-set sec1_end=0x20
+set sec1_end=0x30
 set sec2_start=0x7F
 set sec2_end=0x0
 set wrp1a_start=0x4
@@ -22,17 +22,17 @@ set wrp2a_end=0x7F
 set wrp2b_start=
 set wrp2b_end=
 set hdp1_start=
-set hdp1_end=0x17
+set hdp1_end=0x27
 set hdp2_start=0x7f
-set hdp2_end=0x17
+set hdp2_end=0x27
 set boot_lck=
 set secbootadd0=0x1800C0
 set flashsectnbr=0x7F
 
-set slot0=0xC018000
-set slot1=0xC021000
-set slot2=0xC053000
-set slot3=0xC05C000
+set slot0=0xC028000
+set slot1=0x0
+set slot2=0xC031000
+set slot3=0x0
 set slot4=0x0
 set slot5=0x0
 set slot6=0x0

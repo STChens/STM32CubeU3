@@ -40,3 +40,8 @@ set oemirot_appli_assembly_sign=oemirot_tz_app_init_sign.bin
 set oemurot_appli_secure=oemurot_tz_s_app_init_sign.bin
 set oemurot_appli_non_secure=oemurot_tz_ns_app_init_sign.bin
 set oemurot_appli_assembly_sign=oemurot_tz_app_init_sign.bin
+
+:: ==============================================================================
+::                            OEMiROT Boot ECC384 support
+:: ==============================================================================
+set ecc384_support=1
