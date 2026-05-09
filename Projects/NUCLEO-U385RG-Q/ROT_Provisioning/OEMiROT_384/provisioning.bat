@@ -150,7 +150,11 @@ IF !errorlevel! NEQ 0 goto :step_error
 ::Steps to generate OEMiRoT_Keys.bin file
 echo    * OEMiROT keys configuration
 echo        From TrustedPackageCreator (OBkey tab in Security panel)
+if %ecc384_support% == 1 (
 echo        Select OEMiRoT_Config.xml(Default path is /ROT_Provisioning/OEMiROT_384/Config/OEMiRoT_Config.xml)
+) else (
+echo        Select OEMiRoT_Config.xml(Default path is /ROT_Provisioning/OEMiROT/Config/OEMiRoT_Config.xml)
+)
 echo        Warning: Default keys must NOT be used in a product. Make sure to regenerate your own keys!
 echo        Update the configuration (if/as needed) then generate OEMiRoT_Keys.bin file
 echo        Press any key to continue...
