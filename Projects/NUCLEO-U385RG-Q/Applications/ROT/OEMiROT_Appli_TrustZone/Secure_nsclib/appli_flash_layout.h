@@ -33,7 +33,7 @@
 /*#define OEMUROT_ENABLE*/                          /* Defined: the project is used for OEMuRoT boot stage
                                                    Undefined: the project is used for OEMiRoT boot stage */
 
-#define MCUBOOT_OVERWRITE_ONLY                  /* Defined: the FW installation uses overwrite method.
+/*#define MCUBOOT_OVERWRITE_ONLY*/                  /* Defined: the FW installation uses overwrite method.
                                                    UnDefined: The FW installation uses swap mode. */
 
 #define MCUBOOT_APP_IMAGE_NUMBER       0x2      /* 1: S and NS application binaries are assembled in one single image.
@@ -45,19 +45,19 @@
 #define MCUBOOT_NS_DATA_IMAGE_NUMBER   0x0      /* 1: NS data image for NS application.
                                                    0: No NS data image. */
 
-#define FLASH_AREA_0_OFFSET            0x16000  /* Secure app image primary slot offset */
+#define FLASH_AREA_0_OFFSET            0x2A000  /* Secure app image primary slot offset */
 
 #define FLASH_AREA_0_SIZE              0x9000   /* Secure app image primary slot size */
 
-#define FLASH_AREA_1_OFFSET            0x1F000  /* Non-secure app image primary slot offset */
+#define FLASH_AREA_1_OFFSET            0x33000  /* Non-secure app image primary slot offset */
 
 #define FLASH_AREA_1_SIZE              0x32000  /* Non-secure app image primary slot size */
 
-#define FLASH_AREA_2_OFFSET            0x51000  /* Secure app image secondary slot */
+#define FLASH_AREA_2_OFFSET            0x65000  /* Secure app image secondary slot */
 
 #define FLASH_AREA_2_SIZE              0x9000   /* Secure app image secondary slot size */
 
-#define FLASH_AREA_3_OFFSET            0x5A000  /* Non-secure app image secondary slot */
+#define FLASH_AREA_3_OFFSET            0x6E000  /* Non-secure app image secondary slot */
 
 #define FLASH_AREA_3_SIZE              0x32000   /* Non-secure app image secondary slot size */
 

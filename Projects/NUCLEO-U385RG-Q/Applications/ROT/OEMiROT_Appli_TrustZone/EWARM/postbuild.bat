@@ -21,7 +21,11 @@ set bootpath=OEMiRoT_OEMuRoT
 call %provisioningdir%/OEMiRoT_OEMuRoT/img_config.bat
 ) else (
 set project=OEMiROT
-set bootpath=OEMiROT
+IF "%ecc384_support%" == "1" (
+  set bootpath=OEMiROT_384
+) else (
+  set bootpath=OEMiROT  
+)
 )
 
 :: Enable delayed expansion
@@ -133,6 +137,7 @@ echo Creating only one image >> %current_log_file% 2>>&1
 %python%%applicfg% oneimage -fb %s_code_bin% -o %image_s_size% -sb %ns_code_bin% -i 0x0 -ob %one_code_bin% --vb >> %current_log_file% 2>>&1
 IF !errorlevel! neq 0 goto :error
 set ns_app_enc_sign_bin_xml_field="%bin_path_xml_field%\oemirot_tz_app_enc_sign.bin"
+set ns_app_init_sign_bin_xml_field="%bin_path_xml_field%\oemirot_tz_app_init_sign.bin"
 set ns_app_bin_xml_field="%bin_path_xml_field%\oemirot_tz_app.bin"
 )
 

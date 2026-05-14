@@ -38,10 +38,10 @@
 
 #endif /* OEMUROT_ENABLE */
 
-#define MCUBOOT_OVERWRITE_ONLY  /* */       /* Defined: the FW installation uses overwrite method.
+/*#define MCUBOOT_OVERWRITE_ONLY   */       /* Defined: the FW installation uses overwrite method.
                                            UnDefined: The FW installation uses swap mode. */
 
-#define MCUBOOT_APP_IMAGE_NUMBER 1      /* 1: S application only if FLASH_NS_PARTITION_SIZE = 0 ,
+#define MCUBOOT_APP_IMAGE_NUMBER 2      /* 1: S application only if FLASH_NS_PARTITION_SIZE = 0 ,
                                               else S and NS application binaries assembled in one single image.
                                            2: Two separated images for S and NS application binaries. */
 
@@ -188,7 +188,7 @@
 #else /*OEMUROT_ENABLE */
 
 #if !defined(MCUBOOT_PRIMARY_ONLY) && !defined(MCUBOOT_OVERWRITE_ONLY)
-#define FLASH_AREA_BL2_SIZE             (0x12000)
+#define FLASH_AREA_BL2_SIZE             (0x14000)
 #else
 #define FLASH_AREA_BL2_SIZE             (0x12000)
 #endif
@@ -259,8 +259,8 @@
 
 #else
 /* For Others case, we limit the size to 200 KB for NS partition (except for FULL SECURE) */
-//#define FLASH_NS_PARTITION_SIZE         (0x32000)
-#define FLASH_NS_PARTITION_SIZE         (0x0) // Secure Only App
+#define FLASH_NS_PARTITION_SIZE         (0x32000)
+//#define FLASH_NS_PARTITION_SIZE         (0x0) // Secure Only App
 
 #endif /* MCUBOOT_PRIMARY_ONLY */
 #endif /* OEMIROT_FIRST_BOOT_STAGE */
