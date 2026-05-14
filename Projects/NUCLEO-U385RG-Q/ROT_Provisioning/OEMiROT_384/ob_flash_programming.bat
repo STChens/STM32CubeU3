@@ -2,7 +2,11 @@ call ../env.bat
 :: Get config updated by OEMiROT_Boot
 call img_config.bat
 
-set param2=%2
+if not "%~2"=="" (
+    set param2=%2
+) else (
+    set param2="0"
+)
 set rdp_lev=%param2%
 set rot_provisioning_path=%rot_provisioning_path:"=%
 :: Enable delayed expansion
@@ -16,27 +20,27 @@ set bootpath=OEMiRoT
 
 :: Data updated with the postbuild of OEMiROT-Boot
 set sec1_start=0x0
-set sec1_end=0x20
+set sec1_end=0x32
 set sec2_start=0x7F
 set sec2_end=0x0
 set wrp1a_start=0x4
-set wrp1a_end=0x17
+set wrp1a_end=0x19
 set wrp2a_start=0x7A
 set wrp2a_end=0x7F
 set wrp2b_start=
 set wrp2b_end=
 set hdp1_start=
-set hdp1_end=0x17
+set hdp1_end=0x29
 set hdp2_start=0x7f
-set hdp2_end=0x17
+set hdp2_end=0x29
 set boot_lck=
 set secbootadd0=0x1800C0
 set flashsectnbr=0x7F
 
-set slot0=0xC018000
-set slot1=0x0
-set slot2=0xC021000
-set slot3=0x0
+set slot0=0xC02A000
+set slot1=0xC033000
+set slot2=0xC065000
+set slot3=0xC06E000
 set slot4=0x0
 set slot5=0x0
 set slot6=0x0

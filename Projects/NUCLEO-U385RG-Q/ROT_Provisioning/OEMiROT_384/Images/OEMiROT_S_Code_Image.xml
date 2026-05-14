@@ -24,13 +24,6 @@
 		<Default></Default>
 	</Param>
 	<Param>
-		<Name>Write Option</Name>
-		<Type>Data</Type>
-		<Command>--overwrite-only</Command>
-		<Hidden>1</Hidden>
-		<Default></Default>
-	</Param>
-	<Param>
 		<Name>Endianness</Name>
 		<Type>Data</Type>
 		<Command>-e</Command>
@@ -123,14 +116,14 @@
 	</Param>
 	<Param>
 		<Name>Firmware binary input file</Name>
-		<Value>..\..\..\Applications\ROT\OEMiROT_Appli\Binary\oemirot_tz_s_app.bin</Value>
+		<Value>..\..\..\Applications\ROT\OEMiROT_Appli_TrustZone\Binary\oemirot_tz_s_app.bin</Value>
 		<Type>File</Type>
 		<Tooltip>Select the firmware binary file to be processed for the image generation</Tooltip>
 		<Default>../../../Applications/ROT/OEMiROT_Appli_TrustZone/Binary/oemirot_tz_s_app.bin</Default>
 	</Param>
 	<Output>
 		<Name>Image output file</Name>
-		<Value>..\..\..\Applications\ROT\OEMiROT_Appli\Binary\oemirot_tz_s_app_enc_sign.bin</Value>
+		<Value>..\..\..\Applications\ROT\OEMiROT_Appli_TrustZone\Binary\oemirot_tz_s_app_enc_sign.bin</Value>
 		<Default>../../../Applications/ROT/OEMiROT_Appli_TrustZone/Binary/oemirot_tz_s_app_enc_sign.bin</Default>
 	</Output>
   </McubootFormat>
