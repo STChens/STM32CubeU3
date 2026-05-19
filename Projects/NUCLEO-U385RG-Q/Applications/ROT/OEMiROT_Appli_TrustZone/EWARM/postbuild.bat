@@ -84,9 +84,9 @@ set ns_app_init_sign_bin_xml_field="%bin_path_xml_field%\%oemirot_appli_non_secu
 ::=================================================================================================
 ::Variables updated by OEMiROT_Boot postbuild
 ::=================================================================================================
-set image_ns_size=0x32000
+set image_ns_size=0x3B000
 set image_s_size=0x9000
-set app_image_number=2
+set app_image_number=1
 
 ::=================================================================================================
 :: Check if Python V3 is installed
@@ -137,11 +137,16 @@ echo Creating only one image >> %current_log_file% 2>>&1
 %python%%applicfg% oneimage -fb %s_code_bin% -o %image_s_size% -sb %ns_code_bin% -i 0x0 -ob %one_code_bin% --vb >> %current_log_file% 2>>&1
 IF !errorlevel! neq 0 goto :error
 set ns_app_enc_sign_bin_xml_field="%bin_path_xml_field%\oemirot_tz_app_enc_sign.bin"
-set ns_app_init_sign_bin_xml_field="%bin_path_xml_field%\oemirot_tz_app_init_sign.bin"
+set ns_app_init_sign_bin_xml_field="%bin_path_xml_field%\%oemirot_appli_assembly_sign%"
 set ns_app_bin_xml_field="%bin_path_xml_field%\oemirot_tz_app.bin"
 )
 
 :continue
+
+IF "%app_image_number%" == "1" (
+goto :skip_secure_image_signing
+)
+
 IF %signing% == "secure" (
 echo Creating secure image  >> %current_log_file% 2>>&1
 
@@ -174,6 +179,7 @@ IF !errorlevel! neq 0 goto :error
 %python%%applicfg% xmlval -v %s_data_init_sign_bin_xml_field% --string -n %fw_out_bin_xml_field% %s_data_init_xml% --vb >> %current_log_file% 2>>&1
 IF !errorlevel! neq 0 goto :error
 )
+:skip_secure_image_signing
 
 IF %signing% == "nonsecure" (
 echo Creating nonsecure image  >> %current_log_file% 2>>&1

@@ -80,6 +80,8 @@ extern "C" {
 #define TFM_PARTITION_FIRMWARE_UPDATE
 #define MAX_BOOT_RECORD_SZ 0x100
 
+#define MCUBOOT_TMPBUF_SZ 0x400  /* This is required if using single image for S+NS App to avoid issue
+                                    of flash reading across S and NS boundary */
 /*
  * Cryptographic settings
  */

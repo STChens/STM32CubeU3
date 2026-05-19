@@ -290,6 +290,10 @@ set "command=%python%%applicfg% xmlparam --layout  %preprocess_bl2_file% -m RE_P
 %command%
 IF !errorlevel! NEQ 0 goto :error
 
+set "command=%python%%applicfg% xmlname --layout %preprocess_bl2_file% -m RE_APP_IMAGE_NUMBER -n %auth_ns_xml_field% -sn %auth_s_xml_field% -v 1 -c k %ns_code_init_xml% --vb >> %current_log_file% 2>>&1"
+%command%
+IF !errorlevel! NEQ 0 goto :error
+
 set "command=%python%%applicfg% xmlval --layout %preprocess_bl2_file% -m RE_IMAGE_FLASH_NON_SECURE_IMAGE_SIZE -c S %ns_code_init_xml% --vb >> %current_log_file% 2>>&1"
 %command%
 IF !errorlevel! NEQ 0 goto :error
