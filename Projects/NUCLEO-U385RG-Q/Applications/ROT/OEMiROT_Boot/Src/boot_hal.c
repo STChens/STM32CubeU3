@@ -622,6 +622,33 @@ int32_t boot_platform_init(void)
   }
 #endif
 
+#define DEBUG_FLASH_LAYOUT // Comment out this line to avoid the layout print
+#ifdef DEBUG_FLASH_LAYOUT    
+    BOOT_LOG_INF("BL2 start: %08x", BL2_CODE_START);
+    BOOT_LOG_INF("BL2 size :  %08x", BL2_CODE_SIZE);
+
+    BOOT_LOG_INF("Flash area 0 offset: %08x", FLASH_AREA_0_OFFSET);
+    BOOT_LOG_INF("Flash area 0 size  : %08x", FLASH_AREA_0_SIZE);
+#if (MCUBOOT_APP_IMAGE_NUMBER == 2)    
+    BOOT_LOG_INF("Flash area 1 offset: %08x", FLASH_AREA_1_OFFSET);
+    BOOT_LOG_INF("Flash area 1 size  : %08x", FLASH_AREA_1_SIZE);
+#else
+    BOOT_LOG_INF("NS primary partition offset  : %08x", NS_IMAGE_PRIMARY_PARTITION_OFFSET);
+    BOOT_LOG_INF("S partition size  : %08x", FLASH_S_PARTITION_SIZE);
+#endif
+#if !defined (MCUBOOT_PRIMARY_ONLY) 
+    BOOT_LOG_INF("Flash area 2 offset: %08x", FLASH_AREA_2_OFFSET);
+    BOOT_LOG_INF("Flash area 2 size  : %08x", FLASH_AREA_2_SIZE);
+#if (MCUBOOT_APP_IMAGE_NUMBER == 2)
+    BOOT_LOG_INF("Flash area 3 offset: %08x", FLASH_AREA_3_OFFSET);
+    BOOT_LOG_INF("Flash area 3 size  : %08x", FLASH_AREA_3_SIZE);    
+#endif
+    BOOT_LOG_INF("scratch area 2 offset: %08x", FLASH_AREA_SCRATCH_OFFSET);
+    BOOT_LOG_INF("scratch area 2 size  : %08x", FLASH_AREA_SCRATCH_SIZE);        
+#endif
+    
+    BOOT_LOG_INF("HDP end offset: %08x", FLASH_BL2_HDP_END_OFFSET);        
+#endif
   return 0;
 }
 

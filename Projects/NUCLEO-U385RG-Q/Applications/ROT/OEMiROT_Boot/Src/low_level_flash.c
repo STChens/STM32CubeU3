@@ -383,10 +383,12 @@ static int32_t Flash_ReadData(uint32_t addr, void *data, uint32_t cnt)
   /* area secure and non secure are done with a non secure access */
   if (is_range_secure(&ARM_FLASH0_DEV, addr, cnt))
   {
+    //BOOT_LOG_DBG("Try to read flash @0x%x", (void *)((uint32_t)addr + FLASH_BASE));
     memcpy_flash(data, (void *)((uint32_t)addr + FLASH_BASE), cnt);
   }
   else
   {
+    //BOOT_LOG_DBG("Try to read flash @0x%x", (void *)((uint32_t)addr + FLASH_BASE_NS));
     memcpy_flash(data, (void *)((uint32_t)addr + FLASH_BASE_NS), cnt);
   }
 #else

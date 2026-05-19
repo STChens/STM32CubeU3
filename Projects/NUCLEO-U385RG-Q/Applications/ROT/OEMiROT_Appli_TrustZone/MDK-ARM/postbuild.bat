@@ -84,9 +84,9 @@ set ns_app_init_sign_bin_xml_field="%bin_path_xml_field%\%oemirot_appli_non_secu
 ::=================================================================================================
 ::Variables updated by OEMiROT_Boot postbuild
 ::=================================================================================================
-set image_ns_size=0x3B000
+set image_ns_size=0x32000
 set image_s_size=0x9000
-set app_image_number=1
+set app_image_number=2
 
 ::=================================================================================================
 :: Check if Python V3 is installed
