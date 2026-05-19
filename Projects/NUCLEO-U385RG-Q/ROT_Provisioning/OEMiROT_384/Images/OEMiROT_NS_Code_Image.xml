@@ -16,6 +16,13 @@
 		<Default></Default>
 	</Param>
 	<Param>
+		<Name>Write Option</Name>
+		<Type>Data</Type>
+		<Command>--overwrite-only</Command>
+		<Hidden>1</Hidden>
+		<Default></Default>
+	</Param>
+	<Param>
 		<Name>Encryption key</Name>
 		<Link>GetPublic</Link>
 		<Type>File</Type>
